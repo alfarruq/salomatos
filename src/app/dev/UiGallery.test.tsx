@@ -15,7 +15,15 @@ describe('UiGallery', () => {
   it('renders every section', () => {
     render(<UiGallery />)
 
-    for (const title of ['Typography', 'Surfaces and text levels', 'Button', 'Field and Input']) {
+    for (const title of [
+      'Typography',
+      'Surfaces and text levels',
+      'Button',
+      'Field and Input',
+      'Selection controls',
+      'Badge',
+      'Card, Separator and Skeleton',
+    ]) {
       expect(screen.getByRole('heading', { name: title })).toBeInTheDocument()
     }
   })

@@ -199,19 +199,25 @@ Bironta biznes kodisiz, lekin butun sifat mashinasi ishlab turadi.
 ### 3.2. Asosiy komponentlar (`shared/ui/`)
 shadcn/ui dan nusxalanadi va tokenlarга moslanadi:
 
-| Guruh | Komponentlar |
-|---|---|
-| Forma | `Button`, `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `DatePicker`, `PhoneInput` |
-| Layout | `Card`, `Separator`, `Tabs`, `Sheet`, `Dialog`, `Popover`, `DropdownMenu`, `Tooltip` |
-| Ma'lumot | `Table`, `Badge`, `Avatar`, `Skeleton`, `Pagination` |
-| Fikr-mulohaza | `Toast` (sonner), `Alert`, `EmptyState`, `ErrorState` |
-| Navigatsiya | `Breadcrumb`, `CommandPalette` (cmdk) |
+| Guruh | Komponentlar | Holat |
+|---|---|---|
+| Forma | `Button`, `Field`, `Input`, `Textarea`, `Select`, `Checkbox`, `Switch` | ✅ |
+| Forma | `Radio`, `DatePicker`, `PhoneInput` | ⏳ |
+| Layout | `Card`, `Separator` | ✅ |
+| Layout | `Tabs`, `Sheet`, `Dialog`, `Popover`, `DropdownMenu`, `Tooltip` | ⏳ |
+| Ma'lumot | `Badge`, `Skeleton` | ✅ |
+| Ma'lumot | `Table`, `Avatar`, `Pagination` | ⏳ |
+| Fikr-mulohaza | `Toast` (sonner), `Alert`, `EmptyState`, `ErrorState` | ⏳ |
+| Navigatsiya | `Breadcrumb`, `CommandPalette` (cmdk) | ⏳ |
 
-- [ ] **Har birida `size="sm"` (dense) varianti** — §13 ma'lumot zichligi talabi
-- [ ] Har birida: klaviatura navigatsiyasi, `:focus-visible`, ≥44px bosish maydoni
+- [x] Yozilganlarning har birida `size="sm"` (dense) varianti bor (o'lchamli komponentlarda)
+- [x] Yozilganlarning har biri klaviatura bilan boshqariladi, `:focus-visible` global
+- [x] 25 ta test
 
-**Boshlandi:** `Button`, `Field`, `Input` yozildi (13 ta test). `cn()` va animatsiya
-presetlari (`shared/lib/motion.ts`) tayyor. Qolgani navbatda.
+**Yondashuv:** `shadcn init` ishlatilmadi — u o'z token nomlarini (`--background`,
+`--foreground`) `theme.css` ga yozib, bizning §11.2 tizimimiz bilan to'qnashadi.
+Komponentlar **Radix primitivlari ustiga** o'z tokenlarimiz bilan yozilyapti. Natija
+bir xil (kod bizniki, a11y Radix'dan), lekin token to'qnashuvi yo'q.
 
 > **Dense va 44px ziddiyati qanday yechildi:** §13 jadvalda 32px balandlikni,
 > §11.7 esa ≥44px bosish maydonini talab qiladi. `sm` varianti vizual 32px, lekin
@@ -221,16 +227,23 @@ presetlari (`shared/lib/motion.ts`) tayyor. Qolgani navbatda.
 ### 3.3. Arxitektura komponentlari
 - [ ] `QueryBoundary` (§15) — 4 holatni bitta joyda hal qiladi
 - [ ] `ErrorBoundary` 3 darajada: Root / Route / Widget
-- [ ] `Can` (§9.2) — ruxsat gate
 - [ ] `AppShell`: sidebar + header + content
+- [x] ~~`Can` (§9.2)~~ → **Faza 4 ga ko'chirildi.** `Can` `useCan` orqali
+      `entities/session` ga bog'liq, `shared` esa `entities` ni import qila olmaydi
+      (§3.3). Faza 1 dagi linter buni bloklaydi. To'g'ri joyi — `entities/session/ui/`
 
-### 3.4. Animatsiya
-- [ ] `motion` sozlanadi: `spring({ stiffness: 400, damping: 32 })`
-- [ ] `useReducedMotion()` — har bir animatsiyada majburiy
-- [ ] ⛔ `transition: all` yo'q
+### 3.4. Animatsiya ✅ BAJARILDI
+- [x] `shared/lib/motion.ts` — `springs.control` (400/32/0.8, §11.5 aynan), `springs.surface`,
+      `durations`, `LIST_STAGGER`, `easeOutApple`
+- [x] `useTransition()` — `prefers-reduced-motion` da harakatni nolga tushiradi
+- [x] Global CSS floor: reduced-motion'da barcha animatsiya/tranzitsiya to'xtaydi
+- [x] ⛔ `transition: all` yo'q — barcha komponentlarda property'lar nomma-nom sanalgan
+- [x] `Switch` spring bilan ishlaydi — §11.5 aynan shu komponentni misol qilib keltiradi
 
-### 3.5. `/dev/ui` etalon sahifasi
-- [ ] Barcha komponentlar barcha variantlarda ko'rinadigan route (faqat dev build'da)
+### 3.5. `/dev/ui` etalon sahifasi ✅ ISHLAYDI
+- [x] Barcha yozilgan komponentlar, barcha variantda, mavzu almashtirgich bilan
+- [x] Production bundle'ida **yo'q** (`import.meta.env.DEV` bilan kesiladi — tekshirildi)
+- [ ] Faza 4 da haqiqiy route'ga aylanadi (hozircha `pathname` tekshiruvi)
 
 **Chiqish mezoni:** `/dev/ui` da har bir komponent bor · hech qayerda hardcode `#hex` yo'q · 360px da buzilmaydi · klaviatura bilan butun sahifani aylanib chiqish mumkin · kontrast AA.
 

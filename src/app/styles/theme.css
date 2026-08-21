@@ -55,6 +55,12 @@
   --color-danger-hover: #c00012;
   --color-on-danger: #ffffff;
 
+  /*
+   * Switch and slider knobs stay white in both themes — that is what makes a
+   * toggle read as a physical object rather than a coloured rectangle.
+   */
+  --color-control-knob: #ffffff;
+
   /* ── Radius ── */
   --radius-control: 10px;
   --radius-card: 18px;
@@ -149,6 +155,7 @@
       --color-danger-fill: #c9252d;
       --color-danger-hover: #b3202a;
       --color-on-danger: #ffffff;
+      --color-control-knob: #ffffff;
 
       --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.5), 0 1px 2px oklch(0% 0 0 / 0.4);
       --shadow-popover: 0 8px 28px oklch(0% 0 0 / 0.6);
@@ -180,6 +187,7 @@
     --color-danger-fill: #c9252d;
     --color-danger-hover: #b3202a;
     --color-on-danger: #ffffff;
+    --color-control-knob: #ffffff;
 
     --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.5), 0 1px 2px oklch(0% 0 0 / 0.4);
     --shadow-popover: 0 8px 28px oklch(0% 0 0 / 0.6);

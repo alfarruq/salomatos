@@ -1,7 +1,26 @@
 import { Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/shared/lib/cn'
-import { Button, Field, Input } from '@/shared/ui'
+import {
+  Badge,
+  Button,
+  Card,
+  Checkbox,
+  Field,
+  Input,
+  Select,
+  type SelectOption,
+  Separator,
+  Skeleton,
+  Switch,
+  Textarea,
+} from '@/shared/ui'
+
+const STATUS_OPTIONS: SelectOption[] = [
+  { value: 'active', label: 'Faol' },
+  { value: 'archived', label: 'Arxivlangan' },
+  { value: 'blocked', label: 'Bloklangan', disabled: true },
+]
 
 /**
  * The component reference from §15 of CLAUDE.md, reachable at /dev/ui in dev
@@ -174,6 +193,65 @@ export function UiGallery() {
             <Field label="Disabled">
               <Input disabled placeholder="O'zgartirib bo'lmaydi" />
             </Field>
+
+            <Field description="Bemor kartasida ko'rinadi" label="Izoh">
+              <Textarea placeholder="Qisqacha anamnez" />
+            </Field>
+
+            <Field error="Holat tanlanmagan" label="Holat">
+              <Select options={STATUS_OPTIONS} placeholder="Holatni tanlang" />
+            </Field>
+
+            <Field label="Holat (dense)">
+              <Select options={STATUS_OPTIONS} placeholder="Holat" size="sm" />
+            </Field>
+          </div>
+        </Section>
+
+        <Section title="Selection controls">
+          <Row label="Checkbox">
+            <div className="flex flex-col gap-3">
+              <Checkbox label="Arxivlangan bemorlarni ko'rsatish" />
+              <Checkbox checked="indeterminate" label="Hammasi tanlangan" />
+              <Checkbox disabled label="Disabled" />
+            </div>
+          </Row>
+
+          <Row label="Switch — spring, the one place motion is felt (§11.5)">
+            <div className="flex flex-col gap-3">
+              <Switch defaultChecked label="SMS eslatma yuborish" />
+              <Switch label="Email hisobot" />
+              <Switch disabled label="Disabled" />
+            </div>
+          </Row>
+        </Section>
+
+        <Section title="Badge">
+          <Row label="Tones — colour carries state, never decoration">
+            <Badge tone="neutral">Qoralama</Badge>
+            <Badge tone="accent">Faol</Badge>
+            <Badge tone="success">To&apos;langan</Badge>
+            <Badge tone="warning">Kutilmoqda</Badge>
+            <Badge tone="danger">Bekor qilindi</Badge>
+          </Row>
+        </Section>
+
+        <Section title="Card, Separator and Skeleton">
+          <div className="flex flex-col gap-6">
+            <Card className="p-6">
+              <p className="text-body text-text">Card — border, not shadow (§11.1)</p>
+              <Separator className="my-4" />
+              <p className="text-callout text-text-secondary">Separator above.</p>
+            </Card>
+
+            <div className="flex flex-col gap-2">
+              <span className="text-caption text-text-tertiary">
+                Skeleton — the loading state, never a spinner (§15)
+              </span>
+              <Skeleton className="h-11 w-full" />
+              <Skeleton className="h-11 w-2/3" />
+              <Skeleton className="h-11 w-1/3" />
+            </div>
           </div>
         </Section>
       </div>
