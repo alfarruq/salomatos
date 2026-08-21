@@ -76,6 +76,17 @@ jobs:
           fi
           echo "Dev-only code is absent from dist/"
 
+      # A shipped mock backend serves invented patient records as if they were
+      # real — worse than an outage, because nothing looks broken. This has
+      # already happened once and was caught by the size budget, not by review.
+      - name: Mock backend is not shipped
+        run: |
+          if grep -rIlE "setupWorker|admin@example\.test" dist/; then
+            echo "::error::The MSW mock backend or its fixtures leaked into the production build"
+            exit 1
+          fi
+          echo "Mock backend is absent from dist/"
+
       # §13.6 — a leaked key in the bundle is unrecoverable once shipped.
       - name: No secrets in the bundle
         run: |

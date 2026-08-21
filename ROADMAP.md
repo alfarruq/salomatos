@@ -147,7 +147,13 @@ Bironta biznes kodisiz, lekin butun sifat mashinasi ishlab turadi.
 - [ ] `src/shared/api/generated/` git'ga kiradi, lekin **qo'lda tahrirlanmaydi** (hook himoyalaydi)
 - [ ] MSW mock generatsiyasi yoqiladi (`mock: { type: 'msw', useExamples: true }`)
 
-### 2.2. HTTP klient (§5.2)
+> ✅ **2.2–2.5 bajarildi (2026-08-21), 2.1 backend'ni kutmoqda.** Schema faqat
+> **tiplar** generatsiyasi uchun kerak — `httpClient`, xato normalizatsiyasi va kesh
+> siyosati unga bog'liq emas, shuning uchun ular yozib qo'yildi va MSW mock backend'i
+> bilan sinaldi. Backend tayyor bo'lganda `orval.config.ts` qo'shiladi va
+> `src/shared/api/mocks/` o'chiriladi — boshqa hech qayerga tegilmaydi.
+
+### 2.2. HTTP klient (§5.2) ✅
 - [ ] `ky` instance: `prefixUrl: '/api'`, `credentials: 'same-origin'`, timeout 20s
 - [ ] Retry: faqat GET, `[408, 429, 500, 502, 503, 504]`
 - [ ] `beforeRequest`: CSRF token + `X-Clinic-Id` header
@@ -311,10 +317,29 @@ bir xil (kod bizniki, a11y Radix'dan), lekin token to'qnashuvi yo'q.
 
 ## Faza 4 — Auth, sessiya, RBAC (36 → 46%)
 
-### 4.1. Session entity
-- [ ] `entities/session/`: `sessionQueries.me()`, `Permission` tipi, `useCan()`
-- [ ] `useSessionStore` (Zustand) — **faqat xotirada**, persist yo'q
-- [ ] Ruxsatlar `Set<Permission>` sifatida `/api/me/` dan. ⛔ rol→ruxsat xaritasi hardcode qilinmaydi
+### 4.1. Session entity ✅ BAJARILDI (2026-08-21)
+- [x] `entities/session/`: `sessionQueries.me()`, `Permission` tipi, `useCan()`, `Can`
+- [x] `useSessionStore` (Zustand) — **faqat xotirada**, `persist` yo'q
+- [x] Ruxsatlar `Set<Permission>` sifatida `/api/me/` dan. ⛔ rol→ruxsat xaritasi yo'q
+- [x] **MSW mock backend** — `/api/me/`, login, logout, klinika almashtirish.
+      Testlar haqiqiy `httpClient` orqali o'tadi, stub qilingan `fetch` orqali emas
+
+> 🔌 **Backend ulanish nuqtasi.** Javob Zod bilan **ishga tushirish paytida** tekshiriladi
+> (`sessionSchema.ts`). Sabab: generatsiya qilingan tiplar faqat kompilyatsiya vaqtida
+> ishlaydi — serializer jimgina `permissions` ni tashlab ketsa, natija bo'sh sidebar
+> bo'lardi, ya'ni "bu foydalanuvchiga hech narsa mumkin emas". Endi bu **xato** beradi.
+> Test bilan qoplangan: maydon yo'qolishi va ketma-ket ID (`"1"`) rad etiladi.
+>
+> Tanimagan ruxsat esa **tashlab yuboriladi, rad etilmaydi** — backend yangi ruxsatni
+> frontend'dan oldin chiqarishi mumkin, va notanish satr tufayli ilovaning umuman
+> yuklanmasligi bilinmagan tugmani yashirishdan yomonroq.
+
+### 4.1b. Nima qilish kerak backend tayyor bo'lganda
+1. `pnpm api:generate` (Faza 2.1) — `orval.config.ts` qo'shiladi
+2. `sessionSchema.ts` dagi maydon tiplari generatsiya qilinganlariga almashtiriladi,
+   **`parse` qoladi**
+3. `VITE_USE_MOCKS=false` — `src/shared/api/mocks/` o'chiriladi
+4. Boshqa hech narsa: `httpClient`, `queryClient`, store, `Can` o'zgarmaydi
 
 ### 4.2. Routing
 - [ ] TanStack Router file-based sozlash, `@tanstack/router-plugin`
