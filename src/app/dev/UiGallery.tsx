@@ -3,7 +3,10 @@ import { useState } from 'react'
 import { cn } from '@/shared/lib/cn'
 import {
   Alert,
+  Avatar,
   Badge,
+  type BadgeTone,
+  Breadcrumb,
   Button,
   Card,
   Checkbox,
@@ -17,6 +20,7 @@ import {
   ErrorState,
   Field,
   Input,
+  Pagination,
   Popover,
   QueryBoundary,
   type QueryLike,
@@ -26,6 +30,14 @@ import {
   Sheet,
   Skeleton,
   Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableSkeleton,
+  Tabs,
   Textarea,
   Toaster,
   Tooltip,
@@ -94,6 +106,12 @@ const TEXT_LEVELS = [
   { name: 'text-secondary', className: 'text-text-secondary' },
   { name: 'text-tertiary', className: 'text-text-tertiary' },
 ] as const
+
+const DEMO_ROWS = [
+  { name: 'Vali Aliyev', status: 'Faol', tone: 'success', balance: '120 000' },
+  { name: 'Aziza Karimova', status: 'Kutilmoqda', tone: 'warning', balance: '0' },
+  { name: 'Rustam Yo\u2018ldoshev', status: 'Arxivlangan', tone: 'neutral', balance: '-45 000' },
+] as const satisfies readonly { name: string; status: string; tone: BadgeTone; balance: string }[]
 
 type DemoState = 'loading' | 'empty' | 'error' | 'data'
 
@@ -459,6 +477,86 @@ export function UiGallery() {
                 With action
               </Button>
             </Row>
+          </Section>
+
+          <Section title="Table">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Bemor</TableHead>
+                  <TableHead>Holat</TableHead>
+                  <TableHead align="right">Balans</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {DEMO_ROWS.map((row) => (
+                  <TableRow isInteractive isSelected={row.name === 'Aziza Karimova'} key={row.name}>
+                    <TableCell>
+                      <span className="flex items-center gap-3">
+                        <Avatar name={row.name} size="sm" />
+                        {row.name}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge tone={row.tone}>{row.status}</Badge>
+                    </TableCell>
+                    <TableCell align="right" isNumeric>
+                      {row.balance}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+            <Pagination
+              hasNext
+              hasPrevious={false}
+              nextLabel="Keyingi"
+              onNext={() => toast.info('Keyingi sahifa')}
+              onPrevious={() => undefined}
+              previousLabel="Oldingi"
+              summary="1–3"
+            />
+
+            <Row label="Loading — skeleton shaped like the table (§15)">
+              <Table>
+                <TableSkeleton columns={3} rows={3} />
+              </Table>
+            </Row>
+          </Section>
+
+          <Section title="Tabs, Breadcrumb and Avatar">
+            <div className="flex flex-col gap-8">
+              <Breadcrumb
+                items={[
+                  { label: 'Bemorlar', link: (children) => <a href="/dev/ui">{children}</a> },
+                  { label: 'Bemor kartasi' },
+                ]}
+                label="Navigatsiya"
+              />
+
+              <Tabs
+                items={[
+                  {
+                    value: 'overview',
+                    label: 'Umumiy',
+                    content: <p className="text-body text-text">Umumiy ma&apos;lumot.</p>,
+                  },
+                  {
+                    value: 'visits',
+                    label: 'Tashriflar',
+                    content: <p className="text-body text-text">Tashriflar tarixi.</p>,
+                  },
+                  { value: 'billing', label: 'To&apos;lovlar', content: null, disabled: true },
+                ]}
+              />
+
+              <Row label="Avatar — initials fallback">
+                <Avatar name="Vali Aliyev" size="sm" />
+                <Avatar name="Aziza Karimova" size="md" />
+                <Avatar name="Rustam" size="lg" />
+              </Row>
+            </div>
           </Section>
         </div>
 

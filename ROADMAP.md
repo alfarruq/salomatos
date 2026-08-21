@@ -204,11 +204,17 @@ shadcn/ui dan nusxalanadi va tokenlarга moslanadi:
 | Forma | `Button`, `Field`, `Input`, `Textarea`, `Select`, `Checkbox`, `Switch` | ✅ |
 | Forma | `Radio`, `DatePicker`, `PhoneInput` | ⏳ |
 | Layout | `Card`, `Separator`, `Sheet`, `Dialog`, `Popover`, `DropdownMenu`, `Tooltip` | ✅ |
-| Layout | `Tabs` | ⏳ |
-| Ma'lumot | `Badge`, `Skeleton` | ✅ |
-| Ma'lumot | `Table`, `Avatar`, `Pagination` | ⏳ |
+| Layout | `Tabs` | ✅ |
+| Ma'lumot | `Badge`, `Skeleton`, `Table`, `Avatar`, `Pagination` | ✅ |
 | Fikr-mulohaza | `Toast` (sonner), `Alert`, `EmptyState`, `ErrorState` | ✅ |
-| Navigatsiya | `Breadcrumb`, `CommandPalette` (cmdk) | ⏳ |
+| Navigatsiya | `Breadcrumb` | ✅ |
+| Navigatsiya | `CommandPalette` (cmdk) | ⏳ |
+
+> **`Pagination` raqamli sahifalarsiz — bu ataylab.** §5.4 backend'da `CursorPagination`
+> ni talab qiladi, u esa kursor qaytaradi va **jami sonni qaytarmaydi** (`OFFSET 50000`
+> 1000 klinikaning bemorlar jadvalida PostgreSQL'ni o'ldiradi). Jami son bo'lmasa
+> sahifalar soni ham yo'q, "7-sahifa" havolasi esa hech qayerga ishora qilmaydi.
+> Shuning uchun faqat oldingi/keyingi. Bu kamchilik emas, o'sha qarorning oqibati.
 
 - [x] Yozilganlarning har birida `size="sm"` (dense) varianti bor (o'lchamli komponentlarda)
 - [x] Yozilganlarning har biri klaviatura bilan boshqariladi, `:focus-visible` global

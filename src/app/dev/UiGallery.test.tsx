@@ -26,6 +26,8 @@ describe('UiGallery', () => {
       'Overlays',
       'The four states (§15)',
       'Alert and Toast',
+      'Table',
+      'Tabs, Breadcrumb and Avatar',
     ]) {
       expect(screen.getByRole('heading', { name: title })).toBeInTheDocument()
     }
