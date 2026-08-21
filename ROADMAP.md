@@ -44,17 +44,28 @@ Kod yozishdan oldin hal qilinishi shart bo'lgan narsalar.
 - [ ] `package.json` da `packageManager: pnpm@…` — Faza 1 da, Vite skeleti yaratilgandan keyin
       (hozir yaratilsa `pnpm create vite` bilan to'qnashadi)
 
-### 0.2. 🔴 Bloklovchi qarorlar — bularsiz kod boshlanmaydi
+### 0.2. 🔴 Bloklovchi qarorlar ✅ HAL QILINDI (2026-08-21)
 
-| # | Savol | Nega bloklovchi | Qayerda hal bo'ladi |
+| # | Savol | Qaror | ADR |
 |---|---|---|---|
-| 1 | **Auth: Django session vs JWT httpOnly cookie?** | `httpClient` ning `afterResponse` refresh mantiqi butunlay shunga bog'liq | `ADR-003` yopilsin |
-| 2 | **4-til qaysi?** (`uz-Latn`, `ru`, `en` + `uz-Cyrl` yoki `kaa`) | i18n papka strukturasi va ICU sozlamalari | Biznes qarori |
-| 3 | **Real-time: Django Channels yoki 30s polling?** | Polling bilan boshlash mumkin, lekin backend rejasiga ta'sir qiladi | `cachePolicy.live` dan boshlash tavsiya |
-| 4 | **Klinika vaqt zonasi bittami?** | `CLINIC_TZ` konstantami yoki klinika sozlamasidanmi | Hozircha `Asia/Tashkent` konstanta |
-| 5 | **Biometrik ma'lumot (rentgen) qayerda saqlanadi?** | §13.9 huquqiy talab, media strategiyasi | Yurist bilan |
+| 1 | Auth usuli | **Django session authentication.** `httpClient` da refresh oqimi yo'q: 401 → `hardLogout()` → `/login`. §13.1 dagi JWT rotatsiya jadvali kelajakdagi mobil endpoint uchun | `ADR-003` aniqlashtirildi |
+| 2 | 4-til | **`uz-Latn`, `uz-Cyrl`, `ru`, `en`.** Ikkita o'zbek lokali alohida, transliteratsiya yo'q. `kaa` kechiktirildi | `ADR-008` yangi |
+| 3 | Real-time | **30s polling** (`cachePolicy.live`). Channels keyinroq, migratsiya og'riqsiz | `ADR-009` yangi |
+| 4 | Vaqt zonasi | **`CLINIC_TZ = 'Asia/Tashkent'` konstanta**, `shared/lib/datetime.ts` da jamlangan | `ADR-010` yangi |
+| 5 | Biometrik ma'lumot (rentgen) | ⏸️ **Ochiq — yurist qarori.** Frontend'ni bloklamaydi: `dist/` da PHI yo'q, faqat media URL strategiyasiga ta'sir qiladi (Faza 9.3) | §13.9 |
+
+> **5-savol nega bloklamaydi:** §13.9 ga ko'ra frontend statik fayllari PHI tashimaydi.
+> Qaror faqat media qayerdan beriladi (`X-Accel-Redirect` vs imzolangan URL) degan savolga
+> ta'sir qiladi, va u Faza 7.2 (tibbiy yozuvlar) dan oldin kerak bo'ladi — hozir emas.
 
 ### 0.3. Backend kontrakti (frontend uchun old shart)
+
+> ⏸️ **Tekshirib bo'lmadi.** `localhost:8000` javob bermadi (backend alohida repozitoriyda va
+> hozir ishlamayapti). Bu **Faza 2 ni bloklaydi** — Orval schema'siz tip generatsiya qilolmaydi.
+> Faza 1 (skelet) esa bloklanmaydi, unga backend kerak emas.
+>
+> Backend jamoasi bilan quyidagi ro'yxat tasdiqlansin (`§5.4`):
+
 - [ ] `drf-spectacular` ishlaydi, `/api/schema/` valid OpenAPI 3 qaytaradi
 - [ ] Barcha ID — `UUID`
 - [ ] Sana/vaqt — UTC ISO-8601
@@ -63,7 +74,14 @@ Kod yozishdan oldin hal qilinishi shart bo'lgan narsalar.
 - [ ] `/api/me/` → user + `permissions[]` + `clinics[]`
 - [ ] Xato matnida PHI yo'q
 
-**Chiqish mezoni:** `curl localhost:8000/api/schema/` valid schema beradi · hook'lar `.claude/hooks/` da va ishlayapti · 5 ta qaror yozib qo'yilgan.
+**Chiqish mezoni:**
+- [x] Hook'lar `.claude/hooks/` da va ishlayapti (11/11 test)
+- [x] Qarorlar ADR sifatida yozilgan (`ADR-003` aniqlashtirildi, `ADR-008/009/010` qo'shildi)
+- [x] Repo baseline commit qilingan
+- [ ] ⚠️ `pnpm` o'rnatilsin — `sudo corepack enable pnpm`
+- [ ] ⏸️ `curl localhost:8000/api/schema/` valid schema beradi — **backend tomonda, Faza 2 ni bloklaydi**
+
+**Holat: 0 → 3.5%.** Faza 1 ni boshlash mumkin (unga backend kerak emas), faqat `pnpm` o'rnatilsin.
 
 ---
 
