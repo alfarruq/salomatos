@@ -1,7 +1,239 @@
 @import "tailwindcss";
 
 /*
- * Design tokens land here in phase 3 (§11 + ROADMAP 3.1).
- * Until then this file only wires Tailwind up — no component may hardcode a
- * colour, spacing or radius value in the meantime.
+ * Inter Variable is self-hosted on purpose: §13.5 pins `font-src` to 'self',
+ * so a Google Fonts link would be blocked by our own CSP. Inter is also the
+ * legally safe stand-in for SF Pro, which Apple licenses for Apple platforms
+ * only (§11.2).
  */
+@import "@fontsource-variable/inter";
+
+@theme {
+  /* ── Background layers ── tinted, never pure white ── */
+  --color-canvas: #f5f5f7;
+  --color-surface: #ffffff;
+  --color-elevated: #ffffff;
+  --color-sunken: #ebebef;
+
+  /* ── Borders ── alpha, not flat grey: they sit correctly on any layer ── */
+  --color-border: oklch(0% 0 0 / 0.08);
+  --color-border-strong: oklch(0% 0 0 / 0.14);
+
+  /*
+   * ── Text — three levels, no more (§11.1) ──
+   * Darkened from the values in §11.2 so all three clear WCAG AA, which §11.7
+   * makes mandatory. `pnpm check:contrast` measures every pair.
+   * text-tertiary is not legible on `sunken` and must not be used there —
+   * input placeholders use text-secondary.
+   */
+  --color-text: #1d1d1f;
+  --color-text-secondary: #5f5f65;
+  --color-text-tertiary: #6e6e73;
+
+  /*
+   * ── Accent — exactly one hue, two roles ──
+   * A single token cannot serve both roles: #0071e3 carries white text at
+   * 4.70:1 (fine as a button fill) but sits at 4.31:1 as text on canvas
+   * (fails). So the fill keeps the documented brand blue and text gets a
+   * darker sibling. Same hue, so the interface still reads as one accent.
+   */
+  --color-accent: #0071e3;
+  --color-accent-hover: #0062c8;
+  --color-accent-text: #0068d1;
+  --color-accent-soft: #e8f2fe;
+  --color-on-accent: #ffffff;
+
+  /*
+   * ── Semantic — state only, never decoration ──
+   * `danger` is the text/icon role; `danger-fill` is the destructive button
+   * background. §13: red is reserved for deletion, nothing else.
+   */
+  --color-success: #1f7a35;
+  --color-warning: #8f5b00;
+  --color-danger: #d70015;
+  --color-danger-fill: #d70015;
+  --color-danger-hover: #c00012;
+  --color-on-danger: #ffffff;
+
+  /* ── Radius ── */
+  --radius-control: 10px;
+  --radius-card: 18px;
+  --radius-sheet: 24px;
+
+  /* ── Shadow — very soft. Structure comes from borders (§11.1) ── */
+  --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.04), 0 1px 2px oklch(0% 0 0 / 0.03);
+  --shadow-popover: 0 8px 28px oklch(0% 0 0 / 0.1);
+
+  /* ── Apple's signature curve ── */
+  --ease-out-apple: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-in-out-app: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /*
+   * 8pt grid (§11.3). With a 4px base unit the allowed steps land on plain
+   * Tailwind numbers: p-1 4 · p-2 8 · p-3 12 · p-4 16 · p-6 24 · p-8 32 ·
+   * p-12 48 · p-16 64. Anything else is off-grid and fails review.
+   */
+  --spacing: 4px;
+
+  /* ── Typography (§11.4). Negative tracking at large sizes is the single
+   * most recognisable detail of Apple's type. ── */
+  --font-sans: "Inter Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --text-display: 40px;
+  --text-display--line-height: 44px;
+  --text-display--font-weight: 600;
+  --text-display--letter-spacing: -0.02em;
+
+  --text-title1: 28px;
+  --text-title1--line-height: 34px;
+  --text-title1--font-weight: 600;
+  --text-title1--letter-spacing: -0.015em;
+
+  --text-title2: 22px;
+  --text-title2--line-height: 28px;
+  --text-title2--font-weight: 600;
+  --text-title2--letter-spacing: -0.01em;
+
+  --text-body: 15px;
+  --text-body--line-height: 22px;
+  --text-body--font-weight: 400;
+  --text-body--letter-spacing: 0em;
+
+  --text-callout: 14px;
+  --text-callout--line-height: 20px;
+  --text-callout--font-weight: 400;
+  --text-callout--letter-spacing: 0em;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+  --text-caption--font-weight: 400;
+  --text-caption--letter-spacing: 0.01em;
+
+  /* ── Minimum hit area (§11.7). Never hardcode 44px in a component. ── */
+  --size-touch: 44px;
+}
+
+/*
+ * Dark theme. §11.2 documents the light palette only, so these values are a
+ * proposal — every pair is contrast-checked by `pnpm check:contrast`.
+ *
+ * Two selectors on purpose: the media query follows the OS for users who never
+ * touch the setting, and [data-theme] lets an explicit choice win in both
+ * directions.
+ */
+@layer base {
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --color-canvas: #0b0b0d;
+      --color-surface: #17171a;
+      --color-elevated: #202024;
+      --color-sunken: #101012;
+
+      --color-border: oklch(100% 0 0 / 0.1);
+      --color-border-strong: oklch(100% 0 0 / 0.18);
+
+      --color-text: #f5f5f7;
+      --color-text-secondary: #a1a1a6;
+      --color-text-tertiary: #8e8e93;
+
+      --color-accent: #0069d9;
+      --color-accent-hover: #0a6fd8;
+      --color-accent-text: #2b95ff;
+      --color-accent-soft: oklch(50% 0.19 258 / 0.22);
+      --color-on-accent: #ffffff;
+
+      --color-success: #30d158;
+      --color-warning: #ffb340;
+      --color-danger: #ff6961;
+      --color-danger-fill: #c9252d;
+      --color-danger-hover: #b3202a;
+      --color-on-danger: #ffffff;
+
+      --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.5), 0 1px 2px oklch(0% 0 0 / 0.4);
+      --shadow-popover: 0 8px 28px oklch(0% 0 0 / 0.6);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --color-canvas: #0b0b0d;
+    --color-surface: #17171a;
+    --color-elevated: #202024;
+    --color-sunken: #101012;
+
+    --color-border: oklch(100% 0 0 / 0.1);
+    --color-border-strong: oklch(100% 0 0 / 0.18);
+
+    --color-text: #f5f5f7;
+    --color-text-secondary: #a1a1a6;
+    --color-text-tertiary: #8e8e93;
+
+    --color-accent: #0069d9;
+    --color-accent-hover: #0a6fd8;
+    --color-accent-text: #2b95ff;
+    --color-accent-soft: oklch(50% 0.19 258 / 0.22);
+    --color-on-accent: #ffffff;
+
+    --color-success: #30d158;
+    --color-warning: #ffb340;
+    --color-danger: #ff6961;
+    --color-danger-fill: #c9252d;
+    --color-danger-hover: #b3202a;
+    --color-on-danger: #ffffff;
+
+    --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.5), 0 1px 2px oklch(0% 0 0 / 0.4);
+    --shadow-popover: 0 8px 28px oklch(0% 0 0 / 0.6);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    /* Inter's alternates bring it closer to SF Pro: single-storey a, plain l. */
+    font-feature-settings: "cv11", "ss01", "cv02";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    color-scheme: light dark;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-text);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  /*
+   * Focus is never removed, only shaped. Keyboard users are the ones who
+   * cannot recover from an invisible focus ring (§11.7).
+   */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /*
+   * §11.5 — motion hides latency, it does not seek attention. When the user
+   * has asked the OS for less of it, honour that globally as a floor; each
+   * animated component still checks useReducedMotion() for its own logic.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      /*
+       * `!important` is correct here and nowhere else in this codebase. This
+       * rule has to beat utility classes and inline styles alike, because a
+       * user who set "reduce motion" may be doing so for vestibular reasons —
+       * a single component overriding it is a real symptom, not a style bug.
+       */
+      /* biome-ignore lint/complexity/noImportantStyles: must override every animation source */
+      animation-duration: 0.01ms !important;
+      /* biome-ignore lint/complexity/noImportantStyles: must override every animation source */
+      animation-iteration-count: 1 !important;
+      /* biome-ignore lint/complexity/noImportantStyles: must override every animation source */
+      transition-duration: 0.01ms !important;
+      /* biome-ignore lint/complexity/noImportantStyles: must override every animation source */
+      scroll-behavior: auto !important;
+    }
+  }
+}

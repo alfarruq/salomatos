@@ -40,6 +40,10 @@ jobs:
       - name: Types
         run: pnpm tsc --noEmit
 
+      # §11.7 makes WCAG AA mandatory, and contrast cannot be eyeballed.
+      - name: Design token contrast
+        run: pnpm check:contrast
+
       # Activates automatically once phase 2 adds orval.config.ts. A backend
       # contract change that is not regenerated must fail here, not in production.
       - name: Generated API types are current

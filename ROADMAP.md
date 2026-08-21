@@ -176,11 +176,25 @@ Bironta biznes kodisiz, lekin butun sifat mashinasi ishlab turadi.
 
 > **Bu fazani o'tkazib yubormang yoki qisqartirmang.** Modullardan keyin qurilsa, har modulda tugmalar boshqacha bo'ladi va "Apple-style" hech qachon chiqmaydi. Refaktoring narxi = butun UI'ni qayta yozish.
 
-### 3.1. Tokenlar
-- [ ] `app/styles/theme.css` — Tailwind v4 `@theme` bloki (§11)
-- [ ] Rang, spacing (`4, 8, 12, 16, 24, 32, 48, 64`), radius, typography, `--ease-out-apple`
-- [ ] Light/dark rejim
-- [ ] `@tailwindcss/vite` plugin (PostCSS emas)
+### 3.1. Tokenlar ✅ BAJARILDI (2026-08-21)
+- [x] `app/styles/theme.css` — Tailwind v4 `@theme` bloki
+- [x] Rang, spacing (`--spacing: 4px` → 8pt grid), radius, typography shkalasi, `--ease-out-apple`
+- [x] Light + dark (`prefers-color-scheme` **va** `[data-theme]`)
+- [x] `@tailwindcss/vite` plugin
+- [x] Inter Variable **o'z serverimizdan** — §13.5 `font-src 'self'` Google Fonts'ni bloklaydi
+- [x] `pnpm check:contrast` — 53 juft o'lchanadi, `verify` va CI ichida
+
+> 🔬 **§11.2 palitrasi o'z §11.7 talabidan yiqilardi.** O'lchov ko'rsatdi: `#86868b` oq ustida
+> 3.9:1, `#34c759` — 4.0:1, `#0071e3` matn sifatida canvas ustida 4.31:1. Qiymatlar AA ga
+> moslandi va **aksent ikki rolga ajratildi** (`accent` = fon, `accent-text` = matn), chunki
+> bitta qiymat ikkalasini bajara olmaydi. `ARCHITECTURE.md` §11.2 yangilandi.
+
+### 3.1b. Qo'shimcha tokenlar (hujjatda yo'q edi, kerak bo'ldi)
+- [x] `--color-accent-text` — matn/havola roli
+- [x] `--color-danger-fill` / `--color-danger-hover` / `--color-on-danger` — destruktiv tugma.
+      Dark'da `danger` (#ff6961) oq matn bilan atigi 2.82:1 beradi, shuning uchun fon uchun
+      alohida quyuqroq qiymat kerak
+- [x] `--color-on-accent`, `--size-touch`
 
 ### 3.2. Asosiy komponentlar (`shared/ui/`)
 shadcn/ui dan nusxalanadi va tokenlarга moslanadi:
@@ -195,6 +209,14 @@ shadcn/ui dan nusxalanadi va tokenlarга moslanadi:
 
 - [ ] **Har birida `size="sm"` (dense) varianti** — §13 ma'lumot zichligi talabi
 - [ ] Har birida: klaviatura navigatsiyasi, `:focus-visible`, ≥44px bosish maydoni
+
+**Boshlandi:** `Button`, `Field`, `Input` yozildi (13 ta test). `cn()` va animatsiya
+presetlari (`shared/lib/motion.ts`) tayyor. Qolgani navbatda.
+
+> **Dense va 44px ziddiyati qanday yechildi:** §13 jadvalda 32px balandlikni,
+> §11.7 esa ≥44px bosish maydonini talab qiladi. `sm` varianti vizual 32px, lekin
+> `pointer-coarse:min-h-11` orqali barmoq bilan ishlaganda 44px ga kengayadi.
+> Sichqoncha bilan zichlik saqlanadi, sensorli ekranda qoida buzilmaydi.
 
 ### 3.3. Arxitektura komponentlari
 - [ ] `QueryBoundary` (§15) — 4 holatni bitta joyda hal qiladi

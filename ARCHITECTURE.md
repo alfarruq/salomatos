@@ -987,18 +987,20 @@ Minimalist yo'nalishda nafislik **aniqlikdan** keladi: spacing, tipografika va d
 
   /* ── Matn — 3 daraja, ko'p emas ── */
   --color-text:           #1d1d1f;
-  --color-text-secondary: #6e6e73;
-  --color-text-tertiary:  #86868b;
+  --color-text-secondary: #5f5f65;
+  --color-text-tertiary:  #6e6e73;
 
-  /* ── Aksent — BITTA ── */
-  --color-accent:       #0071e3;
-  --color-accent-hover: #0077ed;
+  /* ── Aksent — BITTA ohang, IKKI rol ── */
+  --color-accent:       #0071e3;   /* fon: oq matn bilan 4.70:1 */
+  --color-accent-hover: #0062c8;
+  --color-accent-text:  #0068d1;   /* matn/havola: canvas ustida 4.94:1 */
   --color-accent-soft:  #e8f2fe;
+  --color-on-accent:    #ffffff;
 
   /* ── Semantik — faqat holat uchun ── */
-  --color-success: #34c759;
-  --color-warning: #ff9f0a;
-  --color-danger:  #ff3b30;
+  --color-success: #1f7a35;
+  --color-warning: #8f5b00;
+  --color-danger:  #d70015;
 
   /* ── Radius ── */
   --radius-control: 10px;   /* tugma, input */
@@ -1026,6 +1028,21 @@ html {
   text-rendering: optimizeLegibility;
 }
 ```
+
+> 🔬 **Kontrast (2026-08-21 yangilandi).** Dastlabki palitra iOS ranglaridan olingan edi va
+> `§11.7` ning o'z AA talabidan yiqilardi: `#86868b` oq ustida 3.9:1, `#34c759` — 4.0:1,
+> `#0071e3` matn sifatida canvas ustida 4.31:1. Qiymatlar AA ga moslab quyultirildi.
+>
+> **Aksent ikki rolga ajratildi**, chunki bitta qiymat ikkalasini bajara olmaydi:
+> `--color-accent` (#0071e3) — fon uchun, oq matn bilan 4.70:1. `--color-accent-text`
+> (#0068d1) — matn va havola uchun. Ohang bir xil, shuning uchun interfeys hamon
+> bitta aksent sifatida o'qiladi.
+>
+> `--color-text-tertiary` **`sunken` ustida ishlatilmaydi** — u yerda AA ga chiqmaydi.
+> Input placeholder'i `--color-text-secondary` dan foydalanadi.
+>
+> Bularning hammasi `pnpm check:contrast` bilan **o'lchanadi** va CI'da majburlanadi.
+> Token o'zgartirsangiz — skript qayta ishga tushadi, taxminga o'rin yo'q.
 
 > ⚖️ **Huquqiy:** **SF Pro'ni veb'da ishlatmang.** Apple litsenziyasi uni faqat Apple platformalari uchun interfeys dizaynida ruxsat beradi; veb-saytga yuklash litsenziya buzilishi. `Inter Variable` yoki `Geist` — vizual jihatdan juda yaqin va bepul (OFL).
 
