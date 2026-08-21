@@ -10,6 +10,7 @@ import {
   Button,
   Card,
   Checkbox,
+  DatePicker,
   Dialog,
   DialogClose,
   DropdownMenu,
@@ -21,9 +22,11 @@ import {
   Field,
   Input,
   Pagination,
+  PhoneInput,
   Popover,
   QueryBoundary,
   type QueryLike,
+  RadioGroup,
   Select,
   type SelectOption,
   Separator,
@@ -191,6 +194,8 @@ function StatesDemo() {
 
 export function UiGallery() {
   const [theme, setTheme] = useState<Theme>('light')
+  const [phone, setPhone] = useState('')
+  const [birthDate, setBirthDate] = useState('')
 
   const toggleTheme = () => {
     const next: Theme = theme === 'light' ? 'dark' : 'light'
@@ -304,6 +309,45 @@ export function UiGallery() {
 
               <Field label="Disabled">
                 <Input disabled placeholder="O'zgartirib bo'lmaydi" />
+              </Field>
+
+              <Field description="Faqat +998 raqamlari" label="Telefon (maskali)">
+                <PhoneInput onChange={setPhone} value={phone} />
+              </Field>
+
+              <Field
+                description="Klaviatura: strelka, PageUp/Down, Home/End"
+                label="Tug'ilgan sana"
+              >
+                <DatePicker
+                  locale="en-GB"
+                  max="2026-12-31"
+                  nextMonthLabel="Keyingi oy"
+                  onChange={setBirthDate}
+                  placeholder="Sanani tanlang"
+                  previousMonthLabel="Oldingi oy"
+                  value={birthDate}
+                />
+              </Field>
+
+              <Field label="Jins">
+                <RadioGroup
+                  options={[
+                    { value: 'male', label: 'Erkak' },
+                    { value: 'female', label: 'Ayol' },
+                  ]}
+                  orientation="horizontal"
+                />
+              </Field>
+
+              <Field label="Eslatma turi">
+                <RadioGroup
+                  options={[
+                    { value: 'sms', label: 'SMS', description: 'Tashrifdan 1 kun oldin' },
+                    { value: 'call', label: "Qo'ng'iroq", description: 'Registratura qiladi' },
+                    { value: 'none', label: 'Kerak emas', disabled: true },
+                  ]}
+                />
               </Field>
 
               <Field description="Bemor kartasida ko'rinadi" label="Izoh">

@@ -202,13 +202,21 @@ shadcn/ui dan nusxalanadi va tokenlarга moslanadi:
 | Guruh | Komponentlar | Holat |
 |---|---|---|
 | Forma | `Button`, `Field`, `Input`, `Textarea`, `Select`, `Checkbox`, `Switch` | ✅ |
-| Forma | `Radio`, `DatePicker`, `PhoneInput` | ⏳ |
+| Forma | `RadioGroup`, `DatePicker`, `PhoneInput` | ✅ |
 | Layout | `Card`, `Separator`, `Sheet`, `Dialog`, `Popover`, `DropdownMenu`, `Tooltip` | ✅ |
 | Layout | `Tabs` | ✅ |
 | Ma'lumot | `Badge`, `Skeleton`, `Table`, `Avatar`, `Pagination` | ✅ |
 | Fikr-mulohaza | `Toast` (sonner), `Alert`, `EmptyState`, `ErrorState` | ✅ |
 | Navigatsiya | `Breadcrumb` | ✅ |
 | Navigatsiya | `CommandPalette` (cmdk) | ⏳ |
+
+> 🗓️ **`DatePicker` vaqt zonasiga umuman tegmaydi.** §12.4 dagi eng jiddiy tuzoq shu:
+> `new Date('2026-01-01')` UTC yarim tunini beradi va Grinvichdan g'arbda **31-dekabr**
+> bo'lib ko'rinadi. Shuning uchun `shared/lib/calendarDate.ts` kiritildi — sana faqat
+> `yyyy-MM-dd` matn va lokal kalendar qismlari sifatida yashaydi. Vaqt zonasi faqat
+> **instant** (uchrashuv qachon boshlanadi) uchun kerak va u alohida modulda qoladi.
+> `2026-02-31` kabi mavjud bo'lmagan kunlar rad etiladi — JavaScript ularni jimgina
+> 3-martga aylantirib yuborardi.
 
 > **`Pagination` raqamli sahifalarsiz — bu ataylab.** §5.4 backend'da `CursorPagination`
 > ni talab qiladi, u esa kursor qaytaradi va **jami sonni qaytarmaydi** (`OFFSET 50000`

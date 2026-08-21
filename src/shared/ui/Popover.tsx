@@ -9,6 +9,12 @@ export interface PopoverProps {
   onOpenChange?: (open: boolean) => void
   side?: 'top' | 'right' | 'bottom' | 'left'
   align?: 'start' | 'center' | 'end'
+  /**
+   * Runs when the panel takes focus on open. Call `preventDefault()` to stop
+   * Radix focusing the panel itself and place focus deliberately instead — a
+   * grid with a roving tabindex has to, or the two compete.
+   */
+  onOpenAutoFocus?: (event: Event) => void
   className?: string
 }
 
@@ -19,6 +25,7 @@ export function Popover({
   onOpenChange,
   side = 'bottom',
   align = 'start',
+  onOpenAutoFocus,
   className,
 }: PopoverProps) {
   return (
@@ -33,6 +40,7 @@ export function Popover({
           side={side}
           align={align}
           sideOffset={8}
+          {...(onOpenAutoFocus === undefined ? {} : { onOpenAutoFocus })}
           // Keeps the panel inside the viewport on a 360px screen instead of
           // letting it run off the edge (§11.7).
           collisionPadding={16}

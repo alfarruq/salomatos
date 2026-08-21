@@ -1,0 +1,87 @@
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { useState } from 'react'
+import { describe, expect, it, vi } from 'vitest'
+import { formatSubscriber, PhoneInput, subscriberDigitsOf } from './PhoneInput'
+
+describe('subscriberDigitsOf', () => {
+  it('accepts every shape a number gets pasted in', () => {
+    for (const input of ['+998901234567', '998901234567', '901234567', '+998 90 123 45 67']) {
+      expect(subscriberDigitsOf(input)).toBe('901234567')
+    }
+  })
+
+  it('refuses to grow past the national number length', () => {
+    expect(subscriberDigitsOf('9012345678999')).toHaveLength(9)
+  })
+
+  it('returns nothing for input with no digits', () => {
+    expect(subscriberDigitsOf('salom')).toBe('')
+  })
+})
+
+describe('formatSubscriber', () => {
+  it('groups a full number', () => {
+    expect(formatSubscriber('901234567')).toBe('90 123 45 67')
+  })
+
+  it('groups every prefix while typing', () => {
+    expect(formatSubscriber('9')).toBe('9')
+    expect(formatSubscriber('901')).toBe('90 1')
+    expect(formatSubscriber('90123')).toBe('90 123')
+    expect(formatSubscriber('9012345')).toBe('90 123 45')
+  })
+})
+
+/**
+ * The component is controlled by design — react-hook-form owns the value in
+ * every real use — so typing has to be exercised through a controlling parent.
+ */
+function Controlled({ onChange }: { onChange: (value: string) => void }) {
+  const [value, setValue] = useState('')
+  return (
+    <PhoneInput
+      onChange={(next) => {
+        setValue(next)
+        onChange(next)
+      }}
+      value={value}
+    />
+  )
+}
+
+describe('PhoneInput', () => {
+  it('emits E.164 as §10 expects it', async () => {
+    const onChange = vi.fn()
+    render(<Controlled onChange={onChange} />)
+
+    await userEvent.type(screen.getByRole('textbox'), '901234567')
+
+    expect(onChange).toHaveBeenLastCalledWith('+998901234567')
+  })
+
+  it('normalises a pasted number that repeats the country code', async () => {
+    const onChange = vi.fn()
+    render(<Controlled onChange={onChange} />)
+
+    await userEvent.click(screen.getByRole('textbox'))
+    await userEvent.paste('+998 90 123 45 67')
+
+    expect(onChange).toHaveBeenLastCalledWith('+998901234567')
+  })
+
+  it('shows the number grouped but stores it plain', () => {
+    render(<PhoneInput value="+998901234567" />)
+
+    expect(screen.getByRole('textbox')).toHaveValue('90 123 45 67')
+  })
+
+  it('emits an empty string rather than a bare country code', async () => {
+    const onChange = vi.fn()
+    render(<PhoneInput onChange={onChange} value="+998901234567" />)
+
+    await userEvent.clear(screen.getByRole('textbox'))
+
+    expect(onChange).toHaveBeenLastCalledWith('')
+  })
+})

@@ -1,0 +1,93 @@
+import { cn } from '@/shared/lib/cn'
+import { useFieldControl } from './Field'
+
+const COUNTRY_CODE = '+998'
+const SUBSCRIBER_LENGTH = 9
+
+export interface PhoneInputProps {
+  /**
+   * E.164, exactly as §10's schema expects it: `+998901234567`. An incomplete
+   * number is emitted the same way so validation, not this component, decides
+   * when it is acceptable.
+   */
+  value?: string
+  onChange?: (value: string) => void
+  disabled?: boolean
+  id?: string
+  name?: string
+  className?: string
+}
+
+/** Everything after the country code, capped at the national number length. */
+export function subscriberDigitsOf(raw: string): string {
+  const digits = raw.replace(/\D/g, '')
+  // Tolerates every way a number gets pasted: +998901234567, 998901234567,
+  // 901234567 and 8901234567 all mean the same thing here.
+  const withoutCountry = digits.startsWith('998') ? digits.slice(3) : digits
+  return withoutCountry.slice(0, SUBSCRIBER_LENGTH)
+}
+
+/** `901234567` → `90 123 45 67`, and every prefix of it while typing. */
+export function formatSubscriber(digits: string): string {
+  const groups = [digits.slice(0, 2), digits.slice(2, 5), digits.slice(5, 7), digits.slice(7, 9)]
+  return groups.filter((group) => group.length > 0).join(' ')
+}
+
+export function PhoneInput({
+  value = '',
+  onChange,
+  disabled,
+  id,
+  name,
+  className,
+}: PhoneInputProps) {
+  const field = useFieldControl()
+  const digits = subscriberDigitsOf(value)
+
+  const handleChange = (next: string) => {
+    const nextDigits = subscriberDigitsOf(next)
+    onChange?.(nextDigits.length === 0 ? '' : `${COUNTRY_CODE}${nextDigits}`)
+  }
+
+  return (
+    <div
+      className={cn(
+        'flex w-full items-center rounded-control border border-border bg-sunken',
+        'transition-[border-color] duration-150 ease-out-apple',
+        'hover:border-border-strong',
+        'has-[input:disabled]:pointer-events-none has-[input:disabled]:opacity-40',
+        'has-[input[aria-invalid=true]]:border-danger',
+        'h-11',
+        className,
+      )}
+    >
+      {/*
+       * The country code is fixed rather than typed: every clinic in this
+       * product is in Uzbekistan, and a prefix the user cannot delete removes a
+       * whole class of malformed numbers.
+       */}
+      <span aria-hidden="true" className="pl-4 text-body text-text-secondary">
+        {COUNTRY_CODE}
+      </span>
+
+      <input
+        id={id ?? field?.controlId}
+        name={name}
+        disabled={disabled}
+        type="tel"
+        // Brings up the numeric keypad on a phone without rejecting spaces.
+        inputMode="tel"
+        autoComplete="tel-national"
+        placeholder="90 123 45 67"
+        value={formatSubscriber(digits)}
+        onChange={(event) => handleChange(event.target.value)}
+        aria-describedby={field?.describedBy}
+        aria-invalid={field?.isInvalid ?? undefined}
+        className={cn(
+          'w-full bg-transparent px-3 text-body text-text outline-none',
+          'placeholder:text-text-secondary',
+        )}
+      />
+    </div>
+  )
+}
