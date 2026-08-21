@@ -1,4 +1,4 @@
-import { queryOptions } from '@tanstack/react-query'
+import { queryOptions, useQuery } from '@tanstack/react-query'
 import { httpClient } from '@/shared/api/httpClient'
 import { cachePolicy } from '@/shared/config/cache'
 import { parseSession } from '../model/sessionSchema'
@@ -31,4 +31,20 @@ export const sessionQueries = {
       // delays the redirect to /login.
       retry: false,
     }),
+}
+
+/**
+ * The session as React should read it: from the query, not the store.
+ *
+ * The store exists for code that cannot subscribe — the HTTP client needs the
+ * clinic id on every request — and is kept in step by a provider effect. A
+ * component reading it directly would depend on that side channel having run,
+ * and would not re-render when switching clinics writes a new session into the
+ * cache.
+ *
+ * Returns undefined only before the guard has resolved; inside `_auth` it is
+ * always present.
+ */
+export function useSession(): Session | undefined {
+  return useQuery(sessionQueries.me()).data
 }

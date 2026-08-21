@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import { fileURLToPath, URL } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { defineConfig, type PluginOption } from 'vite'
@@ -12,6 +13,16 @@ const analyzer = () => visualizer({ filename: 'stats.html', gzipSize: true }) as
 
 export default defineConfig({
   plugins: [
+    // Must run before the React plugin so the generated tree is transformed too.
+    tanstackRouter({
+      routesDirectory: 'src/pages',
+      generatedRouteTree: 'src/routeTree.gen.ts',
+      quoteStyle: 'single',
+      semicolons: false,
+      // Each route becomes its own chunk (§8.3), so a clinic loading the
+      // patient list does not download the reporting screens.
+      autoCodeSplitting: true,
+    }),
     react(),
     tailwindcss(),
     // Opt-in: `pnpm build:analyze` only, so normal builds stay fast.

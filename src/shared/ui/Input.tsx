@@ -23,6 +23,7 @@ export function Input({ size = 'md', id, className, ...props }: InputProps) {
       id={id ?? field?.controlId}
       aria-describedby={props['aria-describedby'] ?? field?.describedBy}
       aria-invalid={props['aria-invalid'] ?? field?.isInvalid ?? undefined}
+      aria-required={field?.isRequired === true ? true : undefined}
       className={cn(
         'w-full rounded-control bg-sunken text-text',
         // The border is the structure; §11.1 prefers it over a shadow.

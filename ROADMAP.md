@@ -341,16 +341,33 @@ bir xil (kod bizniki, a11y Radix'dan), lekin token to'qnashuvi yo'q.
 3. `VITE_USE_MOCKS=false` — `src/shared/api/mocks/` o'chiriladi
 4. Boshqa hech narsa: `httpClient`, `queryClient`, store, `Can` o'zgarmaydi
 
-### 4.2. Routing
-- [ ] TanStack Router file-based sozlash, `@tanstack/router-plugin`
-- [ ] `pages/__root.tsx`, `pages/login.tsx`
-- [ ] `pages/_auth.tsx` — guard **bitta joyda** (§8.2): sessiya yo'q → `/login`, klinika yo'q → `/onboarding`
-- [ ] `manualChunks` (§8.3)
+### 4.2. Routing ✅ BAJARILDI (2026-08-21)
+- [x] TanStack Router file-based, `autoCodeSplitting` — har route alohida chunk (§8.3)
+- [x] `__root.tsx` (route darajasidagi ErrorBoundary), `login.tsx`, `onboarding.tsx`,
+      `index.tsx` (→ `/dashboard`), `_auth/dashboard.tsx`
+- [x] `_auth.tsx` — guard **bitta joyda** (§8.2)
+- [x] `/login?redirect=` faqat **ilova ichidagi yo'l** sifatida validatsiya qilinadi.
+      Ixtiyoriy URL qabul qilish ochiq redirect bo'lardi: parol kiritilgan zahoti
+      xodimni boshqa saytga uchirib yuborish mumkin edi
 
-### 4.3. Auth feature'lari
-- [ ] `features/auth-login/` — forma + server xatosi maydonga qaytadi
-- [ ] `features/auth-logout/` — server blacklist + **`queryClient.clear()`**
-- [ ] `features/clinic-switch/` — 🔴 `qc.clear()` majburiy (§6.2), aks holda ma'lumot sizadi
+### 4.3. Auth feature'lari ✅ BAJARILDI
+- [x] `features/auth-login/` — RHF + Zod, server xatosi maydonga qaytadi (§10)
+- [x] `features/auth-logout/` — `onSettled` da tozalanadi: so'rov yiqilsa ham
+      foydalanuvchi ketishni so'ragan, umumiy stolda keyingi xodim oldingisining
+      bemorlarini ko'rmasligi kerak
+- [x] `features/clinic-switch/` — 🔴 `qc.clear()`, test bilan isbotlangan
+
+### 4.3b. Uchta haqiqiy nuqson topildi
+1. **ky 2 javob tanasini `error.data` ga oldindan o'qiydi** va `response` ni iste'mol
+   qiladi, shuning uchun `response.json()` bo'sh qaytardi. Natijada **har qanday server
+   validatsiya xatosi jimgina yo'qolardi** va foydalanuvchi "nimadir xato" ko'rardi —
+   §10 ning asosiy talabi ishlamas edi.
+2. **401 da keshni tozalash o'zini bekor qilardi.** Kesh o'z ichidagi so'rovga javoban
+   tozalanganda so'rov `CancelledError` bilan uzilardi, guard esa uni "tizimdan chiqqan"
+   deb tanimay xato ekranini ko'rsatardi. Endi 401 da faqat store tozalanadi, kesh esa
+   `/login` ga yetib borganda — u yerda hech narsa uchmayapti.
+3. **`Field` da majburiylik yulduzchasi ochiq nomga kirib ketardi** ("Parol *").
+   Yulduzcha `<label>` dan tashqariga chiqarildi, majburiylik esa `aria-required` bilan.
 
 ### 4.4. Idle timer (§13.4)
 - [ ] `useIdleTimer`: 12 daq timeout, 1 daq oldin ogohlantirish

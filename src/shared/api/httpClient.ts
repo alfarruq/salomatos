@@ -50,9 +50,17 @@ export const api = ky.create({
          * ADR-003: the web client uses Django session authentication, so there
          * is no refresh endpoint to call and nothing to retry. A 401 means the
          * session is gone — hand off once and let the error surface.
+         *
+         * Deferred to a microtask so application code never runs inside this
+         * request's own promise chain. A handler that touched the query cache
+         * would otherwise cancel the very request that triggered it, and the
+         * caller would receive a CancelledError instead of the `unauthorized`
+         * ApiError the route guard branches on.
          */
         if (response.status === 401) {
-          getApiContext().onUnauthorized()
+          queueMicrotask(() => {
+            getApiContext().onUnauthorized()
+          })
         }
         return response
       },
@@ -73,16 +81,21 @@ export async function httpClient<T>(url: string, options?: RequestInit): Promise
     if (response.status === 204) return undefined as T
     return await response.json<T>()
   } catch (error) {
-    throw await toApiError(error)
+    throw toApiError(error)
   }
 }
 
-async function toApiError(error: unknown): Promise<ApiError> {
+function toApiError(error: unknown): ApiError {
   if (error instanceof HTTPError) {
-    const body = await error.response.json().catch(() => ({}))
+    /*
+     * `error.data`, not `error.response.json()`. ky 2 pre-parses the body and
+     * consumes the response doing so, so reading it again yields nothing —
+     * which silently emptied every field error and left users with "something
+     * went wrong" instead of the message DRF sent (§10).
+     */
     return normalizeDrfError({
       status: error.response.status,
-      body,
+      body: error.data,
       requestId: error.response.headers.get('X-Request-Id') ?? undefined,
     })
   }

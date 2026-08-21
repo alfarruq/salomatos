@@ -23,13 +23,17 @@ export function AppProviders({ children }: { children: ReactNode }) {
       getClinicId: getActiveClinicId,
       onUnauthorized: () => {
         /*
-         * ADR-003: session auth, so there is nothing to refresh. Drop
-         * everything the previous user could see before the next screen
-         * renders — §13.4 requires the cache to be cleared on logout, and an
-         * expired session is a logout that nobody chose.
+         * ADR-003: session auth, so there is nothing to refresh — an expired
+         * session is a logout nobody chose.
+         *
+         * Only the store is cleared here. Clearing the *query cache* in
+         * response to a 401 would cancel the request that reported it, and the
+         * guard would see a CancelledError rather than `unauthorized` and show
+         * an error screen instead of the login form. The cache is emptied on
+         * arrival at /login, which is where the user ends up either way and
+         * where nothing is in flight (§13.4).
          */
         useSessionStore.getState().clear()
-        queryClient.clear()
       },
     })
     isConfigured.current = true

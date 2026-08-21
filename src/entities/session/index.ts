@@ -1,4 +1,4 @@
-export { fetchSession, sessionKeys, sessionQueries } from './api/queries'
+export { fetchSession, sessionKeys, sessionQueries, useSession } from './api/queries'
 export {
   parseSession,
   type SessionResponse,

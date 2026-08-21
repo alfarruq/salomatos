@@ -15,6 +15,7 @@ export function Textarea({ id, rows = 4, className, ...props }: TextareaProps) {
       rows={rows}
       aria-describedby={props['aria-describedby'] ?? field?.describedBy}
       aria-invalid={props['aria-invalid'] ?? field?.isInvalid ?? undefined}
+      aria-required={field?.isRequired === true ? true : undefined}
       className={cn(
         'w-full rounded-control border border-border bg-sunken px-4 py-3 text-body text-text',
         // Vertical only: horizontal resize breaks the column layout of a form.
