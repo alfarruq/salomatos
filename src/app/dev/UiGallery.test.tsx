@@ -28,6 +28,8 @@ describe('UiGallery', () => {
       'Alert and Toast',
       'Table',
       'Tabs, Breadcrumb and Avatar',
+      'Command palette',
+      'AppShell',
     ]) {
       expect(screen.getByRole('heading', { name: title })).toBeInTheDocument()
     }

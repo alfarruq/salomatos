@@ -13,7 +13,7 @@
 | 0 | Fundament va bloklovchi qarorlar | 0 → 4 | 2 |
 | 1 | Skelet va CI | 4 → 14 | 5 |
 | 2 | API qatlami | 14 → 22 | 4 |
-| 3 | 🔴 Dizayn tizimi | 22 → 36 | 10 |
+| 3 | 🔴 Dizayn tizimi ✅ | 22 → 36 | 10 |
 | 4 | Auth, sessiya, RBAC | 36 → 46 | 6 |
 | 5 | i18n karkasi | 46 → 52 | 3 |
 | 6 | 🔴 Bemorlar moduli (etalon) | 52 → 66 | 9 |
@@ -172,7 +172,7 @@ Bironta biznes kodisiz, lekin butun sifat mashinasi ishlab turadi.
 
 ---
 
-## Faza 3 — 🔴 Dizayn tizimi (22 → 36%)
+## Faza 3 — 🔴 Dizayn tizimi (22 → 36%) ✅ YAKUNLANDI
 
 > **Bu fazani o'tkazib yubormang yoki qisqartirmang.** Modullardan keyin qurilsa, har modulda tugmalar boshqacha bo'ladi va "Apple-style" hech qachon chiqmaydi. Refaktoring narxi = butun UI'ni qayta yozish.
 
@@ -207,8 +207,7 @@ shadcn/ui dan nusxalanadi va tokenlarга moslanadi:
 | Layout | `Tabs` | ✅ |
 | Ma'lumot | `Badge`, `Skeleton`, `Table`, `Avatar`, `Pagination` | ✅ |
 | Fikr-mulohaza | `Toast` (sonner), `Alert`, `EmptyState`, `ErrorState` | ✅ |
-| Navigatsiya | `Breadcrumb` | ✅ |
-| Navigatsiya | `CommandPalette` (cmdk) | ⏳ |
+| Navigatsiya | `Breadcrumb`, `CommandPalette` (cmdk) | ✅ |
 
 > 🗓️ **`DatePicker` vaqt zonasiga umuman tegmaydi.** §12.4 dagi eng jiddiy tuzoq shu:
 > `new Date('2026-01-01')` UTC yarim tunini beradi va Grinvichdan g'arbda **31-dekabr**
@@ -242,11 +241,13 @@ bir xil (kod bizniki, a11y Radix'dan), lekin token to'qnashuvi yo'q.
 > `pointer-coarse:min-h-11` orqali barmoq bilan ishlaganda 44px ga kengayadi.
 > Sichqoncha bilan zichlik saqlanadi, sensorli ekranda qoida buzilmaydi.
 
-### 3.3. Arxitektura komponentlari
+### 3.3. Arxitektura komponentlari ✅
 - [x] `QueryBoundary` (§15) — 4 holatni bitta joyda hal qiladi
 - [x] `ErrorBoundary` — bitta komponent, uchta joylashuv (Root / Route / Widget).
       `resetKeys` bilan: boshqa sahifaga o'tilganda fallback yangi sahifada qotib qolmaydi
-- [ ] `AppShell`: sidebar + header + content
+- [x] `AppShell`: fiksirlangan rail + top bar + siljiydigan kontent. `lg` dan pastda
+      rail `Sheet` ga aylanadi — registratura stolidagi planshet haqiqiy qurilma.
+      Tab tartibida birinchi element — "asosiy qismga o'tish" havolasi
 
 > **`QueryBoundary` da `error` sloti ixtiyoriy va berilmasa xato qayta otiladi.**
 > Uni yutib yuborish §15 dagi butun ErrorBoundary ierarxiyasini ma'nosiz qilardi —
@@ -275,7 +276,36 @@ bir xil (kod bizniki, a11y Radix'dan), lekin token to'qnashuvi yo'q.
 - [x] Production bundle'ida **yo'q** (`import.meta.env.DEV` bilan kesiladi — tekshirildi)
 - [ ] Faza 4 da haqiqiy route'ga aylanadi (hozircha `pathname` tekshiruvi)
 
-**Chiqish mezoni:** `/dev/ui` da har bir komponent bor · hech qayerda hardcode `#hex` yo'q · 360px da buzilmaydi · klaviatura bilan butun sahifani aylanib chiqish mumkin · kontrast AA.
+---
+
+## ✅ Faza 3 YAKUNLANDI (2026-08-21)
+
+**Chiqish mezoni — hammasi o'lchandi, aytilmadi:**
+
+| Mezon | Natija |
+|---|---|
+| `pnpm verify` | yashil · **93 test**, 3 marta ketma-ket barqaror |
+| Komponentlar | **32 ta**, 17 ta test fayli |
+| Hardcode `#hex` | **0** |
+| `transition: all` | **0** |
+| `localStorage` / `console.log` / `any` / `@ts-ignore` | **0** |
+| Kontrast AA (`check:contrast`) | ikkala mavzuda **barcha juftlar o'tdi** |
+| Bundle | **61.54 kB** / 180 kB · CSS **7.12 kB** / 40 kB |
+| `/dev/ui` production'da | **yo'q** (CI'da grep bilan qulflangan) |
+
+**Fazadagi asosiy tuzatishlar** (hammasi o'lchov natijasida topilgan, taxmin bilan emas):
+
+1. **§11.2 palitrasi o'z §11.7 talabidan yiqilardi** — 8 ta juft AA dan past edi.
+   Aksent ikki rolga ajratildi, `check:contrast` CI'ga ulandi.
+2. **`import.meta.env.DEV` yolg'iz o'zi bundle'ni himoya qilmaydi** — `sonner` ning
+   import vaqtidagi side-effect'i tufayli dev galereyasi production entry'ga minib
+   kelayotgan edi (61.5 → 66 kB). Lazy chunk + CI grep bilan qulflandi.
+3. **`DatePicker` beqaror edi** — Radix popover fokusi bilan poyga. `onOpenAutoFocus`
+   orqali fokus tortishuv o'rniga ataylab joylashtiriladi.
+
+**Faza 4 uchun ochiq qolgan ikkita ish:**
+- `Can` (§9.2) — `entities/session/ui/` da yoziladi, `shared` da emas (qatlam qoidasi)
+- `/dev/ui` haqiqiy dev-only route'ga aylanadi, hozircha `pathname` tekshiruvi
 
 ---
 

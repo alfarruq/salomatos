@@ -1,10 +1,18 @@
 export { Alert, type AlertProps, type AlertTone } from './Alert'
+export { AppShell, type AppShellProps } from './AppShell'
 export { Avatar, type AvatarProps, type AvatarSize } from './Avatar'
 export { Badge, type BadgeProps, type BadgeTone } from './Badge'
 export { Breadcrumb, type BreadcrumbItem, type BreadcrumbProps } from './Breadcrumb'
 export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from './Button'
 export { Card, type CardProps } from './Card'
 export { Checkbox, type CheckboxProps } from './Checkbox'
+export {
+  type CommandGroup,
+  type CommandItem,
+  CommandPalette,
+  type CommandPaletteProps,
+  useCommandShortcut,
+} from './CommandPalette'
 export { DatePicker, type DatePickerProps } from './DatePicker'
 export { Dialog, DialogClose, type DialogProps } from './Dialog'
 export {

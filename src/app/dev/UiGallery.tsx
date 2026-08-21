@@ -10,6 +10,7 @@ import {
   Button,
   Card,
   Checkbox,
+  CommandPalette,
   DatePicker,
   Dialog,
   DialogClose,
@@ -46,6 +47,7 @@ import {
   Tooltip,
   TooltipProvider,
   toast,
+  useCommandShortcut,
 } from '@/shared/ui'
 
 const STATUS_OPTIONS: SelectOption[] = [
@@ -196,6 +198,9 @@ export function UiGallery() {
   const [theme, setTheme] = useState<Theme>('light')
   const [phone, setPhone] = useState('')
   const [birthDate, setBirthDate] = useState('')
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false)
+
+  useCommandShortcut(() => setIsPaletteOpen(true))
 
   const toggleTheme = () => {
     const next: Theme = theme === 'light' ? 'dark' : 'light'
@@ -602,7 +607,64 @@ export function UiGallery() {
               </Row>
             </div>
           </Section>
+
+          <Section title="Command palette">
+            <Row label="⌘K / Ctrl+K, or the button. Query never leaves component state (§3)">
+              <Button onClick={() => setIsPaletteOpen(true)} variant="secondary">
+                Open palette
+              </Button>
+            </Row>
+          </Section>
+
+          <Section title="AppShell">
+            <p className="text-callout text-text-secondary">
+              The authenticated frame — fixed rail, top bar, scrolling content, with the rail
+              becoming a sheet below <code className="font-mono">lg</code>. It owns the whole
+              viewport, so it is exercised by its tests rather than nested here, and becomes the
+              real layout in phase 4.
+            </p>
+          </Section>
         </div>
+
+        <CommandPalette
+          emptyLabel="Hech narsa topilmadi"
+          groups={[
+            {
+              label: 'Sahifalar',
+              items: [
+                {
+                  id: 'patients',
+                  label: 'Bemorlar',
+                  keywords: ['patients'],
+                  hint: '⌘1',
+                  icon: <Users aria-hidden="true" className="size-4" />,
+                  onSelect: () => toast.info('Bemorlar'),
+                },
+                {
+                  id: 'appointments',
+                  label: 'Uchrashuvlar',
+                  keywords: ['appointments'],
+                  hint: '⌘2',
+                  onSelect: () => toast.info('Uchrashuvlar'),
+                },
+              ],
+            },
+            {
+              label: 'Amallar',
+              items: [
+                {
+                  id: 'create-patient',
+                  label: "Bemor qo'shish",
+                  onSelect: () => toast.success("Bemor qo'shish"),
+                },
+              ],
+            },
+          ]}
+          label="Buyruqlar"
+          onOpenChange={setIsPaletteOpen}
+          open={isPaletteOpen}
+          placeholder="Buyruq yoki sahifa"
+        />
 
         <Toaster />
       </div>
