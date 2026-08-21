@@ -1,0 +1,4 @@
+# §17.2 — cheap checks only. The full suite (`pnpm verify`) runs in CI; a
+# pre-commit hook that takes a minute is a hook people start bypassing.
+pnpm exec lint-staged
+pnpm exec tsc --noEmit

@@ -1,0 +1,12 @@
+# §13.8 supply chain: postinstall scripts are blocked unless listed here.
+# Every `true` is an explicit, justified exception.
+allowBuilds:
+  # Vite's bundler — the script links the platform binary, the build cannot
+  # run without it.
+  esbuild: true
+  # Only writes the browser service worker. Generated on demand instead:
+  # `pnpm msw init public/`.
+  msw: false
+  # Native binding for eslint-import-resolver-typescript, which lets the
+  # boundaries plugin follow the `@/` alias (§3.3).
+  unrs-resolver: true

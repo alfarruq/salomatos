@@ -1461,6 +1461,7 @@ vitest related --run
 ```yaml
 - pnpm install --frozen-lockfile
 - pnpm biome ci .
+- pnpm lint:boundaries    # qatlam grafigi (§3.3)
 - pnpm tsc --noEmit
 - pnpm api:check          # generated tiplar yangimi?
 - pnpm i18n:check         # barcha tillarda kalit to'liqmi?

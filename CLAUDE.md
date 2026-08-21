@@ -113,7 +113,8 @@ Vazifa hajmiga qarab. Kichik vazifaga katta seremoniya qo'llama.
 ## 7. Tekshiruv
 
 ```bash
-pnpm verify           # tsc --noEmit && biome ci . && vitest run   ← MAJBURIY
+pnpm verify           # tsc --noEmit && biome ci . && lint:boundaries && vitest run   ← MAJBURIY
+pnpm lint:boundaries  # qatlam grafigi (§3.3) — eslint-plugin-boundaries
 pnpm api:generate     # OpenAPI → TS tiplar (backend schema o'zgarganda)
 pnpm i18n:check       # barcha tillarda kalitlar to'liqmi
 pnpm test             # vitest

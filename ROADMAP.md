@@ -85,36 +85,58 @@ Kod yozishdan oldin hal qilinishi shart bo'lgan narsalar.
 
 ---
 
-## Faza 1 — Skelet va CI (4 → 14%)
+## Faza 1 — Skelet va CI (4 → 14%) ✅ BAJARILDI (2026-08-21)
 
 Bironta biznes kodisiz, lekin butun sifat mashinasi ishlab turadi.
 
-### 1.1. Loyiha yaratish
-```bash
-pnpm create vite@latest salomatos-web -- --template react-ts
-```
-- [ ] `ARCHITECTURE.md` Ilova A dagi barcha paketlar o'rnatiladi
-- [ ] `pnpm config set ignore-scripts true` (§13.8 supply chain)
+### 1.1. Loyiha yaratish ✅
+- [x] Skelet repo ildizida qo'lda qurildi (`pnpm create vite` o'rniga) — backend alohida repozitoriyda,
+      shuning uchun frontend uchun alohida ichki papka kerak emas
+- [x] Ilova A dagi barcha paketlar o'rnatildi
+- [x] §13.8: postinstall skriptlar bloklangan, `pnpm-workspace.yaml` da aniq allowlist
+      (`esbuild: true`, `unrs-resolver: true`, `msw: false`)
 
-### 1.2. TypeScript strict
-- [ ] §17.4 dagi **barcha** flaglar: `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `noUnusedLocals`, `noUnusedParameters`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax`
-- [ ] `@/*` → `src/*` path alias (tsconfig + vite)
+### 1.2. TypeScript strict ✅
+- [x] §17.4 dagi **barcha 7 flag** yoqilgan
+- [x] `@/*` → `src/*` alias (tsconfig + vite)
 
-### 1.3. Papka strukturasi
-- [ ] §3.1 dagi 6 qatlam bo'sh holda yaratiladi, har birida `index.ts`
-- [ ] `eslint-plugin-boundaries` sozlanadi (§3.3 dagi konfiguratsiya aynan)
-- [ ] Biome sozlanadi: lint + format
-- [ ] **Tekshiruv:** `entities` dan `features` ga import yozib ko'r → lint qizil bo'lishi shart
+### 1.3. Papka strukturasi va qatlam himoyasi ✅
+- [x] §3.1 dagi 6 qatlam yaratildi
+- [x] `eslint-plugin-boundaries` sozlandi
+- [x] **Tekshirildi — 4 ta stsenariy:** qonuniy importlar o'tadi · `entities → features`
+      bloklandi · `features → features` (cross-slice) bloklandi · `shared → entities` bloklandi
 
-### 1.4. Skriptlar
-- [ ] `verify`, `api:generate`, `api:check`, `i18n:check`, `test`, `test:e2e`, `build:analyze`, `size-limit`
+### 1.4. Skriptlar ✅
+- [x] `verify`, `lint:boundaries`, `api:generate`, `api:check`, `i18n:check`, `test`,
+      `test:e2e`, `build:analyze`, `size-limit`
+- [x] `scripts/i18n-check.mjs` yozildi — lokal papka yo'q bo'lsa ogohlantirib o'tadi (Faza 5 gacha)
 
-### 1.5. CI (§17.3) va pre-commit (§17.2)
-- [ ] GitHub Actions: install → biome → tsc → api:check → i18n:check → test → build → size-limit → audit → secret grep
-- [ ] Husky + lint-staged
-- [ ] `main` branch himoyalanadi: PR + 1 approve + yashil CI
+### 1.5. CI va pre-commit ✅
+- [x] `.github/workflows/ci.yml` — §17.3 dagi barcha qadamlar
+- [x] `api:check` va E2E **shartli** — mos fayllar paydo bo'lganda avtomatik yoqiladi (Faza 2 / 6)
+- [x] Husky + lint-staged (§17.2)
+- [ ] ⚠️ `main` branch himoyasi — GitHub sozlamalarida qo'lda yoqilsin (PR + 1 approve + yashil CI)
 
-**Chiqish mezoni:** `pnpm verify` yashil · qasddan yozilgan qatlam buzilishi CI'ni qizil qiladi · bo'sh `dist/` build bo'ladi.
+### 1.6. Hujjatdan chetlanishlar
+
+| Nima | Nega |
+|---|---|
+| `eslint-import-resolver-typescript` qo'shildi | Ilova A da yo'q, lekin `boundaries` `@/` aliasini shusiz yechа olmaydi |
+| `@vitejs/plugin-react` `^5` ga qadaldi | v6 vite 8 ni talab qiladi, biz §2.1 bo'yicha vite `^7` da |
+| `vite.config.ts` da bitta `as PluginOption` | `rollup-plugin-visualizer` tiplari `exactOptionalPropertyTypes` bilan mos emas. `any` emas, bitta qatorda izolyatsiya qilingan |
+| Biome: `scripts/**` uchun `noConsole` o'chirildi | Taqiq sababi (§13.4) brauzer bundle'i. Node CLI skriptida qo'llanmaydi |
+
+> **Yangi major versiyalar mavjud, lekin §2 bo'yicha ADR'siz o'tilmadi:**
+> `@tanstack/react-table` 9 (biz `^8`), `motion` 13 (`^12`), `typescript` 7 (`^5.9`), `vite` 8 (`^7`).
+> Ularni ko'tarish alohida qaror — kerak bo'lsa ADR yozilsin.
+
+**Chiqish mezoni — hammasi bajarildi:**
+- [x] `pnpm verify` yashil
+- [x] Qatlam buzilishi lint'ni qizil qiladi (4 ta stsenariyda isbotlandi)
+- [x] `pnpm build` ishlaydi
+- [x] `pnpm size-limit`: JS **61.54 kB** / 180 kB · CSS **1.68 kB** / 40 kB
+- [x] `pnpm audit --audit-level=high` — zaiflik yo'q
+- [x] `dist/` da sir yo'q
 
 ---
 
