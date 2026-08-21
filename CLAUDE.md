@@ -1,0 +1,309 @@
+# CLAUDE.md — SalomatOS Frontend
+
+> Har sessiyada yuklanadi. Bu yerda **so'ralmasdan ham ishlashi kerak** bo'lgan qoidalar bor.
+> Tafsilotlar `ARCHITECTURE.md` da — kerakli **bo'limni** o'qi, butun faylni emas.
+>
+> **Majburlash:** bu fayldagi kritik qoidalar `.claude/settings.json` hook'lari orqali mexanik
+> majburlanadi. Hook bloklasa — aylanib o'tishga urinma, sabab stderr'da yozilgan.
+
+---
+
+## 1. Loyiha
+
+Stomatologiya klinikalari uchun **ko'p ijarachili (multi-tenant) tibbiy SaaS**.
+1000+ klinika. Rollar: `SuperAdmin`, `ClinicAdmin`, `Doctor`, `Patient`. 4 til.
+
+Vite 7 · React 19 · TypeScript strict · TanStack Router · TanStack Query v5 · Zustand · Tailwind v4 · shadcn/ui
+Backend: Django 5 + DRF, alohida repo, same-origin `/api/*`.
+
+**Ma'lumot turi: PHI (tibbiy shaxsiy ma'lumot).** Har bir qaror shundan kelib chiqadi.
+
+---
+
+## 2. Ustuvorlik va override protokoli
+
+| Daraja | Nima | Override mumkinmi |
+|---|---|---|
+| **P0** | Xavfsizlik va PHI | ❌ Yo'q — foydalanuvchi so'rovi ham buni bekor qilmaydi |
+| **P1** | Arxitektura va ma'lumot yaxlitligi | ⚠️ Faqat ADR yozilgandan keyin |
+| **P2** | Kod sifati (tiplar, testlar) | ⚠️ Faqat aniq sabab bilan, kommentda qayd etiladi |
+| **P3** | UX va dizayn tizimi | ✅ Foydalanuvchi qarori ustun |
+
+**P0 override so'ralganda** ("tez bo'lsin, tokenni localStorage'ga tashla"):
+1. Bajarma.
+2. Qaysi P0 qoidasi va nima uchun buzilishini bir jumlada ayt.
+3. Xavfsiz muqobilni taklif qil.
+4. Qayta talab qilinsa ham bajarma — bu qoida foydalanuvchining qulayligi uchun emas, bemorlar uchun.
+
+---
+
+## 3. P0 — Xavfsizlik invariantlari
+
+Har doim, har faylda, har vazifada amal qiladi.
+
+**PHI URL'ga tushmaydi.** Bemor ismi, telefoni, diagnozi hech qachon query param'da bo'lmaydi — server logi, `Referer`, brauzer tarixi va ekran ulashish orqali sizadi.
+→ Qidiruv matni: `useState` + `useDebounce(300)`. URL'ga yozilmaydi.
+→ PHI bo'lmagan filtrlar (sana, status, sahifa, sort) URL'da **qoladi** — ulashiladigan link muhim.
+→ ID sifatida faqat UUID: `?patient=550e8400-...` ✅ · `?patient=Aliyev+Vali` ⛔
+
+**Brauzer xotirasi sirlar uchun ishlatilmaydi.** `localStorage`, `sessionStorage`, `IndexedDB` — token, foydalanuvchi ma'lumoti yoki PHI uchun **qat'iy taqiqlangan**. Faqat RAM. `persistQueryClient` ishlatilmaydi. Sabab: umumiy kompyuter (registratura stoli) va XSS.
+
+**Tenant izolyatsiyasi.** Har bir query key ichida `clinicId`, `entityKeys` factory orqali. `clinicId`siz key = eski klinika ma'lumotining ko'rinishi = **ma'lumot sizib chiqishi**, bug emas.
+
+**Loglarda va xatolarda PHI yo'q.** `console.log(patient)` production build'da ham qoladi. Xato xabari Sentry'ga tushadi. DRF xatosini `normalizeDrfError()` orqali o'tkaz.
+
+**Maxfiy kalit frontendda bo'lmaydi.** Vite'da har bir `VITE_*` o'zgaruvchi bundle ichida ochiq matn. To'lov, SMS, tashqi API — hammasi Django orqali proxy.
+
+**Frontend hech narsani himoya qilmaydi.** `<Can>` va route guard — faqat UX. Haqiqiy avtorizatsiya Django'da. Yangi endpoint qo'shsang, backend'da ruxsat tekshiruvi borligini tasdiqla.
+
+---
+
+## 4. P1 — Arxitektura invariantlari
+
+```
+app → pages → widgets → features → entities → shared
+```
+
+Importlar **faqat o'ngga**. Teskari import — lint xatosi.
+
+| Qatlam | Nima | Misol |
+|---|---|---|
+| `shared/` | Biznes mantiqidan xoli | `ui/Button`, `api/httpClient` |
+| `entities/` | Biznes **obyekti** (ot). Query bor, mutation **yo'q**. | `patient/api/queries` |
+| `features/` | Foydalanuvchi **harakati** (fe'l). Mutation shu yerda. | `patient-create/` |
+| `widgets/` | Sahifa bloki, bir nechta feature'ni birlashtiradi | `patient-table/` |
+| `pages/` | Route komponentlari | `_auth/patients/index.tsx` |
+
+**Chegara testi:** `PatientStatusBadge` → entity (ko'rsatadi). `DeletePatientButton` → feature (amal qiladi).
+
+**Cross-slice qoidasi.** Bir xil qatlamdagi ikki slice bir-birini import qila olmaydi — `features/patient-create` ichida `features/appointment-reschedule` chaqirib bo'lmaydi. Bir nechta feature birga ishlashi kerak bo'lsa, ular **faqat `widgets/` darajasida** birlashtiriladi. Bu `entities` va `widgets` uchun ham amal qiladi.
+
+**Slice tashqarisiga faqat `index.ts` orqali eksport.**
+
+---
+
+## 5. Ish jarayoni
+
+Vazifa hajmiga qarab. Kichik vazifaga katta seremoniya qo'llama.
+
+**Trivial** — bitta fayl, aniq talab (typo, matn, token qiymati)
+→ To'g'ridan-to'g'ri bajar → tekshir → qisqa hisobot.
+
+**Standart** — 2+ fayl yoki yangi komponent/feature
+1. **DISCOVER** — `grep`/`glob` bilan kontekstni torayt. Eng yaqin mavjud o'xshash kodni o'qi (yangi feature uchun — `features/patient-create/`). Hali tahrirlama.
+2. **PLAN** — qisqa bulleted reja. Quyidagi hollarda **tasdiq kut**: API kontrakti, yangi dependency, yangi permission, ADR ta'sir qiladigan o'zgarish.
+3. **EXECUTE** — minimal diff (§6).
+4. **VERIFY** — `pnpm verify` ni bash tool orqali **haqiqatan ishga tushir**.
+5. **REPORT** — o'zgargan fayllar + 1–2 qator izoh.
+
+**Izchillik yangilikdan muhimroq.** Yangi kod yozishdan oldin eng yaqin mavjud namunani o'qi va strukturasini takrorla.
+
+---
+
+## 6. Minimal diff qoidasi
+
+- Faqat vazifa talab qilgan qatorlarni o'zgartir.
+- Tegilmagan kodni **qayta formatlama**, import tartibini o'zgartirma, uslub "yaxshilama". Git blame tarixi saqlanadi.
+- Yo'l-yo'lakay refaktoring qilma. Muammo ko'rsang — aytib o't, tuzatma.
+- Vazifaga aloqasi bo'lmagan kodni o'chirma.
+- Bir vazifada bitta narsa.
+
+---
+
+## 7. Tekshiruv
+
+```bash
+pnpm verify           # tsc --noEmit && biome ci . && vitest run   ← MAJBURIY
+pnpm api:generate     # OpenAPI → TS tiplar (backend schema o'zgarganda)
+pnpm i18n:check       # barcha tillarda kalitlar to'liqmi
+pnpm test             # vitest
+pnpm test:e2e         # playwright
+```
+
+`pnpm verify` — **bajariladigan buyruq**, aytiladigan gap emas. Natijasini ko'rmasdan "tekshirdim" dema.
+
+`Stop` hook har javob oxirida `pnpm verify` ni mustaqil ishga tushiradi. Qizil bo'lsa, davom etishga majbur bo'lasan. Shuning uchun uni o'zing oldindan ishga tushir — aks holda ikki barobar ish bo'ladi.
+
+---
+
+## 8. Nosozlik va qaytish
+
+**`pnpm verify` yiqilsa:** maksimal **2 marta** tuzatishga urin.
+
+Uchinchi urinishga o'tma. To'xta va ayt:
+- qaysi tekshiruv yiqildi (aniq xato matni),
+- nima sinab ko'rilgani,
+- nima uchun ishlamaganligi haqidagi taxminingiz.
+
+**Hech qachon o'z tashabbusing bilan ishni qaytarma.** `git checkout`, `git reset --hard`, `git clean` — tiklanmaydigan yo'qotishga olib keladi va hook bilan bloklangan. Ish saqlanishi kerak bo'lsa `git stash push -u -m "claude-wip: <vazifa>"` **taklif qil**, qarorni foydalanuvchi qabul qiladi.
+
+Bir xil xatoni 2 martadan ko'p tuzatishga urinish kontekstni ifloslantiradi va sifatni pasaytiradi. To'xtash — muvaffaqiyatsizlik emas.
+
+---
+
+## 9. To'xta va so'ra
+
+Aniq triggerlar (mavhum "ishonchim past" emas):
+
+- Yangi dependency kerak
+- `clinicId` yoki tenant konteksti noaniq — **standart qiymat taxmin qilma**
+- Talab ikki xil talqin qilinishi mumkin
+- Backend kontrakti (serializer, endpoint) o'zgarishi kerak
+- Yangi permission kerak
+- `ARCHITECTURE.md` qoidasini buzish kerak (ADR talab qilinadi)
+- PHI bilan ishlashda shubha
+- Vazifa 5+ faylga tegadi va reja tasdiqlanmagan
+
+Bitta aniq savol ber, taxminlar ro'yxatini emas.
+
+---
+
+## 10. Kanonik namunalar
+
+Yangi kod **aynan shu shaklda**.
+
+**Query keys + queryOptions**
+```ts
+export const patientKeys = {
+  scope:  (clinicId: string) => ['clinics', clinicId, 'patients'] as const,
+  list:   (clinicId: string, f: PatientFilters) => [...patientKeys.scope(clinicId), 'list', f] as const,
+  detail: (clinicId: string, id: string) => [...patientKeys.scope(clinicId), 'detail', id] as const,
+}
+
+export const patientQueries = {
+  detail: (clinicId: string, id: string) =>
+    queryOptions({
+      queryKey: patientKeys.detail(clinicId, id),
+      queryFn: ({ signal }) => fetchPatient(id, signal),
+      ...cachePolicy.standard,   // static | standard | live | never | financial
+    }),
+}
+```
+
+**Mutation + optimistic** — faqat qaytariladigan amallarda. To'lov, retsept, tibbiy yozuvni yakunlashda ishlatilmaydi.
+```ts
+useMutation({
+  mutationFn: rescheduleAppointment,
+  onMutate: async (input) => {
+    await qc.cancelQueries({ queryKey: key })
+    const previous = qc.getQueryData(key)
+    qc.setQueryData(key, (old) => applyChange(old, input))
+    return { previous }
+  },
+  onError: (_e, _v, ctx) => qc.setQueryData(key, ctx?.previous),
+  onSettled: () => qc.invalidateQueries({ queryKey: key }),
+})
+```
+
+**Forma — server xatosi maydonga qaytadi**
+```ts
+mutate(values, {
+  onError: (error) => {
+    if (error instanceof ApiError && error.kind === 'validation') {
+      for (const [field, messages] of Object.entries(error.fieldErrors)) {
+        form.setError(field as keyof CreatePatientInput, { message: messages[0] })
+      }
+    }
+  },
+})
+```
+Zod xabarlari — tarjima kalitlari: `.min(2, 'validation.tooShort')`.
+
+**4 holat — har bir ma'lumot ekranida majburiy**
+```tsx
+<QueryBoundary
+  query={patientsQuery}
+  loading={<PatientTableSkeleton rows={10} />}
+  empty={<EmptyPatients onCreate={openCreate} />}
+>
+  {(patients) => <PatientTable data={patients} />}
+</QueryBoundary>
+```
+
+**Ruxsat (faqat UX)**
+```tsx
+<Can permission="patient:archive"><ArchivePatientButton id={patient.id} /></Can>
+```
+Ruxsatlar `/api/me/` dan. Rol → ruxsat xaritasini frontendda hardcode qilma.
+
+---
+
+## 11. Kod va javob uslubi
+
+**Kod**
+- `any`, `@ts-ignore`, asossiz `!` — taqiqlangan. `unknown` + narrowing.
+- API tiplari qo'lda yozilmaydi — `src/shared/api/generated` dan import. Bu papka tahrirlanmaydi.
+- Foydalanuvchiga ko'rinadigan matn — faqat `t()`.
+- Rang/spacing/radius — faqat `@theme` tokenlari. Hardcode `#hex` yo'q.
+- `useEffect` + `fetch` yo'q → `useQuery` yoki route `loader`.
+- Mutation `retry: false`.
+- Kod, kommentariya, commit — **ingliz tilida**.
+- Kommentariya faqat **nega** uchun. Kod o'zi nima qilishini aytsin.
+
+**Javob**
+- Qisqa. Kod yozgandan keyin uzun tushuntirish kerak emas.
+- O'zgarishni 1–2 qatorda ayt. Butun faylni qayta ko'chirma.
+- So'ralmasa o'quv materiali yozma.
+- Har papkaga `README.md` yaratma.
+- Kodda emoji yo'q.
+
+---
+
+## 12. Vazifani yakunlashdan oldin (Task Completion)
+
+- [ ] `pnpm verify` **bajarildi** va yashil
+- [ ] Query key ichida `clinicId`
+- [ ] URL'ga PHI tushmadi, qidiruv `useState`da
+- [ ] `localStorage` / `sessionStorage` ishlatilmadi
+- [ ] `console.log` qolmadi
+- [ ] 4 holat (loading / empty / error / success) bor
+- [ ] Matn `t()` orqali, 4 tilda kalit qo'shildi
+- [ ] Faqat `@theme` tokenlari
+- [ ] Qatlam va cross-slice qoidalari buzilmadi
+- [ ] Diff minimal — tegilmagan kod o'zgarmagan
+- [ ] Yangi dependency yo'q (yoki so'ralgan va tasdiqlangan)
+- [ ] Yangi endpoint bo'lsa — backend'da ruxsat tekshiruvi bor
+
+---
+
+## 13. Dizayn qoidalari
+
+To'liq token jadvali: `ARCHITECTURE.md` §11 + `src/app/styles/theme.css`.
+
+- Spacing: faqat `4, 8, 12, 16, 24, 32, 48, 64`.
+- Soya emas — chegara (`--color-border`, alpha orqali).
+- Bitta aksent rang. Qizil — faqat o'chirish.
+- Matn ierarxiyasi 3 daraja: `text`, `text-secondary`, `text-tertiary`.
+- Animatsiya: fizik harakat → `spring({ stiffness: 400, damping: 32 })`. Rang/opacity → `150ms` + `--ease-out-apple`. `transition: all` yo'q.
+- `useReducedMotion()` har bir animatsiyada.
+- Sifat poli: klaviatura navigatsiyasi, `:focus-visible`, 360px, kontrast AA, bosish maydoni ≥44px.
+
+**Ma'lumot zichligi.** Jadval, moliyaviy ro'yxat va bemorlar bazasida ortiqcha bo'shliq qoldirma — xodim bir ekranda ko'p qator ko'rishi kerak. Bu joylarda `Table`, `List`, `Input` uchun `size="sm"` (dense) variantidan foydalan. Keng bo'shliq — bo'sh holatlar va marketing sahifalari uchun.
+
+---
+
+## 14. Loyiha tuzoqlari
+
+**Vaqt zonasi.** Backend UTC ISO-8601 qaytaradi. Konvertatsiya faqat ko'rsatishda: `Intl.DateTimeFormat` + `timeZone: 'Asia/Tashkent'`. Klinika zonasi ishlatiladi, brauzernikidan emas.
+
+**Rus tilida ko'plik.** Uch shakl (1 / 2–4 / 5–20). ICU majburiy: `{count, plural, one {...} few {...} other {...}}`.
+
+**DRF xatolari** 4 xil shaklda keladi → `normalizeDrfError()`.
+
+**Pagination** — `CursorPagination` + `useInfiniteQuery` yoki `keepPreviousData`.
+
+**100+ qatorli ro'yxat** → `@tanstack/react-virtual`.
+
+**Klinika almashtirish** → `queryClient.clear()` majburiy.
+
+---
+
+## 15. Batafsil ma'lumot qayerda
+
+| Mavzu | Manba |
+|---|---|
+| To'liq arxitektura, ADR | `ARCHITECTURE.md` |
+| Qatlamlar §3 · API §5 · Kesh §6 · Xavfsizlik §13 · Anti-patternlar §20 | `ARCHITECTURE.md` |
+| Dizayn tokenlari | `ARCHITECTURE.md` §11 + `theme.css` |
+| Komponent etaloni | `/dev/ui` route |
+| Majburlash qoidalari | `.claude/settings.json` |
