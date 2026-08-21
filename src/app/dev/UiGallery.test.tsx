@@ -23,6 +23,7 @@ describe('UiGallery', () => {
       'Selection controls',
       'Badge',
       'Card, Separator and Skeleton',
+      'Overlays',
     ]) {
       expect(screen.getByRole('heading', { name: title })).toBeInTheDocument()
     }

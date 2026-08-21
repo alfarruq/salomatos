@@ -203,8 +203,8 @@ shadcn/ui dan nusxalanadi va tokenlarга moslanadi:
 |---|---|---|
 | Forma | `Button`, `Field`, `Input`, `Textarea`, `Select`, `Checkbox`, `Switch` | ✅ |
 | Forma | `Radio`, `DatePicker`, `PhoneInput` | ⏳ |
-| Layout | `Card`, `Separator` | ✅ |
-| Layout | `Tabs`, `Sheet`, `Dialog`, `Popover`, `DropdownMenu`, `Tooltip` | ⏳ |
+| Layout | `Card`, `Separator`, `Sheet`, `Dialog`, `Popover`, `DropdownMenu`, `Tooltip` | ✅ |
+| Layout | `Tabs` | ⏳ |
 | Ma'lumot | `Badge`, `Skeleton` | ✅ |
 | Ma'lumot | `Table`, `Avatar`, `Pagination` | ⏳ |
 | Fikr-mulohaza | `Toast` (sonner), `Alert`, `EmptyState`, `ErrorState` | ⏳ |
@@ -212,7 +212,11 @@ shadcn/ui dan nusxalanadi va tokenlarга moslanadi:
 
 - [x] Yozilganlarning har birida `size="sm"` (dense) varianti bor (o'lchamli komponentlarda)
 - [x] Yozilganlarning har biri klaviatura bilan boshqariladi, `:focus-visible` global
-- [x] 25 ta test
+- [x] 34 ta test — jumladan `Dialog` fokus tuzog'i va menyu klaviatura navigatsiyasi
+
+**Overlay animatsiyasi CSS'da, JS'da emas.** Sabab: Radix CSS animatsiyasini o'zi
+aniqlaydi va chiqish tugagunicha elementni DOM'da ushlab turadi — aks holda dialog
+yopilish animatsiyasi o'rtasida yo'qolib qoladi. Davomiyliklar §11.5 dan olindi.
 
 **Yondashuv:** `shadcn init` ishlatilmadi — u o'z token nomlarini (`--background`,
 `--foreground`) `theme.css` ga yozib, bizning §11.2 tizimimiz bilan to'qnashadi.

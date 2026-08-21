@@ -61,6 +61,9 @@
    */
   --color-control-knob: #ffffff;
 
+  /* Scrim behind modals — dims the page without tinting it. */
+  --color-scrim: oklch(0% 0 0 / 0.4);
+
   /* ── Radius ── */
   --radius-control: 10px;
   --radius-card: 18px;
@@ -118,6 +121,104 @@
 
   /* ── Minimum hit area (§11.7). Never hardcode 44px in a component. ── */
   --size-touch: 44px;
+
+  /*
+   * ── Overlay motion (§11.5) ──
+   * Kept as CSS animations rather than JS: Radix detects them and holds the
+   * element mounted until the exit finishes, so a dialog cannot disappear
+   * mid-fade. Durations are the ones §11.5 specifies — a modal opens in 220ms
+   * from 0.96 scale, everything else is a 150ms opacity move.
+   *
+   * The global prefers-reduced-motion rule below neutralises all of these.
+   */
+  --animate-overlay-in: overlay-in 150ms var(--ease-out-apple);
+  --animate-overlay-out: overlay-out 150ms var(--ease-out-apple);
+  --animate-modal-in: modal-in 220ms var(--ease-out-apple);
+  --animate-modal-out: modal-out 150ms var(--ease-out-apple);
+  --animate-popover-in: popover-in 150ms var(--ease-out-apple);
+  --animate-popover-out: popover-out 100ms var(--ease-out-apple);
+  --animate-sheet-in: sheet-in 220ms var(--ease-out-apple);
+  --animate-sheet-out: sheet-out 180ms var(--ease-out-apple);
+
+  @keyframes overlay-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes overlay-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes modal-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  @keyframes modal-out {
+    from {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.96);
+    }
+  }
+
+  @keyframes popover-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes popover-out {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+
+  @keyframes sheet-in {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes sheet-out {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
 }
 
 /*
@@ -156,6 +257,7 @@
       --color-danger-hover: #b3202a;
       --color-on-danger: #ffffff;
       --color-control-knob: #ffffff;
+      --color-scrim: oklch(0% 0 0 / 0.6);
 
       --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.5), 0 1px 2px oklch(0% 0 0 / 0.4);
       --shadow-popover: 0 8px 28px oklch(0% 0 0 / 0.6);
@@ -188,6 +290,7 @@
     --color-danger-hover: #b3202a;
     --color-on-danger: #ffffff;
     --color-control-knob: #ffffff;
+    --color-scrim: oklch(0% 0 0 / 0.6);
 
     --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.5), 0 1px 2px oklch(0% 0 0 / 0.4);
     --shadow-popover: 0 8px 28px oklch(0% 0 0 / 0.6);

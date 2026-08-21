@@ -6,14 +6,24 @@ import {
   Button,
   Card,
   Checkbox,
+  Dialog,
+  DialogClose,
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   Field,
   Input,
+  Popover,
   Select,
   type SelectOption,
   Separator,
+  Sheet,
   Skeleton,
   Switch,
   Textarea,
+  Tooltip,
+  TooltipProvider,
 } from '@/shared/ui'
 
 const STATUS_OPTIONS: SelectOption[] = [
@@ -88,173 +98,248 @@ export function UiGallery() {
   }
 
   return (
-    <div className="min-h-dvh bg-canvas px-6 py-12">
-      <div className="mx-auto flex max-w-3xl flex-col gap-12">
-        <header className="flex items-center justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-title1 text-text">Component reference</h1>
-            <p className="text-callout text-text-secondary">
-              Every variant and state, both themes. Dev builds only.
-            </p>
-          </div>
-          <Button onClick={toggleTheme} variant="secondary">
-            {theme === 'light' ? 'Dark' : 'Light'}
-          </Button>
-        </header>
-
-        <Section title="Typography">
-          <div className="flex flex-col gap-4">
-            {TYPE_SCALE.map(([className, label]) => (
-              <p className={`${className} text-text`} key={className}>
-                {label}
+    <TooltipProvider delayDuration={300}>
+      <div className="min-h-dvh bg-canvas px-6 py-12">
+        <div className="mx-auto flex max-w-3xl flex-col gap-12">
+          <header className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              <h1 className="text-title1 text-text">Component reference</h1>
+              <p className="text-callout text-text-secondary">
+                Every variant and state, both themes. Dev builds only.
               </p>
-            ))}
-          </div>
-        </Section>
+            </div>
+            <Button onClick={toggleTheme} variant="secondary">
+              {theme === 'light' ? 'Dark' : 'Light'}
+            </Button>
+          </header>
 
-        <Section title="Surfaces and text levels">
-          <div className="flex flex-col gap-3">
-            {SURFACES.map((surface) => (
-              <div
-                className={cn(
-                  surface.className,
-                  'flex flex-wrap gap-4 rounded-control border border-border p-4',
-                )}
-                key={surface.name}
-              >
-                <span className="w-20 text-caption text-text-tertiary">{surface.name}</span>
-                {TEXT_LEVELS.map((level) =>
-                  // text-tertiary is deliberately absent on sunken — it cannot
-                  // reach AA there (see check:contrast).
-                  surface.name === 'sunken' && level.name === 'text-tertiary' ? null : (
-                    <span className={cn('text-callout', level.className)} key={level.name}>
-                      {level.name}
-                    </span>
-                  ),
-                )}
+          <Section title="Typography">
+            <div className="flex flex-col gap-4">
+              {TYPE_SCALE.map(([className, label]) => (
+                <p className={`${className} text-text`} key={className}>
+                  {label}
+                </p>
+              ))}
+            </div>
+          </Section>
+
+          <Section title="Surfaces and text levels">
+            <div className="flex flex-col gap-3">
+              {SURFACES.map((surface) => (
+                <div
+                  className={cn(
+                    surface.className,
+                    'flex flex-wrap gap-4 rounded-control border border-border p-4',
+                  )}
+                  key={surface.name}
+                >
+                  <span className="w-20 text-caption text-text-tertiary">{surface.name}</span>
+                  {TEXT_LEVELS.map((level) =>
+                    // text-tertiary is deliberately absent on sunken — it cannot
+                    // reach AA there (see check:contrast).
+                    surface.name === 'sunken' && level.name === 'text-tertiary' ? null : (
+                      <span className={cn('text-callout', level.className)} key={level.name}>
+                        {level.name}
+                      </span>
+                    ),
+                  )}
+                </div>
+              ))}
+            </div>
+          </Section>
+
+          <Section title="Button">
+            <Row label="Variants (md)">
+              <Button variant="primary">Bemorni saqlash</Button>
+              <Button variant="secondary">Bekor qilish</Button>
+              <Button variant="ghost">Batafsil</Button>
+              <Button iconLeft={<Trash2 aria-hidden="true" className="size-4" />} variant="danger">
+                O&apos;chirish
+              </Button>
+            </Row>
+
+            <Row label="Dense (sm) — tables and toolbars">
+              <Button size="sm" variant="primary">
+                Qo&apos;shish
+              </Button>
+              <Button size="sm" variant="secondary">
+                Filtr
+              </Button>
+              <Button size="sm" variant="ghost">
+                Tahrirlash
+              </Button>
+            </Row>
+
+            <Row label="States">
+              <Button isLoading variant="primary">
+                Saqlanmoqda
+              </Button>
+              <Button disabled variant="primary">
+                Disabled
+              </Button>
+              <Button disabled variant="secondary">
+                Disabled
+              </Button>
+            </Row>
+          </Section>
+
+          <Section title="Field and Input">
+            <div className="flex max-w-sm flex-col gap-6">
+              <Field isRequired label="Ism">
+                <Input placeholder="Vali" />
+              </Field>
+
+              <Field description="+998 bilan boshlanadi" label="Telefon">
+                <Input placeholder="+998901234567" />
+              </Field>
+
+              <Field error="Telefon raqami noto'g'ri" label="Telefon">
+                <Input defaultValue="12345" />
+              </Field>
+
+              <Field label="Dense">
+                <Input placeholder="Qidiruv" size="sm" />
+              </Field>
+
+              <Field label="Disabled">
+                <Input disabled placeholder="O'zgartirib bo'lmaydi" />
+              </Field>
+
+              <Field description="Bemor kartasida ko'rinadi" label="Izoh">
+                <Textarea placeholder="Qisqacha anamnez" />
+              </Field>
+
+              <Field error="Holat tanlanmagan" label="Holat">
+                <Select options={STATUS_OPTIONS} placeholder="Holatni tanlang" />
+              </Field>
+
+              <Field label="Holat (dense)">
+                <Select options={STATUS_OPTIONS} placeholder="Holat" size="sm" />
+              </Field>
+            </div>
+          </Section>
+
+          <Section title="Selection controls">
+            <Row label="Checkbox">
+              <div className="flex flex-col gap-3">
+                <Checkbox label="Arxivlangan bemorlarni ko'rsatish" />
+                <Checkbox checked="indeterminate" label="Hammasi tanlangan" />
+                <Checkbox disabled label="Disabled" />
               </div>
-            ))}
-          </div>
-        </Section>
+            </Row>
 
-        <Section title="Button">
-          <Row label="Variants (md)">
-            <Button variant="primary">Bemorni saqlash</Button>
-            <Button variant="secondary">Bekor qilish</Button>
-            <Button variant="ghost">Batafsil</Button>
-            <Button iconLeft={<Trash2 aria-hidden="true" className="size-4" />} variant="danger">
-              O&apos;chirish
-            </Button>
-          </Row>
+            <Row label="Switch — spring, the one place motion is felt (§11.5)">
+              <div className="flex flex-col gap-3">
+                <Switch defaultChecked label="SMS eslatma yuborish" />
+                <Switch label="Email hisobot" />
+                <Switch disabled label="Disabled" />
+              </div>
+            </Row>
+          </Section>
 
-          <Row label="Dense (sm) — tables and toolbars">
-            <Button size="sm" variant="primary">
-              Qo&apos;shish
-            </Button>
-            <Button size="sm" variant="secondary">
-              Filtr
-            </Button>
-            <Button size="sm" variant="ghost">
-              Tahrirlash
-            </Button>
-          </Row>
+          <Section title="Badge">
+            <Row label="Tones — colour carries state, never decoration">
+              <Badge tone="neutral">Qoralama</Badge>
+              <Badge tone="accent">Faol</Badge>
+              <Badge tone="success">To&apos;langan</Badge>
+              <Badge tone="warning">Kutilmoqda</Badge>
+              <Badge tone="danger">Bekor qilindi</Badge>
+            </Row>
+          </Section>
 
-          <Row label="States">
-            <Button isLoading variant="primary">
-              Saqlanmoqda
-            </Button>
-            <Button disabled variant="primary">
-              Disabled
-            </Button>
-            <Button disabled variant="secondary">
-              Disabled
-            </Button>
-          </Row>
-        </Section>
+          <Section title="Card, Separator and Skeleton">
+            <div className="flex flex-col gap-6">
+              <Card className="p-6">
+                <p className="text-body text-text">Card — border, not shadow (§11.1)</p>
+                <Separator className="my-4" />
+                <p className="text-callout text-text-secondary">Separator above.</p>
+              </Card>
 
-        <Section title="Field and Input">
-          <div className="flex max-w-sm flex-col gap-6">
-            <Field isRequired label="Ism">
-              <Input placeholder="Vali" />
-            </Field>
-
-            <Field description="+998 bilan boshlanadi" label="Telefon">
-              <Input placeholder="+998901234567" />
-            </Field>
-
-            <Field error="Telefon raqami noto'g'ri" label="Telefon">
-              <Input defaultValue="12345" />
-            </Field>
-
-            <Field label="Dense">
-              <Input placeholder="Qidiruv" size="sm" />
-            </Field>
-
-            <Field label="Disabled">
-              <Input disabled placeholder="O'zgartirib bo'lmaydi" />
-            </Field>
-
-            <Field description="Bemor kartasida ko'rinadi" label="Izoh">
-              <Textarea placeholder="Qisqacha anamnez" />
-            </Field>
-
-            <Field error="Holat tanlanmagan" label="Holat">
-              <Select options={STATUS_OPTIONS} placeholder="Holatni tanlang" />
-            </Field>
-
-            <Field label="Holat (dense)">
-              <Select options={STATUS_OPTIONS} placeholder="Holat" size="sm" />
-            </Field>
-          </div>
-        </Section>
-
-        <Section title="Selection controls">
-          <Row label="Checkbox">
-            <div className="flex flex-col gap-3">
-              <Checkbox label="Arxivlangan bemorlarni ko'rsatish" />
-              <Checkbox checked="indeterminate" label="Hammasi tanlangan" />
-              <Checkbox disabled label="Disabled" />
+              <div className="flex flex-col gap-2">
+                <span className="text-caption text-text-tertiary">
+                  Skeleton — the loading state, never a spinner (§15)
+                </span>
+                <Skeleton className="h-11 w-full" />
+                <Skeleton className="h-11 w-2/3" />
+                <Skeleton className="h-11 w-1/3" />
+              </div>
             </div>
-          </Row>
+          </Section>
 
-          <Row label="Switch — spring, the one place motion is felt (§11.5)">
-            <div className="flex flex-col gap-3">
-              <Switch defaultChecked label="SMS eslatma yuborish" />
-              <Switch label="Email hisobot" />
-              <Switch disabled label="Disabled" />
-            </div>
-          </Row>
-        </Section>
+          <Section title="Overlays">
+            <Row label="Dialog — focus trapped, Escape closes, 220ms open (§11.5)">
+              <Dialog
+                description="Bemor arxivga o'tadi. Yozuvlari saqlanib qoladi."
+                footer={
+                  <>
+                    <DialogClose asChild>
+                      <Button variant="secondary">Bekor qilish</Button>
+                    </DialogClose>
+                    <Button variant="danger">Arxivlash</Button>
+                  </>
+                }
+                title="Bemorni arxivlash"
+                trigger={<Button variant="secondary">Dialog</Button>}
+              >
+                <p className="text-body text-text-secondary">
+                  Arxivlangan bemor ro&apos;yxatda ko&apos;rinmaydi, lekin qidiruvda topiladi.
+                </p>
+              </Dialog>
 
-        <Section title="Badge">
-          <Row label="Tones — colour carries state, never decoration">
-            <Badge tone="neutral">Qoralama</Badge>
-            <Badge tone="accent">Faol</Badge>
-            <Badge tone="success">To&apos;langan</Badge>
-            <Badge tone="warning">Kutilmoqda</Badge>
-            <Badge tone="danger">Bekor qilindi</Badge>
-          </Row>
-        </Section>
+              <Dialog
+                description="Yopib bo'lmaydi — Escape ham, tashqariga bosish ham ishlamaydi."
+                footer={
+                  <DialogClose asChild>
+                    <Button variant="primary">Tugatish</Button>
+                  </DialogClose>
+                }
+                isDismissDisabled
+                title="To'lovni yakunlash"
+                trigger={<Button variant="secondary">Dialog (dismiss o&apos;chirilgan)</Button>}
+              />
+            </Row>
 
-        <Section title="Card, Separator and Skeleton">
-          <div className="flex flex-col gap-6">
-            <Card className="p-6">
-              <p className="text-body text-text">Card — border, not shadow (§11.1)</p>
-              <Separator className="my-4" />
-              <p className="text-callout text-text-secondary">Separator above.</p>
-            </Card>
+            <Row label="Sheet — side panel on the dialog primitive">
+              <Sheet
+                description="Filtrlar bemorlar ro'yxatiga qo'llanadi."
+                footer={<Button variant="primary">Qo&apos;llash</Button>}
+                title="Filtrlar"
+                trigger={<Button variant="secondary">Sheet</Button>}
+              >
+                <div className="flex flex-col gap-6">
+                  <Field label="Holat">
+                    <Select options={STATUS_OPTIONS} placeholder="Holat" />
+                  </Field>
+                  <Checkbox label="Faqat bugungi tashriflar" />
+                </div>
+              </Sheet>
+            </Row>
 
-            <div className="flex flex-col gap-2">
-              <span className="text-caption text-text-tertiary">
-                Skeleton — the loading state, never a spinner (§15)
-              </span>
-              <Skeleton className="h-11 w-full" />
-              <Skeleton className="h-11 w-2/3" />
-              <Skeleton className="h-11 w-1/3" />
-            </div>
-          </div>
-        </Section>
+            <Row label="Popover, menu and tooltip">
+              <Popover trigger={<Button variant="secondary">Popover</Button>}>
+                <p className="text-body text-text">Ixtiyoriy kontent.</p>
+              </Popover>
+
+              <DropdownMenu trigger={<Button variant="secondary">Amallar</Button>}>
+                <DropdownMenuLabel>Bemor</DropdownMenuLabel>
+                <DropdownMenuItem>Tahrirlash</DropdownMenuItem>
+                <DropdownMenuItem disabled>Nusxalash</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  iconLeft={<Trash2 aria-hidden="true" className="size-4" />}
+                  isDestructive
+                >
+                  O&apos;chirish
+                </DropdownMenuItem>
+              </DropdownMenu>
+
+              <Tooltip content="Ma'lumot faqat shu yerda turmasin — tooltip sensorli ekranda ko'rinmaydi">
+                <Button variant="ghost">Tooltip</Button>
+              </Tooltip>
+            </Row>
+          </Section>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   )
 }
