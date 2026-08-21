@@ -1,7 +1,8 @@
-import { Trash2 } from 'lucide-react'
+import { Trash2, Users } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/shared/lib/cn'
 import {
+  Alert,
   Badge,
   Button,
   Card,
@@ -12,9 +13,13 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  EmptyState,
+  ErrorState,
   Field,
   Input,
   Popover,
+  QueryBoundary,
+  type QueryLike,
   Select,
   type SelectOption,
   Separator,
@@ -22,8 +27,10 @@ import {
   Skeleton,
   Switch,
   Textarea,
+  Toaster,
   Tooltip,
   TooltipProvider,
+  toast,
 } from '@/shared/ui'
 
 const STATUS_OPTIONS: SelectOption[] = [
@@ -87,6 +94,82 @@ const TEXT_LEVELS = [
   { name: 'text-secondary', className: 'text-text-secondary' },
   { name: 'text-tertiary', className: 'text-text-tertiary' },
 ] as const
+
+type DemoState = 'loading' | 'empty' | 'error' | 'data'
+
+const DEMO_STATES: DemoState[] = ['loading', 'empty', 'error', 'data']
+
+/** Builds the query shape QueryBoundary reads, without a real request. */
+function demoQuery(state: DemoState): QueryLike<string[]> {
+  return {
+    data: state === 'data' ? ['Vali Aliyev', 'Aziza Karimova'] : state === 'empty' ? [] : undefined,
+    isPending: state === 'loading',
+    isError: state === 'error',
+    error: state === 'error' ? new Error('network') : null,
+    refetch: () => toast.info('refetch() chaqirildi'),
+  }
+}
+
+function StatesDemo() {
+  const [state, setState] = useState<DemoState>('loading')
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap gap-2">
+        {DEMO_STATES.map((candidate) => (
+          <Button
+            key={candidate}
+            onClick={() => setState(candidate)}
+            size="sm"
+            variant={state === candidate ? 'primary' : 'secondary'}
+          >
+            {candidate}
+          </Button>
+        ))}
+      </div>
+
+      <div className="rounded-control border border-border">
+        <QueryBoundary
+          empty={
+            <EmptyState
+              action={<Button variant="primary">Bemor qo&apos;shish</Button>}
+              description="Birinchi bemorni qo'shsangiz, u shu yerda ko'rinadi."
+              icon={<Users aria-hidden="true" className="size-8" />}
+              title="Hali bemor qo'shilmagan"
+            />
+          }
+          error={({ retry }) => (
+            <ErrorState
+              description="Internet aloqasini tekshirib, qayta urinib ko'ring."
+              onRetry={retry ?? (() => {})}
+              requestId="req_01J8XYZ"
+              retryLabel="Qayta urinish"
+              title="Bemorlar ro'yxati yuklanmadi"
+            />
+          )}
+          loading={
+            <div className="flex flex-col gap-2 p-4">
+              <Skeleton className="h-11 w-full" />
+              <Skeleton className="h-11 w-full" />
+              <Skeleton className="h-11 w-2/3" />
+            </div>
+          }
+          query={demoQuery(state)}
+        >
+          {(patients) => (
+            <ul className="flex flex-col gap-2 p-4">
+              {patients.map((patient) => (
+                <li className="text-body text-text" key={patient}>
+                  {patient}
+                </li>
+              ))}
+            </ul>
+          )}
+        </QueryBoundary>
+      </div>
+    </div>
+  )
+}
 
 export function UiGallery() {
   const [theme, setTheme] = useState<Theme>('light')
@@ -338,7 +421,48 @@ export function UiGallery() {
               </Tooltip>
             </Row>
           </Section>
+
+          <Section title="The four states (§15)">
+            <StatesDemo />
+          </Section>
+
+          <Section title="Alert and Toast">
+            <Row label="Alert — inline, stays on the page">
+              <div className="flex w-full flex-col gap-3">
+                <Alert title="Klinika sozlamalari yangilandi." tone="info" />
+                <Alert title="Bemor saqlandi." tone="success" />
+                <Alert title="Bu vaqt band. Boshqa vaqt tanlang." tone="warning" />
+                <Alert title="O'zgarishlar saqlanmadi. Qayta urinib ko'ring." tone="danger">
+                  Internet aloqasi uzilgan bo&apos;lishi mumkin.
+                </Alert>
+              </div>
+            </Row>
+
+            <Row label="Toast — transient. Never PHI (§13.4)">
+              <Button onClick={() => toast.success('Saqlandi')} variant="secondary">
+                Success
+              </Button>
+              <Button
+                onClick={() => toast.error('Bu vaqt band. Boshqa vaqt tanlang.')}
+                variant="secondary"
+              >
+                Error
+              </Button>
+              <Button
+                onClick={() =>
+                  toast('Bemor arxivlandi', {
+                    action: { label: 'Qaytarish', onClick: () => toast.success('Qaytarildi') },
+                  })
+                }
+                variant="secondary"
+              >
+                With action
+              </Button>
+            </Row>
+          </Section>
         </div>
+
+        <Toaster />
       </div>
     </TooltipProvider>
   )

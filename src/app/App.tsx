@@ -1,4 +1,17 @@
-import { UiGallery } from './dev/UiGallery'
+import { lazy, Suspense } from 'react'
+
+/**
+ * Lazy rather than a plain import guarded by `import.meta.env.DEV`.
+ *
+ * The guard alone is not enough: dead-code elimination cannot drop a module
+ * that has side effects at import time — sonner injects its stylesheet on
+ * load — so the reference page was dragging its dependencies into the
+ * production entry chunk. A dynamic import puts them in a chunk that is only
+ * ever requested by /dev/ui.
+ */
+const UiGallery = import.meta.env.DEV
+  ? lazy(async () => ({ default: (await import('./dev/UiGallery')).UiGallery }))
+  : () => null
 
 /**
  * Placeholder shell. The router, providers and real layout arrive in phase 4
@@ -6,10 +19,12 @@ import { UiGallery } from './dev/UiGallery'
  * this pathname check goes away.
  */
 export function App() {
-  // `import.meta.env.DEV` is statically replaced, so the gallery and everything
-  // it pulls in are dropped from the production bundle entirely.
   if (import.meta.env.DEV && window.location.pathname === '/dev/ui') {
-    return <UiGallery />
+    return (
+      <Suspense fallback={null}>
+        <UiGallery />
+      </Suspense>
+    )
   }
 
   return (

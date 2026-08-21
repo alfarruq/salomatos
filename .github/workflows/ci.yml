@@ -65,6 +65,17 @@ jobs:
       - name: Audit dependencies
         run: pnpm audit --audit-level=high
 
+      # The /dev/ui reference page must never reach production. A dependency
+      # with import-time side effects can silently defeat tree-shaking, so this
+      # is checked rather than assumed.
+      - name: Dev-only code is not shipped
+        run: |
+          if grep -rIl "Component reference" dist/; then
+            echo "::error::The /dev/ui gallery leaked into the production build"
+            exit 1
+          fi
+          echo "Dev-only code is absent from dist/"
+
       # §13.6 — a leaked key in the bundle is unrecoverable once shipped.
       - name: No secrets in the bundle
         run: |

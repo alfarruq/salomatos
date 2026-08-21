@@ -207,7 +207,7 @@ shadcn/ui dan nusxalanadi va tokenlarга moslanadi:
 | Layout | `Tabs` | ⏳ |
 | Ma'lumot | `Badge`, `Skeleton` | ✅ |
 | Ma'lumot | `Table`, `Avatar`, `Pagination` | ⏳ |
-| Fikr-mulohaza | `Toast` (sonner), `Alert`, `EmptyState`, `ErrorState` | ⏳ |
+| Fikr-mulohaza | `Toast` (sonner), `Alert`, `EmptyState`, `ErrorState` | ✅ |
 | Navigatsiya | `Breadcrumb`, `CommandPalette` (cmdk) | ⏳ |
 
 - [x] Yozilganlarning har birida `size="sm"` (dense) varianti bor (o'lchamli komponentlarda)
@@ -229,9 +229,21 @@ bir xil (kod bizniki, a11y Radix'dan), lekin token to'qnashuvi yo'q.
 > Sichqoncha bilan zichlik saqlanadi, sensorli ekranda qoida buzilmaydi.
 
 ### 3.3. Arxitektura komponentlari
-- [ ] `QueryBoundary` (§15) — 4 holatni bitta joyda hal qiladi
-- [ ] `ErrorBoundary` 3 darajada: Root / Route / Widget
+- [x] `QueryBoundary` (§15) — 4 holatni bitta joyda hal qiladi
+- [x] `ErrorBoundary` — bitta komponent, uchta joylashuv (Root / Route / Widget).
+      `resetKeys` bilan: boshqa sahifaga o'tilganda fallback yangi sahifada qotib qolmaydi
 - [ ] `AppShell`: sidebar + header + content
+
+> **`QueryBoundary` da `error` sloti ixtiyoriy va berilmasa xato qayta otiladi.**
+> Uni yutib yuborish §15 dagi butun ErrorBoundary ierarxiyasini ma'nosiz qilardi —
+> route va widget darajasidagi chegaralar aynan shuning uchun bor. Yon foydasi:
+> `shared/ui` ichida hech qanday tarjima qilinmagan matn hardcode qilinmaydi.
+
+> ⚠️ **Topilgan tuzoq: `import.meta.env.DEV` yolg'iz o'zi yetarli emas.** `sonner`
+> modul yuklanganda stil kiritadi, shuning uchun tree-shaking uni o'lik shox ichidan
+> ham olib tashlay olmadi va galereya bog'liqliklari production entry chunk'iga
+> tushib qoldi (61.5 → 66 kB). Yechim: galereya `lazy()` + ternary orqali chaqiriladi,
+> shunda production build'da chunk umuman yaratilmaydi. CI'da grep bilan qulflandi.
 - [x] ~~`Can` (§9.2)~~ → **Faza 4 ga ko'chirildi.** `Can` `useCan` orqali
       `entities/session` ga bog'liq, `shared` esa `entities` ni import qila olmaydi
       (§3.3). Faza 1 dagi linter buni bloklaydi. To'g'ri joyi — `entities/session/ui/`

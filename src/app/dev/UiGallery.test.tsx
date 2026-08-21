@@ -24,6 +24,8 @@ describe('UiGallery', () => {
       'Badge',
       'Card, Separator and Skeleton',
       'Overlays',
+      'The four states (§15)',
+      'Alert and Toast',
     ]) {
       expect(screen.getByRole('heading', { name: title })).toBeInTheDocument()
     }
