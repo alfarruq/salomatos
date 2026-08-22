@@ -1,7 +1,9 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from '@tanstack/react-router'
 import { LogOut } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Can, fullName, sessionQueries, useSession } from '@/entities/session'
 import { useLogout } from '@/features/auth-logout'
+import { LanguageSwitcher } from '@/features/language-switch'
 import { LockScreen, useIdleLock, useLockStore } from '@/features/session-lock'
 import { ApiError } from '@/shared/api/errors'
 import {
@@ -47,6 +49,7 @@ export const Route = createFileRoute('/_auth')({
 })
 
 function AuthenticatedLayout() {
+  const { t } = useTranslation('common')
   const navigate = useNavigate()
   const session = useSession()
   const { mutate: logout, isPending } = useLogout()
@@ -81,29 +84,32 @@ function AuthenticatedLayout() {
       brand={<span className="text-title2 text-text">SalomatOS</span>}
       headerActions={
         session ? (
-          <DropdownMenu
-            trigger={
-              <button aria-label={fullName(session)} className="rounded-full" type="button">
-                <Avatar name={fullName(session)} />
-              </button>
-            }
-          >
-            <DropdownMenuLabel>{session.email}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              disabled={isPending}
-              iconLeft={<LogOut aria-hidden="true" className="size-4" />}
-              onSelect={handleLogout}
+          <>
+            <LanguageSwitcher />
+            <DropdownMenu
+              trigger={
+                <button aria-label={fullName(session)} className="rounded-full" type="button">
+                  <Avatar name={fullName(session)} />
+                </button>
+              }
             >
-              Chiqish
-            </DropdownMenuItem>
-          </DropdownMenu>
+              <DropdownMenuLabel>{session.email}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                disabled={isPending}
+                iconLeft={<LogOut aria-hidden="true" className="size-4" />}
+                onSelect={handleLogout}
+              >
+                {t('action.signOut')}
+              </DropdownMenuItem>
+            </DropdownMenu>
+          </>
         ) : null
       }
       labels={{
-        skipToContent: "Asosiy qismga o'tish",
-        openNavigation: 'Menyuni ochish',
-        navigation: 'Asosiy menyu',
+        skipToContent: t('nav.skipToContent'),
+        openNavigation: t('nav.openNavigation'),
+        navigation: t('nav.navigation'),
       }}
       sidebar={
         <ul className="flex flex-col gap-1">
@@ -112,21 +118,21 @@ function AuthenticatedLayout() {
               className="block rounded-control px-3 py-2 text-body text-text-secondary hover:bg-sunken hover:text-text"
               to="/dashboard"
             >
-              Boshqaruv paneli
+              {t('nav.dashboard')}
             </Link>
           </li>
           {/* Nothing here is a permission check that matters — Django's is. */}
           <Can permission="patient:read">
             <li>
               <span className="block px-3 py-2 text-body text-text-tertiary">
-                Bemorlar (Faza 6)
+                {t('nav.patients')}
               </span>
             </li>
           </Can>
           <Can permission="billing:read">
             <li>
               <span className="block px-3 py-2 text-body text-text-tertiary">
-                To&apos;lovlar (Faza 7)
+                {t('nav.billing')}
               </span>
             </li>
           </Can>

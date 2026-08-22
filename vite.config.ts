@@ -50,9 +50,26 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-query': ['@tanstack/react-query'],
+        /*
+         * React only, and matched by path rather than by package name:
+         * `react-dom/client` is a different module id from `react-dom`, so the
+         * name-based form in §8.3 left React DOM in the entry chunk and
+         * produced a 3 kB "vendor-react" that cached nothing.
+         *
+         * Splitting further was measured and rejected. Four vendor chunks
+         * (react / tanstack / i18n / zod) came to 183 kB gzip against 170 kB
+         * for this arrangement: each file is compressed with its own
+         * dictionary, so cutting the payload into pieces costs real bytes. The
+         * budget in §14.1 is about what a clinic downloads on 4G, and 13 kB is
+         * worth more than a finer cache granularity.
+         *
+         * React is the exception because it is both the largest dependency and
+         * the one that changes least, so it earns its own file.
+         */
+        manualChunks: (id) => {
+          if (!id.includes('node_modules')) return undefined
+          if (/[\\/]react(-dom)?[\\/]/.test(id) || id.includes('scheduler')) return 'vendor-react'
+          return undefined
         },
       },
     },

@@ -3,6 +3,8 @@ import { createMemoryHistory, createRouter, RouterProvider } from '@tanstack/rea
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HttpResponse, http } from 'msw'
+import { Suspense } from 'react'
+import { I18nextProvider } from 'react-i18next'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useSessionStore } from '@/entities/session'
 import { useLockStore } from '@/features/session-lock'
@@ -10,6 +12,7 @@ import { routeTree } from '@/routeTree.gen'
 import { configureApi, resetApiContext } from '@/shared/api/httpContext'
 import { setMockSession } from '@/shared/api/mocks/handlers'
 import { server } from '@/shared/api/mocks/server'
+import { createI18n } from '@/shared/i18n'
 import { IDLE_TIMEOUT_MS, IDLE_WARNING_MS } from '@/shared/lib/useIdleTimer'
 import { Toaster } from '@/shared/ui'
 import { createQueryClient } from './providers/queryClient'
@@ -37,10 +40,21 @@ function renderApp(initialPath = '/') {
     history: createMemoryHistory({ initialEntries: [initialPath] }),
   })
 
+  /*
+   * Pinned to the product default rather than left to the browser: jsdom
+   * reports en-US, so the assertions below would silently start checking
+   * English and stop saying anything about what staff actually see.
+   */
+  const i18n = createI18n('uz-Latn')
+
   render(
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-      <Toaster />
+      <I18nextProvider i18n={i18n}>
+        <Suspense fallback={null}>
+          <RouterProvider router={router} />
+        </Suspense>
+        <Toaster />
+      </I18nextProvider>
     </QueryClientProvider>,
   )
 

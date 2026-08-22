@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Session } from '@/entities/session'
 import { fullName } from '@/entities/session'
 import { IDLE_WARNING_MS, useIdleTimer } from '@/shared/lib/useIdleTimer'
@@ -17,6 +18,7 @@ const WARNING_TOAST_ID = 'idle-warning'
  * nothing left to see.
  */
 export function useIdleLock(session: Session | undefined): void {
+  const { t } = useTranslation('auth')
   const queryClient = useQueryClient()
   const isLocked = useLockStore((state) => state.isLocked)
 
@@ -36,12 +38,12 @@ export function useIdleLock(session: Session | undefined): void {
   }, [queryClient])
 
   const handleWarning = useCallback(() => {
-    toast.warning('Ekran tez orada qulflanadi', {
+    toast.warning(t('lock.warningTitle'), {
       id: WARNING_TOAST_ID,
-      description: `${Math.round(IDLE_WARNING_MS / 1000)} soniyadan so'ng parol so'raladi.`,
+      description: t('lock.warningBody', { seconds: Math.round(IDLE_WARNING_MS / 1000) }),
       duration: IDLE_WARNING_MS,
     })
-  }, [])
+  }, [t])
 
   const handleActive = useCallback(() => {
     toast.dismiss(WARNING_TOAST_ID)

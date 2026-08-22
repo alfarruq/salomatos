@@ -1,7 +1,9 @@
 import { QueryClientProvider } from '@tanstack/react-query'
-import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { type ReactNode, Suspense, useEffect, useRef, useState } from 'react'
+import { I18nextProvider } from 'react-i18next'
 import { getActiveClinicId, type Session, sessionKeys, useSessionStore } from '@/entities/session'
 import { configureApi } from '@/shared/api/httpContext'
+import { createI18n } from '@/shared/i18n'
 import { Toaster, TooltipProvider } from '@/shared/ui'
 import { createQueryClient } from './queryClient'
 
@@ -16,6 +18,8 @@ export function AppProviders({ children }: { children: ReactNode }) {
   // One client for the app's lifetime; recreating it on render would empty the
   // cache on every state change.
   const [queryClient] = useState(createQueryClient)
+  // Also once: recreating it would drop every loaded namespace.
+  const [i18n] = useState(() => createI18n())
   const isConfigured = useRef(false)
 
   if (!isConfigured.current) {
@@ -56,10 +60,18 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider delayDuration={300}>
-        {children}
-        <Toaster />
-      </TooltipProvider>
+      <I18nextProvider i18n={i18n}>
+        <TooltipProvider delayDuration={300}>
+          {/*
+           * Namespaces load on demand (§12.1), so the first render of a screen
+           * may suspend. `null` rather than a spinner: it resolves in a frame
+           * from a local chunk, and a flash of loader would be worse than
+           * nothing.
+           */}
+          <Suspense fallback={null}>{children}</Suspense>
+          <Toaster />
+        </TooltipProvider>
+      </I18nextProvider>
     </QueryClientProvider>
   )
 }

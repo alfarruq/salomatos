@@ -1,5 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query'
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { ErrorBoundary, ErrorState } from '@/shared/ui'
 
 export interface RouterContext {
@@ -15,6 +16,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 })
 
 function RootLayout() {
+  const { t } = useTranslation('common')
+
   return (
     /*
      * The route-level boundary from §15: one page failing leaves navigation and
@@ -24,10 +27,10 @@ function RootLayout() {
     <ErrorBoundary
       fallback={({ reset }) => (
         <ErrorState
-          description="Sahifani qayta yuklang yoki boshqa bo'limga o'ting."
+          description={t('error.pageBody')}
           onRetry={reset}
-          retryLabel="Qayta urinish"
-          title="Bu sahifa ochilmadi"
+          retryLabel={t('action.retry')}
+          title={t('error.pageTitle')}
         />
       )}
     >

@@ -1,0 +1,28 @@
+{
+  "app": { "name": "SalomatOS" },
+  "action": {
+    "save": "Сақлаш",
+    "cancel": "Бекор қилиш",
+    "retry": "Қайта уриниш",
+    "close": "Ёпиш",
+    "signOut": "Чиқиш"
+  },
+  "nav": {
+    "skipToContent": "Асосий қисмга ўтиш",
+    "openNavigation": "Менюни очиш",
+    "navigation": "Асосий меню",
+    "breadcrumb": "Саҳифалар занжири",
+    "dashboard": "Бошқарув панели",
+    "patients": "Беморлар",
+    "billing": "Тўловлар"
+  },
+  "language": { "label": "Тил", "change": "Тилни ўзгартириш" },
+  "error": {
+    "pageTitle": "Бу саҳифа очилмади",
+    "pageBody": "Саҳифани қайта юкланг ёки бошқа бўлимга ўтинг.",
+    "network": "Серверга уланиб бўлмади. Интернетни текширинг.",
+    "unknown": "Амал бажарилмади. Қайта уриниб кўринг."
+  },
+  "patientCount_one": "{{count}} бемор",
+  "patientCount_other": "{{count}} бемор"
+}

@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Building2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useLogout } from '@/features/auth-logout'
 import { Button, EmptyState } from '@/shared/ui'
 
@@ -13,6 +14,7 @@ export const Route = createFileRoute('/onboarding')({
  * instead would look broken.
  */
 function OnboardingPage() {
+  const { t } = useTranslation('auth')
   const navigate = useNavigate()
   const { mutate: logout } = useLogout()
 
@@ -23,13 +25,13 @@ function OnboardingPage() {
           <Button
             onClick={() => logout(undefined, { onSettled: () => navigate({ to: '/login' }) })}
           >
-            Boshqa hisob bilan kirish
+            {t('onboarding.switchAccount')}
           </Button>
         }
         headingLevel={1}
-        description="Administrator sizni klinikaga qo'shgach, bu yerda ish boshlaysiz."
+        description={t('onboarding.body')}
         icon={<Building2 aria-hidden="true" className="size-8" />}
-        title="Sizga hali klinika biriktirilmagan"
+        title={t('onboarding.title')}
       />
     </main>
   )

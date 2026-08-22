@@ -1,5 +1,6 @@
 import { Lock } from 'lucide-react'
 import { type FormEvent, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ApiError } from '@/shared/api/errors'
 import { Alert, Avatar, Button, Card, Field, Input } from '@/shared/ui'
 import { useLockStore } from '../model/lockStore'
@@ -18,6 +19,7 @@ export interface LockScreenProps {
  * what does the protecting.
  */
 export function LockScreen({ onSignOut }: LockScreenProps) {
+  const { t } = useTranslation(['auth', 'common'])
   const email = useLockStore((state) => state.lockedEmail)
   const name = useLockStore((state) => state.lockedName)
   const { mutate: unlock, isPending } = useUnlock()
@@ -45,8 +47,8 @@ export function LockScreen({ onSignOut }: LockScreenProps) {
           passwordRef.current?.focus()
           setError(
             cause instanceof ApiError && cause.kind === 'validation'
-              ? "Parol noto'g'ri"
-              : "Ulanib bo'lmadi. Qayta urinib ko'ring.",
+              ? t('auth:lock.wrongPassword')
+              : t('common:error.network'),
           )
         },
       },
@@ -57,7 +59,7 @@ export function LockScreen({ onSignOut }: LockScreenProps) {
     // Not a `<dialog>` or a Radix modal: those trap focus inside an app the
     // user is locked out of. This replaces the page rather than layering on it.
     <div
-      aria-label="Ekran qulflangan"
+      aria-label={t('auth:lock.title')}
       className="fixed inset-0 z-100 flex items-center justify-center bg-canvas p-4"
       role="dialog"
     >
@@ -69,9 +71,9 @@ export function LockScreen({ onSignOut }: LockScreenProps) {
             <Avatar name={name} size="lg" />
           )}
           <div className="flex flex-col gap-1">
-            <h1 className="text-title2 text-text">Ekran qulflangan</h1>
+            <h1 className="text-title2 text-text">{t('auth:lock.title')}</h1>
             <p className="text-callout text-text-secondary">
-              {name ?? email} · davom etish uchun parolni kiriting
+              {t('auth:lock.subtitle', { name: name ?? email })}
             </p>
           </div>
         </div>
@@ -79,7 +81,7 @@ export function LockScreen({ onSignOut }: LockScreenProps) {
         {error === null ? null : <Alert title={error} tone="danger" />}
 
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          <Field label="Parol">
+          <Field label={t('auth:login.password')}>
             <Input
               autoComplete="current-password"
               onChange={(event) => setPassword(event.target.value)}
@@ -90,12 +92,12 @@ export function LockScreen({ onSignOut }: LockScreenProps) {
           </Field>
 
           <Button isLoading={isPending} type="submit" variant="primary">
-            Qulfni ochish
+            {t('auth:lock.unlock')}
           </Button>
         </form>
 
         <Button onClick={onSignOut} variant="ghost">
-          Boshqa foydalanuvchi
+          {t('auth:lock.otherUser')}
         </Button>
       </Card>
     </div>

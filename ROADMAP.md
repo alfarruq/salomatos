@@ -15,7 +15,7 @@
 | 2 | API qatlami | 14 → 22 | 4 |
 | 3 | 🔴 Dizayn tizimi ✅ | 22 → 36 | 10 |
 | 4 | Auth, sessiya, RBAC ✅ | 36 → 46 | 6 |
-| 5 | i18n karkasi | 46 → 52 | 3 |
+| 5 | i18n karkasi ✅ | 46 → 52 | 3 |
 | 6 | 🔴 Bemorlar moduli (etalon) | 52 → 66 | 9 |
 | 7 | Qolgan biznes modullari | 66 → 86 | 30 |
 | 8 | Bemor portali + SuperAdmin | 86 → 94 | 12 |
@@ -412,18 +412,41 @@ radix bor.
 
 ---
 
-## Faza 5 — i18n karkasi (46 → 52%)
+## Faza 5 — i18n karkasi (46 → 52%) ✅ YAKUNLANDI (2026-08-22)
 
-- [ ] `i18next` + `react-i18next` + `i18next-icu`
-- [ ] 4 til, namespace'lar modul bo'yicha, **lazy** yuklanadi (§12.1)
-- [ ] Rus ko'pligi ICU orqali — `{count, plural, one{} few{} other{}}`
-- [ ] `uz-Latn` va `uz-Cyrl` — ikkita alohida lokal, avtomatik transliteratsiya emas
-- [ ] `shared/lib/datetime.ts` — `Intl.DateTimeFormat` + `timeZone: CLINIC_TZ`
-- [ ] `pnpm i18n:check` skripti + CI'ga ulanadi
-- [ ] Til almashtirgich komponenti
-- [ ] Tolgee/Crowdin ulanishi (ixtiyoriy, keyinroq)
+- [x] `i18next` + `react-i18next`, 4 lokal (ADR-008), namespace'lar **lazy** (§12.1)
+- [x] Har (lokal, namespace) juftligi alohida chunk — build'da 12 ta kichik fayl
+- [x] `uz-Latn` va `uz-Cyrl` bir-biriga fallback qilmaydi (`nonExplicitSupportedLngs: false`)
+- [x] `shared/lib/datetime.ts` — `Intl` + `CLINIC_TZ`, `clinicDayOf()` bilan
+- [x] `pnpm i18n:check` endi haqiqiy ish qilyapti va `verify` ichida
+- [x] `features/language-switch/` — har til o'z tilida yozilgan
+- [x] Barcha UI matni `t()` orqali; `LoginForm` dagi vaqtinchalik lug'at o'chirildi
+- [x] 152 test
 
-**Chiqish mezoni:** `i18n:check` yashil · til almashganda sana formati ham o'zgaradi · rus ko'pligi 1/3/7 da to'g'ri.
+> ⚠️ **ICU plagini ishlatilmadi — §12.2 dan ongli chetlanish.**
+> §12.2 himoya qilayotgan talab — ruscha ko'plikning uch shakli. i18next'ning o'z
+> ko'plik mexanizmi `Intl.PluralRules` ustida ishlaydi va ruschani **to'g'ri** qiladi,
+> jumladan odamlar adashadigan holatlarda: 21 = one, 22 = few, 101 = one. Test bilan
+> qulflangan.
+>
+> Plagin yo'li `intl-messageformat` ni talab qiladi — 113 kB ochilgan holda, o'sha
+> paytdagi ~20 kB bundle zaxirasiga qarshi. Platforma allaqachon beradigan xatti-harakat
+> uchun buni to'lash mantiqsiz. Qaytarish — konfiguratsiya va JSON sintaksisi
+> o'zgarishi, qayta yozish emas.
+
+> **`i18n:check` endi ko'plikni til bo'yicha tekshiradi.** Har lokaldan `Intl.PluralRules`
+> aytgan shakllar **aynan** talab qilinadi — inglizchada `_few` bo'lishi ham xato, ruschada
+> yo'qligi ham. Bu §12.2 dagi haqiqiy xavfni ushlaydi va tekshirib ko'rildi: ruschadan
+> `_few` olib tashlansa, skript darhol yiqiladi.
+
+> ⛔ **Til tanlovi brauzerda saqlanmaydi.** §3 brauzer xotirasini taqiqlaydi va
+> mexanik guard uni bloklaydi (hatto kommentariyadagi so'zni ham — buni o'z boshimdan
+> kechirdim). Til brauzer sozlamasidan o'qiladi va sessiya davomida almashtiriladi;
+> xodimning tanlovini eslab qolish uning **user record**iga tegishli — bu backend
+> maydoni va aslida to'g'ri joyi ham o'sha.
+
+### 5.1. Backend'dan kutiladigan qo'shimcha
+- [ ] `/api/me/` da `preferred_language` maydoni — til tanlovini eslab qolish uchun
 
 ---
 

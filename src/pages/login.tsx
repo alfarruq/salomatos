@@ -1,4 +1,5 @@
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { sessionQueries } from '@/entities/session'
 import { LoginForm } from '@/features/auth-login'
@@ -42,6 +43,7 @@ export const Route = createFileRoute('/login')({
 })
 
 function LoginPage() {
+  const { t } = useTranslation('auth')
   const navigate = useNavigate()
   const search = Route.useSearch()
 
@@ -49,8 +51,8 @@ function LoginPage() {
     <main className="flex min-h-dvh items-center justify-center bg-canvas p-4">
       <Card className="w-full max-w-sm p-8">
         <div className="mb-8 flex flex-col gap-2">
-          <h1 className="text-title1 text-text">SalomatOS</h1>
-          <p className="text-callout text-text-secondary">Davom etish uchun tizimga kiring.</p>
+          <h1 className="text-title1 text-text">{t('login.title')}</h1>
+          <p className="text-callout text-text-secondary">{t('login.subtitle')}</p>
         </div>
 
         <LoginForm

@@ -1,0 +1,30 @@
+{
+  "app": { "name": "SalomatOS" },
+  "action": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "retry": "Повторить",
+    "close": "Закрыть",
+    "signOut": "Выйти"
+  },
+  "nav": {
+    "skipToContent": "Перейти к содержимому",
+    "openNavigation": "Открыть меню",
+    "navigation": "Главное меню",
+    "breadcrumb": "Хлебные крошки",
+    "dashboard": "Панель управления",
+    "patients": "Пациенты",
+    "billing": "Платежи"
+  },
+  "language": { "label": "Язык", "change": "Сменить язык" },
+  "error": {
+    "pageTitle": "Страница не открылась",
+    "pageBody": "Обновите страницу или перейдите в другой раздел.",
+    "network": "Не удалось связаться с сервером. Проверьте интернет.",
+    "unknown": "Действие не выполнено. Попробуйте ещё раз."
+  },
+  "patientCount_one": "{{count}} пациент",
+  "patientCount_few": "{{count}} пациента",
+  "patientCount_many": "{{count}} пациентов",
+  "patientCount_other": "{{count}} пациента"
+}

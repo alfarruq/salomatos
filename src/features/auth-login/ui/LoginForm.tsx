@@ -1,31 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { ApiError } from '@/shared/api/errors'
 import { Alert, Button, Field, Input } from '@/shared/ui'
 import { type LoginInput, loginSchema } from '../model/schema'
 import { useLogin } from '../model/useLogin'
-
-/**
- * ⚠️ Temporary. Zod and the server both return translation keys (§10); i18n
- * arrives in phase 5, and this map is deleted then in favour of `t()`.
- * A key that reaches the screen unmapped is shown as-is rather than hidden, so
- * the gap is visible rather than silent.
- */
-const MESSAGES: Record<string, string> = {
-  'validation.required': "Bu maydon to'ldirilishi shart",
-  'validation.email': "Email manzil noto'g'ri",
-}
-
-function translate(key: string | undefined): string | undefined {
-  if (key === undefined) return undefined
-  return MESSAGES[key] ?? key
-}
 
 export interface LoginFormProps {
   onSuccess: () => void
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
+  const { t } = useTranslation(['auth', 'validation', 'common'])
+
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     // onBlur, not onChange: validating every keystroke nags rather than helps.
@@ -34,6 +21,17 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   })
 
   const { mutate, isPending } = useLogin()
+
+  /**
+   * Zod returns keys like `validation.required` (§10). The server returns
+   * already-translated prose, because Django localises from `Accept-Language`
+   * (§12.3). So: translate if it looks like one of our keys, otherwise show it
+   * as it arrived.
+   */
+  const message = (value: string | undefined): string | undefined => {
+    if (value === undefined) return undefined
+    return value.startsWith('validation.') ? t(value.replace('validation.', 'validation:')) : value
+  }
 
   const handleSubmit = form.handleSubmit((values) =>
     mutate(values, {
@@ -47,24 +45,24 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
          * server objected to.
          */
         for (const [field, messages] of Object.entries(error.fieldErrors)) {
-          const message = messages[0]
-          if (message === undefined) continue
+          const first = messages[0]
+          if (first === undefined) continue
 
           if (field === 'non_field_errors') {
             // DRF's shape for "these credentials do not match", which belongs
             // to the form rather than to either input.
-            form.setError('root', { message })
+            form.setError('root', { message: first })
             continue
           }
-          form.setError(field as keyof LoginInput, { message })
+          form.setError(field as keyof LoginInput, { message: first })
         }
 
         if (Object.keys(error.fieldErrors).length === 0) {
           form.setError('root', {
             message:
               error.kind === 'network'
-                ? "Serverga ulanib bo'lmadi. Internetni tekshiring."
-                : (error.detail ?? 'Kirish amalga oshmadi. Qayta urinib ko`ring.'),
+                ? t('common:error.network')
+                : (error.detail ?? t('auth:login.failed')),
           })
         }
       },
@@ -75,23 +73,31 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
   return (
     <form className="flex flex-col gap-6" noValidate onSubmit={handleSubmit}>
-      {rootError ? <Alert title={translate(rootError) ?? rootError} tone="danger" /> : null}
+      {rootError ? <Alert title={rootError} tone="danger" /> : null}
 
-      <Field error={translate(form.formState.errors.email?.message)} isRequired label="Email">
+      <Field
+        error={message(form.formState.errors.email?.message)}
+        isRequired
+        label={t('auth:login.email')}
+      >
         <Input
           autoComplete="username"
-          placeholder="siz@klinika.uz"
+          placeholder={t('auth:login.emailPlaceholder')}
           type="email"
           {...form.register('email')}
         />
       </Field>
 
-      <Field error={translate(form.formState.errors.password?.message)} isRequired label="Parol">
+      <Field
+        error={message(form.formState.errors.password?.message)}
+        isRequired
+        label={t('auth:login.password')}
+      >
         <Input autoComplete="current-password" type="password" {...form.register('password')} />
       </Field>
 
       <Button isLoading={isPending} type="submit" variant="primary">
-        Kirish
+        {t('auth:login.submit')}
       </Button>
     </form>
   )
