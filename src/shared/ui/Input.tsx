@@ -1,10 +1,10 @@
-import type { ComponentPropsWithoutRef } from 'react'
+import type { ComponentPropsWithRef } from 'react'
 import { cn } from '@/shared/lib/cn'
 import { useFieldControl } from './Field'
 
 export type InputSize = 'sm' | 'md'
 
-export interface InputProps extends Omit<ComponentPropsWithoutRef<'input'>, 'size' | 'className'> {
+export interface InputProps extends Omit<ComponentPropsWithRef<'input'>, 'size' | 'className'> {
   /** `sm` is the dense variant for tables and toolbars (§13 data density). */
   size?: InputSize
   className?: string

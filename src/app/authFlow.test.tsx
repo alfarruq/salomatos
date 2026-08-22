@@ -1,14 +1,17 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createMemoryHistory, createRouter, RouterProvider } from '@tanstack/react-router'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HttpResponse, http } from 'msw'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useSessionStore } from '@/entities/session'
+import { useLockStore } from '@/features/session-lock'
 import { routeTree } from '@/routeTree.gen'
 import { configureApi, resetApiContext } from '@/shared/api/httpContext'
 import { setMockSession } from '@/shared/api/mocks/handlers'
 import { server } from '@/shared/api/mocks/server'
+import { IDLE_TIMEOUT_MS, IDLE_WARNING_MS } from '@/shared/lib/useIdleTimer'
+import { Toaster } from '@/shared/ui'
 import { createQueryClient } from './providers/queryClient'
 
 /**
@@ -37,6 +40,7 @@ function renderApp(initialPath = '/') {
   render(
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <Toaster />
     </QueryClientProvider>,
   )
 
@@ -49,6 +53,7 @@ afterEach(() => {
   resetApiContext()
   setMockSession(null)
   useSessionStore.getState().clear()
+  useLockStore.getState().unlock()
 })
 afterAll(() => server.close())
 
@@ -158,5 +163,96 @@ describe('clinic switching', () => {
         queryClient.getQueryData(['clinics', '4f7b2e91-3a5c-4d18-9f60-1c2a8b7d4e33', 'patients']),
       ).toBeUndefined()
     })
+  })
+})
+
+describe('idle lock', () => {
+  /*
+   * Fake timers must be in place before the component mounts, or the idle
+   * timeout is scheduled with the real `setTimeout` and advancing fake time
+   * moves nothing. `shouldAdvanceTime` keeps promises and MSW working while
+   * still allowing a deliberate jump forward.
+   */
+  const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    setMockSession('admin')
+  })
+  afterEach(() => vi.useRealTimers())
+
+  async function goIdle() {
+    await screen.findByRole('heading', { name: 'Boshqaruv paneli' })
+    await act(async () => {
+      vi.advanceTimersByTime(IDLE_TIMEOUT_MS)
+    })
+    return screen.findByRole('heading', { name: 'Ekran qulflangan' })
+  }
+
+  it('locks the screen and drops the patient data behind it', async () => {
+    const { queryClient } = renderApp('/dashboard')
+    await screen.findByRole('heading', { name: 'Boshqaruv paneli' })
+
+    const patientsKey = ['clinics', '4f7b2e91-3a5c-4d18-9f60-1c2a8b7d4e33', 'patients']
+    queryClient.setQueryData(patientsKey, ['Vali Aliyev'])
+
+    await act(async () => {
+      vi.advanceTimersByTime(IDLE_TIMEOUT_MS)
+    })
+    expect(await screen.findByRole('heading', { name: 'Ekran qulflangan' })).toBeInTheDocument()
+
+    /*
+     * §13.4 — the overlay is not what protects anything. Clearing the cache
+     * is: an overlay alone would leave the patient record in the DOM, one
+     * devtools panel or one screenshot away.
+     *
+     * The session query comes back on its own, because the layout still
+     * subscribes to it. That is fine and not what is being protected: it is
+     * the signed-in user's own name and permissions, not a patient's record.
+     */
+    expect(queryClient.getQueryData(patientsKey)).toBeUndefined()
+    expect(screen.queryByRole('heading', { name: 'Boshqaruv paneli' })).not.toBeInTheDocument()
+  })
+
+  it('names who is locked out, and nothing about a patient', async () => {
+    renderApp('/dashboard')
+    await goIdle()
+
+    // Identity is the only thing that survives a lock, and it is on screen in
+    // a public room.
+    expect(screen.getByText(/Dilnoza Rahimova/)).toBeInTheDocument()
+  })
+
+  it('warns before locking so the user can stay', async () => {
+    renderApp('/dashboard')
+    await screen.findByRole('heading', { name: 'Boshqaruv paneli' })
+
+    await act(async () => {
+      vi.advanceTimersByTime(IDLE_TIMEOUT_MS - IDLE_WARNING_MS)
+    })
+
+    expect(await screen.findByText('Ekran tez orada qulflanadi')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Ekran qulflangan' })).not.toBeInTheDocument()
+  })
+
+  it('comes back to the dashboard on the right password', async () => {
+    renderApp('/dashboard')
+    await goIdle()
+
+    await user.type(screen.getByLabelText('Parol'), 'salomat')
+    await user.click(screen.getByRole('button', { name: 'Qulfni ochish' }))
+
+    expect(await screen.findByRole('heading', { name: 'Boshqaruv paneli' })).toBeInTheDocument()
+  })
+
+  it('stays locked on the wrong password', async () => {
+    renderApp('/dashboard')
+    await goIdle()
+
+    await user.type(screen.getByLabelText('Parol'), 'wrong')
+    await user.click(screen.getByRole('button', { name: 'Qulfni ochish' }))
+
+    expect(await screen.findByText("Parol noto'g'ri")).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Ekran qulflangan' })).toBeInTheDocument()
   })
 })

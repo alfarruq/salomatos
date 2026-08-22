@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, redirect, useNavigate } from '@tanstack/
 import { LogOut } from 'lucide-react'
 import { Can, fullName, sessionQueries, useSession } from '@/entities/session'
 import { useLogout } from '@/features/auth-logout'
+import { LockScreen, useIdleLock, useLockStore } from '@/features/session-lock'
 import { ApiError } from '@/shared/api/errors'
 import {
   AppShell,
@@ -50,10 +51,29 @@ function AuthenticatedLayout() {
   const session = useSession()
   const { mutate: logout, isPending } = useLogout()
 
+  const isLocked = useLockStore((state) => state.isLocked)
+  useIdleLock(session)
+
   const handleLogout = () => {
     logout(undefined, {
       onSettled: () => navigate({ to: '/login' }),
     })
+  }
+
+  /*
+   * §13.4 — returned before the shell, not layered over it. By this point the
+   * cache is already empty, so there is nothing underneath worth hiding; not
+   * rendering the app at all also keeps its keyboard traps out of the way.
+   */
+  if (isLocked) {
+    return (
+      <LockScreen
+        onSignOut={() => {
+          useLockStore.getState().unlock()
+          handleLogout()
+        }}
+      />
+    )
   }
 
   return (

@@ -1,8 +1,8 @@
-import type { ComponentPropsWithoutRef } from 'react'
+import type { ComponentPropsWithRef } from 'react'
 import { cn } from '@/shared/lib/cn'
 import { useFieldControl } from './Field'
 
-export interface TextareaProps extends Omit<ComponentPropsWithoutRef<'textarea'>, 'className'> {
+export interface TextareaProps extends Omit<ComponentPropsWithRef<'textarea'>, 'className'> {
   className?: string
 }
 

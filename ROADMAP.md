@@ -14,7 +14,7 @@
 | 1 | Skelet va CI | 4 → 14 | 5 |
 | 2 | API qatlami | 14 → 22 | 4 |
 | 3 | 🔴 Dizayn tizimi ✅ | 22 → 36 | 10 |
-| 4 | Auth, sessiya, RBAC | 36 → 46 | 6 |
+| 4 | Auth, sessiya, RBAC ✅ | 36 → 46 | 6 |
 | 5 | i18n karkasi | 46 → 52 | 3 |
 | 6 | 🔴 Bemorlar moduli (etalon) | 52 → 66 | 9 |
 | 7 | Qolgan biznes modullari | 66 → 86 | 30 |
@@ -315,7 +315,7 @@ bir xil (kod bizniki, a11y Radix'dan), lekin token to'qnashuvi yo'q.
 
 ---
 
-## Faza 4 — Auth, sessiya, RBAC (36 → 46%)
+## Faza 4 — Auth, sessiya, RBAC (36 → 46%) ✅ YAKUNLANDI
 
 ### 4.1. Session entity ✅ BAJARILDI (2026-08-21)
 - [x] `entities/session/`: `sessionQueries.me()`, `Permission` tipi, `useCan()`, `Can`
@@ -369,11 +369,46 @@ bir xil (kod bizniki, a11y Radix'dan), lekin token to'qnashuvi yo'q.
 3. **`Field` da majburiylik yulduzchasi ochiq nomga kirib ketardi** ("Parol *").
    Yulduzcha `<label>` dan tashqariga chiqarildi, majburiylik esa `aria-required` bilan.
 
-### 4.4. Idle timer (§13.4)
-- [ ] `useIdleTimer`: 12 daq timeout, 1 daq oldin ogohlantirish
-- [ ] Tugaganda: ekran qulflanadi → ma'lumot yashiriladi → parol so'raladi → `queryClient.clear()`
+### 4.4. Idle timer (§13.4) ✅ BAJARILDI (2026-08-22)
+- [x] `shared/lib/useIdleTimer` — 12 daq, 1 daq oldin ogohlantirish, passiv listenerlar,
+      1s throttle (mousemove sekundiga o'nlab marta ishlaydi)
+- [x] `features/session-lock/` — lock store, `LockScreen`, `useUnlock`
+- [x] Tugaganda: identifikator saqlanadi → `queryClient.clear()` → qulf ekrani
 
-**Chiqish mezoni:** login→dashboard→logout ishlaydi · klinika almashganda eski ma'lumot ko'rinmaydi (test bilan isbotlangan) · idle timeout ishlaydi.
+> **Overlay hech narsani himoya qilmaydi — keshni tozalash himoya qiladi.** Faqat ustiga
+> qatlam qo'yilsa, bemor kartochkasi DOM'da qolaveradi: bitta devtools paneli yoki bitta
+> skrinshot yetadi. Kesh tozalangach har bir ekran o'z loading holatiga qaytadi va
+> ko'radigan narsa qolmaydi. Test aynan shuni tekshiradi.
+>
+> Qulf ekrani `_auth` layout'idan **oldin** qaytariladi, ustiga qo'yilmaydi — foydalanuvchi
+> kira olmaydigan ilovaning klaviatura tuzoqlari yo'lda turmasligi uchun.
+>
+> `session-lock` `auth-login` dan `useLogin` ni **import qila olmaydi** (cross-slice, §4),
+> shuning uchun o'z mutatsiyasi bor. Qayta autentifikatsiya server sessiyasini ham
+> yangilaydi — nazoratsiz qolgan ekran uchun bu xavfsizroq.
+
+---
+
+## ✅ Faza 4 YAKUNLANDI (2026-08-22)
+
+| Mezon | Natija |
+|---|---|
+| `pnpm verify` | yashil · **133 test**, 3 marta ketma-ket barqaror |
+| login → dashboard → logout | ✅ integratsiya testi (§16.2 №1) |
+| Klinika almashganda eski ma'lumot | ✅ ko'rinmaydi, test bilan isbotlangan (§16.2 №5) |
+| Idle timeout | ✅ qulflaydi va keshni tozalaydi (§16.2 №8) |
+| Ruxsatsiz rol tugmani ko'rmasligi | ✅ `Can` testlari (§16.2 №6) |
+| Bundle | **159.6 kB** / 180 kB |
+
+**Faza 4 da topilgan 4 ta haqiqiy nuqson** (hammasi test yozish jarayonida, taxmin bilan emas):
+1. ky 2 `error.data` — har qanday server validatsiya xatosi jimgina yo'qolardi
+2. 401 da kesh tozalash o'z so'rovini bekor qilardi → login o'rniga xato ekrani
+3. `Field` yulduzchasi ochiq nomga kirardi ("Parol yulduzcha")
+4. `EmptyState`/`ErrorState` sarlavhalari `<p>` edi, `<h>` emas
+
+⚠️ **Faza 6 dan oldin `pnpm build:analyze`.** Bironta biznes moduli yozilmasdan turib
+159.6/180 kB — atigi **20 kB zaxira**. Entry chunk 144 kB va unda router, zod, motion,
+radix bor.
 
 ---
 
