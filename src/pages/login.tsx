@@ -1,27 +1,25 @@
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { z } from 'zod'
+import * as v from 'valibot'
 import { sessionQueries } from '@/entities/session'
 import { LoginForm } from '@/features/auth-login'
 import { Card } from '@/shared/ui'
 
-const searchSchema = z.object({
+const searchSchema = v.object({
   /**
    * Where to go back to after signing in.
    *
    * ⛔ Validated as an app-relative path on purpose. Accepting an arbitrary URL
    * here is an open redirect: a link to /login?redirect=https://evil.example
    * would send a receptionist somewhere else immediately after they typed
-   * their password.
+   * their password. The `(?!\/)` also rejects `//evil.example`, which browsers
+   * read as protocol-relative and would resolve off-site.
    */
-  redirect: z
-    .string()
-    .regex(/^\/(?!\/)/, 'must be an app-relative path')
-    .optional(),
+  redirect: v.optional(v.pipe(v.string(), v.regex(/^\/(?!\/)/, 'must be an app-relative path'))),
 })
 
 export const Route = createFileRoute('/login')({
-  validateSearch: searchSchema,
+  validateSearch: (search) => v.parse(searchSchema, search),
 
   beforeLoad: async ({ context }) => {
     // Already signed in? Do not show a login form.

@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import * as v from 'valibot'
 import type { Permission, Session } from './types'
 
 /**
@@ -21,25 +21,25 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 
 // §5.4 requires UUIDs everywhere: sequential integer ids are open to
 // enumeration (/patients/1, /patients/2, ...).
-const uuid = z.string().regex(UUID, 'expected a UUID')
+const uuid = v.pipe(v.string(), v.regex(UUID, 'expected a UUID'))
 
-const clinicSchema = z.object({
+const clinicSchema = v.object({
   id: uuid,
-  name: z.string().min(1),
+  name: v.pipe(v.string(), v.minLength(1)),
 })
 
-export const sessionResponseSchema = z.object({
+export const sessionResponseSchema = v.object({
   id: uuid,
-  first_name: z.string(),
-  last_name: z.string(),
-  email: z.string(),
-  role: z.enum(['SuperAdmin', 'ClinicAdmin', 'Doctor', 'Patient']),
-  permissions: z.array(z.string()),
-  clinics: z.array(clinicSchema),
-  active_clinic_id: uuid.nullable(),
+  first_name: v.string(),
+  last_name: v.string(),
+  email: v.string(),
+  role: v.picklist(['SuperAdmin', 'ClinicAdmin', 'Doctor', 'Patient']),
+  permissions: v.array(v.string()),
+  clinics: v.array(clinicSchema),
+  active_clinic_id: v.nullable(uuid),
 })
 
-export type SessionResponse = z.infer<typeof sessionResponseSchema>
+export type SessionResponse = v.InferOutput<typeof sessionResponseSchema>
 
 const KNOWN_PERMISSIONS: ReadonlySet<string> = new Set<Permission>([
   'patient:read',
@@ -81,5 +81,5 @@ export function toSession(response: SessionResponse): Session {
 }
 
 export function parseSession(raw: unknown): Session {
-  return toSession(sessionResponseSchema.parse(raw))
+  return toSession(v.parse(sessionResponseSchema, raw))
 }

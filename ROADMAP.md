@@ -445,6 +445,28 @@ radix bor.
 > xodimning tanlovini eslab qolish uning **user record**iga tegishli — bu backend
 > maydoni va aslida to'g'ri joyi ham o'sha.
 
+### 5.2. Bundle: Zod → Valibot (ADR-011)
+
+Faza 5 oxirida o'lchov 174.3/180 kB ni ko'rsatdi — bironta biznes moduli yozilmasdan
+turib **5.7 kB zaxira**. Zod initial yo'lda edi, chunki uni ikkita eager modul
+ishlatadi: `sessionSchema` va `login.tsx` dagi `validateSearch` (TanStack Router
+`autoCodeSplitting` da faqat komponentni ajratadi).
+
+- [x] Valibot'ga o'tildi — API bir xil, `@hookform/resolvers` ikkalasini qo'llaydi
+- [x] Uch fayl: `sessionSchema`, `auth-login/model/schema`, `login.tsx`
+- [x] `loginSchema` uchun test yozildi — validator almashtirilgani uchun xatti-harakat qulflandi
+- [x] `ARCHITECTURE.md` §2.1, §7.3, §10.1, Ilova A va `CLAUDE.md` §10 namunalari yangilandi
+
+| | Initial JS (gzip) | Zaxira |
+|---|---|---|
+| Zod bilan | 174.3 kB | 5.7 kB |
+| Valibot bilan | **160.1 kB** | **19.9 kB** |
+
+> ⚠️ **Men −27 kB deb bashorat qilgandim, haqiqiy yutuq −14.2 kB.** O'sha raqam Zod
+> alohida vendor chunk bo'lgan o'lchovdan olingan edi — u yerda har fayl o'z gzip
+> lug'ati bilan siqiladi va Zod'ning narxi ikki barobar katta ko'rinadi. Bitta chunk
+> ichida marjinal narx ancha kam. Zaxira baribir 3.5 barobar oshdi.
+
 ### 5.1. Backend'dan kutiladigan qo'shimcha
 - [ ] `/api/me/` da `preferred_language` maydoni — til tanlovini eslab qolish uchun
 

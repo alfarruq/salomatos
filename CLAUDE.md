@@ -208,7 +208,7 @@ mutate(values, {
   },
 })
 ```
-Zod xabarlari — tarjima kalitlari: `.min(2, 'validation.tooShort')`.
+Validatsiya xabarlari — tarjima kalitlari: `v.minLength(2, 'validation.tooShort')` (Valibot, `ADR-011`).
 
 **4 holat — har bir ma'lumot ekranida majburiy**
 ```tsx

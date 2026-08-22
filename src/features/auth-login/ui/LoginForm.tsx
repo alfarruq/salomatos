@@ -1,4 +1,4 @@
-import { zodResolver } from '@hookform/resolvers/zod'
+import { valibotResolver } from '@hookform/resolvers/valibot'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { ApiError } from '@/shared/api/errors'
@@ -14,7 +14,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const { t } = useTranslation(['auth', 'validation', 'common'])
 
   const form = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
+    resolver: valibotResolver(loginSchema),
     // onBlur, not onChange: validating every keystroke nags rather than helps.
     mode: 'onBlur',
     defaultValues: { email: '', password: '' },
@@ -23,7 +23,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const { mutate, isPending } = useLogin()
 
   /**
-   * Zod returns keys like `validation.required` (§10). The server returns
+   * Valibot returns keys like `validation.required` (§10). The server returns
    * already-translated prose, because Django localises from `Accept-Language`
    * (§12.3). So: translate if it looks like one of our keys, otherwise show it
    * as it arrived.

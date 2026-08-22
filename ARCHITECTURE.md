@@ -120,9 +120,9 @@ Versiyalar 2026-yil iyul holatiga. **Major versiyani o'zgartirish — ADR talab 
 | `@tanstack/react-router` | `^1` | Routing (tip-xavfsiz) |
 | `@tanstack/react-query` | `^5.101` | Server state |
 | `zustand` | `^5` | Client state |
-| `zod` | `^4` | Runtime validatsiya |
+| `valibot` | `^1` | Runtime validatsiya (`ADR-011` — Zod o'rniga) |
 | `react-hook-form` | `^7.80` | Formalar |
-| `@hookform/resolvers` | `^5` | RHF ↔ Zod ko'prigi |
+| `@hookform/resolvers` | `^5` | RHF ↔ Valibot ko'prigi |
 
 > **Eslatma:** React uchun TanStack Query hamon **v5**. Internetdagi "v6" — Svelte adapteri, ichida baribir v5 core ishlaydi. Adashmang.
 
@@ -213,7 +213,7 @@ src/
 ├── entities/                     # Biznes OBYEKTLARI (ot)
 │   ├── patient/
 │   │   ├── api/                  # queryOptions, mutations, query keys
-│   │   ├── model/                # tiplar, Zod schema, mapper'lar
+│   │   ├── model/                # tiplar, validatsiya schema'si, mapper'lar
 │   │   └── ui/                   # PatientAvatar, PatientStatusBadge
 │   ├── appointment/
 │   ├── clinic/
@@ -318,7 +318,7 @@ Bu refaktoring erkinligini beradi: ichki strukturani xohlagancha o'zgartirasiz, 
 | Hook fayli | `camelCase.ts` | `usePatientFilters.ts` |
 | Boshqa `.ts` fayllar | `camelCase.ts` | `queryKeys.ts`, `formatPhone.ts` |
 | Tip / Interface | `PascalCase` | `Patient`, `AppointmentStatus` |
-| Zod schema | `camelCase` + `Schema` | `createPatientSchema` |
+| Validatsiya schema'si | `camelCase` + `Schema` | `createPatientSchema` |
 | Konstanta | `SCREAMING_SNAKE` | `IDLE_TIMEOUT_MS` |
 | Boolean o'zgaruvchi | `is/has/can` prefiksi | `isLoading`, `canEditPatient` |
 | Event handler | `handle` prefiksi | `handleSubmit` |
@@ -764,7 +764,7 @@ Filtrlar `useState`da emas, URL'da yashaydi:
 ```tsx
 // pages/_auth/patients/index.tsx
 export const Route = createFileRoute('/_auth/patients/')({
-  validateSearch: zodValidator(patientFiltersSchema),   // tip-xavfsiz search params
+  validateSearch: (search) => v.parse(patientFiltersSchema, search),   // tip-xavfsiz
   loaderDeps: ({ search }) => search,
   loader: ({ context, deps }) =>
     context.queryClient.ensureInfiniteQueryData(
@@ -898,16 +898,18 @@ export function Can({ permission, fallback = null, children }: CanProps) {
 
 ```tsx
 // features/patient-create/model/schema.ts
-export const createPatientSchema = z.object({
-  firstName: z.string().trim().min(2, 'validation.tooShort').max(60),
-  lastName: z.string().trim().min(2, 'validation.tooShort').max(60),
-  phone: z.string().regex(/^\+998\d{9}$/, 'validation.phoneUz'),
-  birthDate: z.string().date().refine(notInFuture, 'validation.birthDateFuture'),
-  gender: z.enum(['male', 'female']),
-  notes: z.string().max(1000).optional(),
+import * as v from 'valibot'   // ADR-011
+
+export const createPatientSchema = v.object({
+  firstName: v.pipe(v.string(), v.trim(), v.minLength(2, 'validation.tooShort'), v.maxLength(60)),
+  lastName:  v.pipe(v.string(), v.trim(), v.minLength(2, 'validation.tooShort'), v.maxLength(60)),
+  phone:     v.pipe(v.string(), v.regex(/^\+998\d{9}$/, 'validation.phoneUz')),
+  birthDate: v.pipe(v.string(), v.check(notInFuture, 'validation.birthDateFuture')),
+  gender:    v.picklist(['male', 'female']),
+  notes:     v.optional(v.pipe(v.string(), v.maxLength(1000))),
 })
 
-export type CreatePatientInput = z.infer<typeof createPatientSchema>
+export type CreatePatientInput = v.InferOutput<typeof createPatientSchema>
 ```
 
 Xato xabarlari — **tarjima kalitlari**, tayyor matn emas. 4 ta til bor.
@@ -917,7 +919,7 @@ Xato xabarlari — **tarjima kalitlari**, tayyor matn emas. 4 ta til bor.
 export function CreatePatientForm({ onSuccess }: Props) {
   const { t } = useTranslation('patients')
   const form = useForm<CreatePatientInput>({
-    resolver: zodResolver(createPatientSchema),
+    resolver: valibotResolver(createPatientSchema),
     mode: 'onBlur',                          // onChange emas — har harfda validatsiya bezovta qiladi
   })
   const { mutate, isPending } = useCreatePatient()
@@ -1426,7 +1428,7 @@ Tibbiy tizimda qisman ishlaydigan ilova — butunlay o'lgan ilovadan ancha yaxsh
 
 | Daraja | Vosita | Qamrov | Nima testlanadi |
 |---|---|---|---|
-| Unit | Vitest | Mantiq 100% | Formatlash, hisob-kitob, Zod schema, mapper |
+| Unit | Vitest | Mantiq 100% | Formatlash, hisob-kitob, validatsiya schema'si, mapper |
 | Komponent | Vitest + RTL + MSW | Asosiy oqimlar | Formalar, jadvallar, `Can` gate |
 | E2E | Playwright | 8–12 kritik yo'l | Quyida |
 
@@ -1689,6 +1691,49 @@ Har bir formatlash chaqiruviga klinika kontekstini uzatish — hozir hech narsa 
 
 ---
 
+### ADR-011 — Validatsiya: Valibot, Zod emas
+**Status:** Qabul qilingan (2026-08-22)
+
+**Kontekst.** `§2.1` `zod ^4` ni belgilaydi. Faza 5 oxirida bundle o'lchandi:
+initial JS **174.3 kB / 180 kB** — bironta biznes moduli yozilmasdan turib atigi
+**5.7 kB zaxira**. Vendor tarkibi (gzip, o'lchangan): React 69 · TanStack 37 ·
+**Zod 29** · i18next 16 · ilova kodi 36.
+
+Zod initial yo'lda, chunki uni ikkita eager modul ishlatadi: sessiya javobini
+tekshirish (`sessionSchema`) va `login.tsx` dagi `validateSearch` — TanStack
+Router `autoCodeSplitting` da faqat komponentni ajratadi, `beforeLoad` va
+`validateSearch` esa route daraxti bilan birga yuklanadi.
+
+**Qaror.** Zod o'rniga **Valibot**. API bir xil (schema + parse + tip chiqarish),
+`@hookform/resolvers` ikkalasini ham qo'llab-quvvatlaydi, Standard Schema orqali
+TanStack Router bilan ham ishlaydi.
+
+**Natija — o'lchangan, taxmin emas.**
+
+| | Initial JS (gzip) |
+|---|---|
+| Zod bilan | 174.3 kB |
+| Valibot bilan | **160.1 kB** |
+| Farq | **−14.2 kB** |
+
+> ⚠️ Dastlab **−27 kB** deb baholangan edi. U raqam Zod alohida vendor chunk
+> bo'lgan o'lchovdan olingan, u yerda har fayl o'z gzip lug'ati bilan siqiladi.
+> Bitta chunk ichida Zod'ning marjinal narxi ikki barobar kam chiqdi. Bashorat
+> emas, o'lchov yozilyapti.
+
+**Oqibatlar.**
+- ➕ Zaxira 5.7 → **19.9 kB**, ya'ni Faza 6–7 uchun haqiqiy joy
+- ➖ Zod ekotizimi kengroq va ko'proq tanish; Valibot API'si funksional
+  (`v.pipe(v.string(), v.minLength(1))`), zanjirli emas
+- ➖ Generatsiya qilingan tiplar (Orval) Zod schema chiqarishi mumkin edi —
+  Faza 2.1 da tekshiriladi; kerak bo'lsa faqat `sessionSchema` qaytariladi
+- ⚖️ `§2.1` jadvali yangilandi
+
+**Qachon qayta ko'riladi.** Agar Orval Valibot chiqara olmasa va qo'lda ko'prik
+yozish narxi 14 kB dan qimmatga tushsa.
+
+---
+
 ## 19. Definition of Done
 
 PR merge bo'lishidan oldin:
@@ -1807,7 +1852,7 @@ pnpm create vite@latest salomatos-web -- --template react-ts
 cd salomatos-web
 
 # Yadro
-pnpm add @tanstack/react-router @tanstack/react-query zustand zod \
+pnpm add @tanstack/react-router @tanstack/react-query zustand valibot \
          react-hook-form @hookform/resolvers ky nuqs \
          date-fns @date-fns/tz
 
@@ -1816,7 +1861,7 @@ pnpm add tailwindcss @tailwindcss/vite motion lucide-react sonner cmdk \
          @tanstack/react-table @tanstack/react-virtual
 
 # i18n
-pnpm add i18next react-i18next i18next-icu i18next-browser-languagedetector
+pnpm add i18next react-i18next i18next-resources-to-backend
 
 # Dev
 pnpm add -D @biomejs/biome vitest @testing-library/react @testing-library/user-event \
