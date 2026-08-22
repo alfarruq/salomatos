@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # §13.8 — a lockfile that installs reproducibly is the whole point.
+  CI: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint and format
+        run: pnpm biome ci .
+
+      - name: Layer boundaries
+        run: pnpm lint:boundaries
+
+      - name: Types
+        run: pnpm tsc --noEmit
+
+      # §11.7 makes WCAG AA mandatory, and contrast cannot be eyeballed.
+      - name: Design token contrast
+        run: pnpm check:contrast
+
+      # Activates automatically once phase 2 adds orval.config.ts. A backend
+      # contract change that is not regenerated must fail here, not in production.
+      - name: Generated API types are current
+        if: hashFiles('orval.config.ts') != ''
+        run: pnpm api:check
+
+      - name: Translations complete
+        run: pnpm i18n:check
+
+      - name: Tests
+        run: pnpm vitest run --coverage
+
+      - name: Build
+        run: pnpm build
+
+      - name: Bundle budget
+        run: pnpm size-limit
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high
+
+      # The /dev/ui reference page must never reach production. A dependency
+      # with import-time side effects can silently defeat tree-shaking, so this
+      # is checked rather than assumed.
+      - name: Dev-only code is not shipped
+        run: |
+          if grep -rIl "Component reference" dist/; then
+            echo "::error::The /dev/ui gallery leaked into the production build"
+            exit 1
+          fi
+          echo "Dev-only code is absent from dist/"
+
+      # §13.6 — a leaked key in the bundle is unrecoverable once shipped.
+      - name: No secrets in the bundle
+        run: |
+          if grep -rIE "(SECRET|PRIVATE_KEY|PASSWORD|sk_live_)" dist/; then
+            echo "::error::Possible secret found in dist/"
+            exit 1
+          fi
+          echo "No secrets found in dist/"
+
+  e2e:
+    # §17.3 — the full browser suite only gates merges into main.
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Are there any specs yet?
+        id: specs
+        run: echo "count=$(ls e2e/*.spec.ts 2>/dev/null | wc -l)" >> "$GITHUB_OUTPUT"
+
+      - name: Install browsers
+        if: steps.specs.outputs.count != '0'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run E2E
+        if: steps.specs.outputs.count != '0'
+        run: pnpm test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure() && steps.specs.outputs.count != '0'
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

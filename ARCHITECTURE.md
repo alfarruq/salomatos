@@ -987,18 +987,20 @@ Minimalist yo'nalishda nafislik **aniqlikdan** keladi: spacing, tipografika va d
 
   /* ── Matn — 3 daraja, ko'p emas ── */
   --color-text:           #1d1d1f;
-  --color-text-secondary: #6e6e73;
-  --color-text-tertiary:  #86868b;
+  --color-text-secondary: #5f5f65;
+  --color-text-tertiary:  #6e6e73;
 
-  /* ── Aksent — BITTA ── */
-  --color-accent:       #0071e3;
-  --color-accent-hover: #0077ed;
+  /* ── Aksent — BITTA ohang, IKKI rol ── */
+  --color-accent:       #0071e3;   /* fon: oq matn bilan 4.70:1 */
+  --color-accent-hover: #0062c8;
+  --color-accent-text:  #0068d1;   /* matn/havola: canvas ustida 4.94:1 */
   --color-accent-soft:  #e8f2fe;
+  --color-on-accent:    #ffffff;
 
   /* ── Semantik — faqat holat uchun ── */
-  --color-success: #34c759;
-  --color-warning: #ff9f0a;
-  --color-danger:  #ff3b30;
+  --color-success: #1f7a35;
+  --color-warning: #8f5b00;
+  --color-danger:  #d70015;
 
   /* ── Radius ── */
   --radius-control: 10px;   /* tugma, input */
@@ -1026,6 +1028,21 @@ html {
   text-rendering: optimizeLegibility;
 }
 ```
+
+> 🔬 **Kontrast (2026-08-21 yangilandi).** Dastlabki palitra iOS ranglaridan olingan edi va
+> `§11.7` ning o'z AA talabidan yiqilardi: `#86868b` oq ustida 3.9:1, `#34c759` — 4.0:1,
+> `#0071e3` matn sifatida canvas ustida 4.31:1. Qiymatlar AA ga moslab quyultirildi.
+>
+> **Aksent ikki rolga ajratildi**, chunki bitta qiymat ikkalasini bajara olmaydi:
+> `--color-accent` (#0071e3) — fon uchun, oq matn bilan 4.70:1. `--color-accent-text`
+> (#0068d1) — matn va havola uchun. Ohang bir xil, shuning uchun interfeys hamon
+> bitta aksent sifatida o'qiladi.
+>
+> `--color-text-tertiary` **`sunken` ustida ishlatilmaydi** — u yerda AA ga chiqmaydi.
+> Input placeholder'i `--color-text-secondary` dan foydalanadi.
+>
+> Bularning hammasi `pnpm check:contrast` bilan **o'lchanadi** va CI'da majburlanadi.
+> Token o'zgartirsangiz — skript qayta ishga tushadi, taxminga o'rin yo'q.
 
 > ⚖️ **Huquqiy:** **SF Pro'ni veb'da ishlatmang.** Apple litsenziyasi uni faqat Apple platformalari uchun interfeys dizaynida ruxsat beradi; veb-saytga yuklash litsenziya buzilishi. `Inter Variable` yoki `Geist` — vizual jihatdan juda yaqin va bepul (OFL).
 
@@ -1461,6 +1478,7 @@ vitest related --run
 ```yaml
 - pnpm install --frozen-lockfile
 - pnpm biome ci .
+- pnpm lint:boundaries    # qatlam grafigi (§3.3)
 - pnpm tsc --noEmit
 - pnpm api:check          # generated tiplar yangimi?
 - pnpm i18n:check         # barcha tillarda kalit to'liqmi?
@@ -1551,6 +1569,12 @@ vitest related --run
 - ➖ CSRF himoyasi kerak → `§13.3`
 - ➖ Bir nechta backend domeni bo'lsa murakkablashadi → hozircha yo'q
 
+**Aniqlashtirish (2026-08-21).** Qaror qayta tasdiqlandi: **Django session authentication**.
+`§13.1` dagi access/refresh muddati va rotatsiya jadvali — kelajakdagi **mobil JWT endpoint**iga tegishli,
+veb SPA'ga emas. Amaliy oqibati: `httpClient` da (`§5.2`) refresh oqimi **yo'q** —
+401 kelganda `refreshSession()` chaqirilmaydi, to'g'ridan-to'g'ri `hardLogout()` bajariladi va
+`/login` ga yo'naltiriladi. Sessiya muddatini Django uzaytiradi, frontend emas.
+
 ---
 
 ### ADR-004 — TanStack Query, Redux emas
@@ -1598,6 +1622,70 @@ vitest related --run
 **Sabab.** Registratura kompyuteri umumiy. `localStorage`/`IndexedDB`dagi bemor bazasi — logout'dan keyin ham qoladi va istalgan xodim (yoki brauzer kengaytmasi) o'qiy oladi.
 
 **Oqibat.** Offline rejim yo'q. Bu ongli almashuv: klinikada barqaror internet bor deb faraz qilinadi.
+
+---
+
+### ADR-008 — Tillar: uz-Latn, uz-Cyrl, ru, en
+**Status:** Qabul qilingan (2026-08-21)
+
+**Kontekst.** `§12` 4 tilni talab qiladi, lekin 4-si ochiq qolgan edi (`uz-Cyrl` yoki `kaa`).
+
+**Qaror.** `uz-Latn`, `uz-Cyrl`, `ru`, `en`.
+
+**Sabab.** `uz-Cyrl` — mavjud auditoriya uchun real ehtiyoj (katta yoshli xodimlar, ayrim hududlar),
+va tarjima narxi eng past, chunki manba matn allaqachon o'zbekcha. `kaa` (qoraqalpoq) rad etilmadi,
+faqat kechiktirildi — o'sha bozorga chiqish qarori qabul qilinganda 5-lokal sifatida qo'shiladi.
+
+**Oqibatlar.**
+- ⚠️ `uz-Latn` va `uz-Cyrl` — **ikkita alohida lokal** (`§12.5`). Avtomatik transliteratsiya
+  ishlatilmaydi: imlo va ayrim atamalar farq qiladi.
+- `pnpm i18n:check` to'rttala lokalda kalit to'liqligini talab qiladi.
+- Ikkita o'zbek lokali tarjimonning ishini deyarli ikki barobar qilmaydi, lekin ularni
+  sinxron ushlash uchun Tolgee/Crowdin (`§12.6`) foydasi oshadi.
+
+---
+
+### ADR-009 — Real-time: polling bilan boshlash, Channels keyin
+**Status:** Qabul qilingan (2026-08-21)
+
+**Kontekst.** `§6.6` WebSocket (Django Channels) invalidatsiya signallarini tavsiya qiladi.
+Bu backend'da Channels + Redis infratuzilmasini talab qiladi va frontend Faza 2 ni bloklaydi.
+
+**Qaror.** `cachePolicy.live` (30s `refetchInterval` + `refetchOnWindowFocus`) bilan boshlanadi.
+Channels keyinroq, yuk yoki konflikt statistikasi buni oqlaganda qo'shiladi.
+
+**Sabab.** `§6.6` ning o'zi aytadi: chaqiruv joyi ikkalasida bir xil
+(`queryClient.invalidateQueries`), shuning uchun migratsiya og'riqsiz. Infratuzilmani
+o'lchanmagan ehtiyoj uchun oldindan qurish — erta optimizatsiya.
+
+**Oqibatlar.**
+- ➕ Backend'da qo'shimcha ish yo'q, Faza 2 bloklanmaydi
+- ➖ Eng yomon holatda 30 soniyalik kechikish. Registratura uchun qabul qilinadi;
+  ikki bemorni bir vaqtga yozish xavfi backend'dagi 409 conflict bilan qoplanadi (`§6.5`)
+- ➖ 1000 klinikada polling backend yukini oshiradi → `live` siyosati **faqat** bugungi
+  jadval va navbat holatiga qo'llaniladi, boshqa hech qayerga emas
+
+**Qachon qayta ko'riladi.** Polling yuki Django uchun sezilarli bo'lganda yoki
+konflikt xatolari foydalanuvchilarni bezovta qila boshlaganda.
+
+---
+
+### ADR-010 — Klinika vaqt zonasi: konstanta
+**Status:** Qabul qilingan (2026-08-21)
+
+**Kontekst.** `§12.4` vaqt zonasi klinikanikidan olinishini talab qiladi, lekin u qayerda
+saqlanishi ochiq edi: konstantami yoki har klinika sozlamasidami.
+
+**Qaror.** `CLINIC_TZ = 'Asia/Tashkent'` — `shared/lib/datetime.ts` dagi konstanta.
+
+**Sabab.** O'zbekiston butunlay bitta vaqt zonasida (UTC+5) va yozgi vaqtga o'tish yo'q.
+Har bir formatlash chaqiruviga klinika kontekstini uzatish — hozir hech narsa bermaydigan murakkablik.
+
+**Oqibatlar.**
+- ➕ `formatAppointmentTime(utcIso, locale)` imzosi sodda qoladi
+- ➖ Xorijga chiqilsa refaktoring kerak. Narxi past, chunki konvertatsiya
+  **faqat bitta modulda** (`shared/lib/datetime.ts`) jamlangan — qoida shuning uchun ham bor
+- ⚠️ Brauzer vaqt zonasi **hech qachon** ishlatilmaydi, hatto konstanta bo'lsa ham
 
 ---
 

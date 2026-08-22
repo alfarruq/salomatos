@@ -1,0 +1,12 @@
+* text=auto eol=lf
+
+# Generated from the OpenAPI schema — collapsed in review, never hand-edited (§5.1)
+src/shared/api/generated/** linguist-generated=true
+
+# Lockfile: single source of truth, reviewed as a whole
+pnpm-lock.yaml -diff linguist-generated=true
+
+*.sh text eol=lf
+*.png binary
+*.jpg binary
+*.woff2 binary
