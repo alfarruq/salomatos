@@ -16,11 +16,12 @@
 | 3 | 🔴 Dizayn tizimi ✅ | 22 → 36 | 10 |
 | 4 | Auth, sessiya, RBAC ✅ | 36 → 46 | 6 |
 | 5 | i18n karkasi ✅ | 46 → 52 | 3 |
-| 6 | 🔴 Bemorlar moduli (etalon) | 52 → 66 | 9 |
+| 5.5 | Backend kontraktiga moslashish ✅ | 52 → 54 | 1 |
+| 6 | 🔴 Bemorlar moduli (etalon) | 54 → 66 | 9 |
 | 7 | Qolgan biznes modullari | 66 → 86 | 30 |
-| 8 | Bemor portali + SuperAdmin | 86 → 94 | 12 |
-| 9 | Production hardening | 94 → 100 | 8 |
-|  | **Jami** |  | **~89 kun (≈4.5 oy)** |
+| 8 | SuperAdmin panel (bemor portali bekor qilindi) | 86 → 90 | 6 |
+| 9 | Production hardening | 90 → 100 | 8 |
+|  | **Jami** |  | **~84 kun (≈4.2 oy)** |
 
 **Ketma-ketlikni buzmang.** Har bir faza oldingisining chiqish mezoniga tayanadi. Ayniqsa Faza 3 — uni modullardan keyinga surish qaytarib bo'lmaydigan xato (`ARCHITECTURE.md` §21).
 
@@ -142,39 +143,41 @@ Bironta biznes kodisiz, lekin butun sifat mashinasi ishlab turadi.
 
 ## Faza 2 — API qatlami (14 → 22%)
 
-### 2.1. Orval
-- [ ] `orval.config.ts` (§5.1 aynan) · `pnpm api:generate` ishlaydi
-- [ ] `src/shared/api/generated/` git'ga kiradi, lekin **qo'lda tahrirlanmaydi** (hook himoyalaydi)
-- [ ] MSW mock generatsiyasi yoqiladi (`mock: { type: 'msw', useExamples: true }`)
+### 2.1. Orval ⛔ BEKOR QILINDI (2026-08-25) — `ADR-006` qayta ko'rildi
+- [x] ~~`orval.config.ts`~~ — **bo'lmaydi**. Backend `drf-yasg` ni ishlatadi, u Swagger 2.0
+      chiqaradi (Orval OpenAPI 3 kutadi), va schema route'i `if settings.DEBUG:` ichida —
+      to'g'ri sozlangan production'da umuman mavjud emas
+- [x] Tiplar qo'lda, Valibot sxemalari sifatida — **ishga tushirish paytida** tekshiriladi
+- [x] MSW mocklari qo'lda yozildi va haqiqiy kontraktni takrorlaydi
 
-> ✅ **2.2–2.5 bajarildi (2026-08-21), 2.1 backend'ni kutmoqda.** Schema faqat
-> **tiplar** generatsiyasi uchun kerak — `httpClient`, xato normalizatsiyasi va kesh
-> siyosati unga bog'liq emas, shuning uchun ular yozib qo'yildi va MSW mock backend'i
-> bilan sinaldi. Backend tayyor bo'lganda `orval.config.ts` qo'shiladi va
-> `src/shared/api/mocks/` o'chiriladi — boshqa hech qayerga tegilmaydi.
+> Backend `drf-spectacular` ga o'tsa va `/api/schema/` ni `DEBUG` dan chiqarsa qaytariladi.
+> CI'dagi `api:check` qadami `hashFiles('orval.config.ts')` sharti ostida — o'zini
+> avtomatik o'chirib turibdi, tegishga hojat yo'q.
 
-### 2.2. HTTP klient (§5.2) ✅
-- [ ] `ky` instance: `prefixUrl: '/api'`, `credentials: 'same-origin'`, timeout 20s
-- [ ] Retry: faqat GET, `[408, 429, 500, 502, 503, 504]`
-- [ ] `beforeRequest`: CSRF token + `X-Clinic-Id` header
-- [ ] `afterResponse`: 401 → **bitta** refresh promise (parallel 401'lar uchun) → retry yoki `hardLogout()`
+### 2.2. HTTP klient (§5.2) ✅ BAJARILDI (2026-08-21, 2026-08-25 da qayta ishlangan)
+- [x] `ky` instance: `prefix`, timeout 20s
+- [x] Retry: faqat GET, `[408, 429, 500, 502, 503, 504]`
+- [x] `beforeRequest`: ~~CSRF + `X-Clinic-Id`~~ → **`Authorization: Bearer`** (`ADR-003` qayta ko'rildi)
+- [x] `afterResponse`: 401 → `onUnauthorized()`. Refresh oqimi yo'q — backend'da refresh route'i yo'q
 
-### 2.3. Xato normalizatsiyasi (§5.3)
-- [ ] `ApiError` klassi: `kind`, `fieldErrors`, `detail`, `requestId`
-- [ ] `normalizeDrfError()` — DRF ning 4 xil xato shakli
-- [ ] **Unit test:** har 4 shakl to'g'ri parse bo'ladi
-- [ ] ⛔ `ApiError` ichida PHI bo'lmasligi tekshiriladi
+### 2.3. Xato normalizatsiyasi (§5.3) ✅ BAJARILDI
+- [x] `ApiError`: `kind`, `fieldErrors`, `detail`, **`messageKey`**, `requestId`
+- [x] `normalizeDrfError()` — ~~DRF ning 4 shakli~~ → backend'ning yagona konverti
+      (`{message, message_key, errors, exception_class}`)
+- [x] Maydon xatolari **kod** sifatida keladi (`"required"`) → `validation.required` kalitiga o'giriladi
+- [x] ⛔ Django traceback'i (`DEBUG=True`) `detail` ga chiqarilmaydi — §13.4
 
-### 2.4. Kesh siyosati (§6.3)
-- [ ] `shared/config/cache.ts`: `static` / `standard` / `live` / `never`
-- [ ] **`financial` policy qo'shilsin** — `CLAUDE.md` §10 uni tilga oladi, `ARCHITECTURE.md` §6.3 da yo'q. Nomuvofiqlikni yoping.
-- [ ] `queryClient` (§6.4): retry mantiqi, `throwOnError`, `mutations.retry: false`
-- [ ] ⛔ `persistQueryClient` ishlatilmaydi
+### 2.4. Kesh siyosati (§6.3) ✅ BAJARILDI (2026-08-21)
+- [x] `shared/config/cache.ts`: `static` / `standard` / `live` / `financial` / `never`
+- [x] `financial` qo'shildi — `ARCHITECTURE.md` §6.3 dagi nomuvofiqlik yopildi
+- [x] `queryClient` (§6.4): retry mantiqi, `throwOnError`, `mutations.retry: false`
+- [x] ⛔ `persistQueryClient` ishlatilmaydi
 
-### 2.5. Vite proxy
-- [ ] Dev'da `/api` → `localhost:8000` proxy (prod'da nginx qiladi)
+### 2.5. Vite proxy ✅
+- [x] Dev'da `/api` proxy (prod'da nginx, same-origin)
 
-**Chiqish mezoni:** `pnpm api:generate` tiplar chiqaradi · `api:check` CI'da ishlaydi · 401 refresh oqimi test bilan qoplangan.
+**Chiqish mezoni (qayta ta'riflangan):** ~~`api:generate` tiplar chiqaradi~~ · `ApiError`
+haqiqiy backend konvertini parse qiladi (test bilan) · 401 → hard logout (test bilan).
 
 ---
 
@@ -472,33 +475,184 @@ ishlatadi: `sessionSchema` va `login.tsx` dagi `validateSearch` (TanStack Router
 
 ---
 
+## Faza 5.5 — Backend kontraktiga moslashish ✅ YAKUNLANDI (2026-08-25)
+
+> Rejada yo'q edi. Backend kodi va `https://salomatos.uz` tahlil qilinganda ma'lum bo'ldiki,
+> mavjud Django ilovasi hujjatlardagi kontraktdan **arxitektura darajasida** farq qiladi.
+> Foydalanuvchi qarori: backend'ni qayta yozmasdan, frontend'ni unga moslashtirish.
+
+### 5.5.1. Nima mos kelmagan
+
+| Hujjat nima deydi | Backend nima qiladi | Yechim |
+|---|---|---|
+| Session cookie + CSRF | `simplejwt`, token javob tanasida | `ADR-003` qayta ko'rildi |
+| Refresh oqimi (mobil uchun) | Refresh route'i **yo'q** | 401 = terminal |
+| Logout endpoint | **Yo'q**, token bekor qilinmaydi | Chiqish lokal |
+| UUID | `AutoField`, `<int:pk>` | `ADR-013` |
+| `/api/me/` → `permissions[]`, `clinics[]`, `id` | 8 ta maydon, ID ham yo'q | `ADR-012` + JWT'dan `user_id` |
+| Ko'p klinika + almashtirish | `User.clinic` — bitta FK | `clinic-switch` o'chirildi |
+| DRF ning 4 xato shakli | Yagona maxsus konvert | `normalizeDrfError` qayta yozildi |
+| `drf-spectacular` / OpenAPI 3 | `drf-yasg` / Swagger 2, `DEBUG` ostida | `ADR-006` qayta ko'rildi |
+| `CursorPagination` | `PageNumberPagination`, `PAGE_SIZE=10` | Faza 6 da hisobga olinadi |
+| UTC ISO-8601 | Bemor ro'yxatida `"24.08.2026 14:30"` satri | Faza 6 da hisobga olinadi |
+
+### 5.5.2. Bajarilgan ish
+- [x] `shared/lib/jwt.ts` — token payload'idan `user_id`. **Tekshirmaydi**, faqat o'qiydi
+- [x] `shared/api/tokenStore.ts` — token **faqat RAM'da**. P0 saqlandi
+- [x] `httpClient` — `Bearer`, CSRF va `X-Clinic-Id` olib tashlandi
+- [x] `errors.ts` — backend konverti; maydon kodlari tarjima kalitiga aylanadi
+- [x] `entities/session` — `types`, `sessionSchema`, `permissions.ts`, `store`
+- [x] `auth-login` (username), `auth-logout` (lokal), `session-lock` (username bilan unlock)
+- [x] `clinic-switch` va `onboarding` route'i o'chirildi — backend'da bunday holat yo'q
+- [x] MSW mocklari haqiqiy kontraktni takrorlaydi
+- [x] 4 tilda kalitlar: `login.username`, `serverError.*`, 7 ta yangi DRF validatsiya kodi
+
+**Natija:** `pnpm verify` yashil · **160 test** (27 fayl) · bundle **159.87 kB** / 180 kB
+
+### 5.5.3. Ochiq qolgan narsalar
+
+**Frontend tomonda — ikkita ongli narx:**
+1. **Sahifa yangilanishi = tizimdan chiqish.** Token xotirada, backend cookie o'rnatmaydi.
+   To'g'ri yechim backend tomonda (`httpOnly` cookie).
+2. **`?search=` nginx log'iga tushadi.** Backend qidiruvni faqat GET param sifatida
+   qabul qiladi. Brauzer URL'iga yozilmaydi (§3 saqlanadi), lekin server log'ida qoladi.
+   🔴 **Faza 6.2 dan oldin** nginx `log_format` dan query string olib tashlansin.
+
+**Backend tomonda — frontend hal qila olmaydigan zaifliklar (o'zgarmadi):**
+- 🔴 `/api/telegram/*` — `AllowAny`, telefon raqami yoki ketma-ket ID bo'yicha PHI
+- 🔴 `DEBUG = True` production'da (`/swagger/` ochiqligi buni isbotlaydi)
+- 🔴 IDOR: `get_user`, `get_appointment`, `get_treatment`, `get_recipe`, `get_doctor`,
+  `get_galleries` — tenant filtri yo'q
+- 🟠 `CORS_ALLOW_ALL_ORIGINS = True` — bir domenga o'tilgach umuman kerak emas
+- 🟠 `update_patient` har doim `TypeError` beradi (`get_patient` ga `user` uzatilmagan)
+
+---
+
 ## Faza 6 — 🔴 Bemorlar moduli — ETALON (52 → 66%)
 
 > Bu modul **namuna** bo'ladi. Qolgan barcha modullar buni takrorlaydi. Shoshilmang — bu yerdagi har bir qaror 10 marta ko'chiriladi.
 
-### 6.1. `entities/patient/`
-- [ ] `model/types.ts`, `model/schema.ts` (Zod)
-- [ ] `api/queries.ts` — `patientKeys` factory + `patientQueries` (§6.1 aynan)
-- [ ] 🔴 Har bir key ichida `clinicId`
-- [ ] `ui/PatientStatusBadge`, `ui/PatientAvatar` — passiv, mutation yo'q
-- [ ] `index.ts` public API
+> ⚠️ **Faza 5.5 dan keyin o'zgargan shartlar.** Quyidagi punktlar hujjatda yozilganidek
+> emas: ID — **butun son**; pagination — **`PageNumberPagination`** (`{count, next,
+> previous, results}`), ya'ni `useInfiniteQuery` o'rniga sahifa raqami ham mumkin va
+> `count` mavjud; `PatientListSerializer.appointment_date` — **oldindan formatlangan satr**,
+> `Intl` bilan qayta formatlab bo'lmaydi (`birth_date` esa normal ISO sana);
+> `doctor` — ID'siz **matn**. Yangi endpoint yozishdan oldin `apps/clinic/api/v1/` ga qarang.
 
-### 6.2. `features/`
-- [ ] `patient-create/` — Zod schema + RHF + `mode: 'onBlur'` + server xatosi maydonga
-- [ ] `patient-edit/`
-- [ ] `patient-archive/` — `<Can permission="patient:archive">` ostida
-- [ ] `patient-search/` — 🔴 `useState` + `useDebounce(300)`, **URL'ga yozilmaydi** (PHI)
+### 6.1. `entities/patient/` ✅ BAJARILDI (2026-08-25)
+- [x] `model/types.ts` — `PatientListItem` va `Patient` **alohida tiplar**: list va detail
+      serializer'lari boshqa shakl, ularni bitta tip qilish "list yubormagan maydonni
+      o'qish" degani
+- [x] `model/schema.ts` (**Valibot**, `ADR-011`) + mapper
+- [x] `api/queries.ts` — `patientKeys` factory + `patientQueries` (§6.1 aynan)
+- [x] 🔴 Har bir key ichida `clinicId` — test bilan qulflangan, ikki klinika bir xil
+      bemor ID uchun turli key oladi
+- [x] `ui/PatientStatusBadge`, `ui/PatientAvatar` — passiv, mutation yo'q
+- [x] `index.ts` public API
+- [x] `shared/api/pagination.ts` — DRF `PageNumberPagination` konverti (umumiy)
+- [x] MSW: `GET /api/patients/`, `GET /api/patients/<id>/` — filtr va pagination bilan
+- [x] `patients` i18n namespace × 4 til
 
-### 6.3. `widgets/patient-table/`
-- [ ] TanStack Table (headless) + `size="sm"` dense
-- [ ] PHI bo'lmagan filtrlar (sana, status, sahifa, sort) → URL (`nuqs`)
-- [ ] `useInfiniteQuery` + cursor pagination
-- [ ] 100+ qator → `@tanstack/react-virtual`
-- [ ] Qatorga hover → `prefetchQuery(detail)`
+> 🗓️ **`appointment_date` oldindan formatlangan satr keladi** (`"24.08.2026 14:30"`).
+> Uni shundayligicha ko'rsatish inglizcha yoki ruscha interfeysga `dd.MM.yyyy` sanani
+> chiqarardi — §12.4 aynan shuning oldini oladi. Shuning uchun `parseFormattedAppointment`
+> qismlarni qayta ajratib oladi va formatlashni UI'ga qoldiradi. Mavjud bo'lmagan kun
+> (`31.02.2026`) va vaqt rad etiladi — JavaScript ularni jimgina 3-martga surib yuborardi.
 
-### 6.4. `pages/_auth/patients/`
-- [ ] `index.tsx` — ro'yxat, `QueryBoundary` bilan 4 holat
-- [ ] `$patientId.tsx` — kartochka (UUID param)
+**Natija:** 181 test (30 fayl) · bundle o'zgarmadi (**159.87 kB**) — entity hali bironta
+route'ga ulanmagan, shuning uchun initial chunk'ga tushmaydi.
+
+### 6.2. `features/` ✅ BAJARILDI (2026-08-25), bittasidan tashqari
+- [x] `patient-create/` — Valibot + RHF + `mode: 'onBlur'` + server xatosi maydonga
+- [x] `patient-edit/` — yozildi, lekin **server tomonda yiqiladi** (quyida)
+- [ ] ⛔ `patient-archive/` — **backend'da endpoint yo'q.** Yozilmadi (quyida)
+- [x] `patient-search/` — 🔴 `useState` + `useDebounce(300)`, **URL'ga yozilmaydi** (PHI)
+- [x] `shared/lib/useDebounce.ts` — hujjatda yo'q edi, 6.2 uchun kerak bo'ldi
+
+**Cross-slice muammosi qanday yechildi.** `patient-create` va `patient-edit` bir xil
+maydonlarni bir xil serializer'ga yuboradi, lekin §4 bo'yicha ular bir-birini import qila
+olmaydi. Takrorlash o'rniga **entity** ga ko'chirildi: `model/formSchema.ts` (yoziladigan
+shakl, `toPatientPayload`, `patientFormFieldOf`) va `ui/PatientFormFields.tsx` (mutatsiyasiz,
+faqat maydonlar). Har feature faqat o'z mutatsiyasiga egalik qiladi.
+
+> ⛔ **`patient-archive` yozilmadi, chunki chaqiradigan narsa yo'q.**
+> `PatientDetailUpdateDeleteView` da faqat `get` va `patch` bor — `delete` metodi yozilmagan
+> (view nomida "Delete" bo'lsa ham). `User` modelida arxiv/soft-delete maydoni ham yo'q.
+> Ya'ni `patient:archive` ruxsati frontend'da mavjud, lekin uning ortida hech narsa yo'q.
+> Endpoint paydo bo'lganda feature ~30 qator bo'ladi: `<Can permission="patient:archive">`
+> ostidagi tugma + mutatsiya + `patientKeys.scope` invalidatsiyasi.
+
+> ⚠️ **`patient-edit` haqiqiy serverda 500 beradi.** `update_patient` →
+> `get_patient(user_id=...)`, lekin metod `(user_id, user)` talab qiladi → `TypeError`.
+> Mijoz tomoni to'g'ri yozilgan va mock ustida test bilan qoplangan; mock kontraktni
+> **mo'ljallanganidek** takrorlaydi, chunki nuqsonga qarab kod yozish uni muzlatib qo'yardi.
+> Bir qatorlik backend tuzatishi — va aynan o'sha qator yo'qolgan tenant tekshiruvini ham
+> tiklaydi.
+
+> 🗓️ **`todayCalendarDate()`, `toISOString().slice(0,10)` emas.** Tug'ilgan sana uchun
+> `max` qiymati UTC kunidan olinsa, Toshkentda ertalab soat 5 gacha "kecha" bo'ladi va
+> bugun tug'ilgan chaqaloqni rad etardi. §12.4 ning aynan o'zi.
+
+**Natija:** 192 test (33 fayl) · 4 tilda 67 kalit · bundle **159.87 kB** (o'zgarmadi)
+
+### 6.3. `widgets/patient-table/` ✅ BAJARILDI (2026-08-25)
+- [x] TanStack Table (headless) + `density="compact"`
+- [x] PHI bo'lmagan filtrlar (status, shifokor, sahifa) → URL, **`nuqs` emas** (quyida)
+- [x] ~~`useInfiniteQuery` + cursor~~ → `PageNumberPagination` + `placeholderData: keepPreviousData`
+- [x] ⛔ `@tanstack/react-virtual` **ishlatilmadi** (quyida)
+- [x] Qatorga hover va fokus → `prefetchQuery(detail)`
+- [x] 4 holat `QueryBoundary` orqali; bo'sh holat ikki xil — hech bemor yo'q va
+      qidiruv hech narsa topmadi. Ikkovi turli harakat taklif qiladi
+
+> **`nuqs` o'rniga router'ning `validateSearch`i.** `ARCHITECTURE.md` §7.3 aynan shu naqshni
+> ko'rsatadi va u `login.tsx` da allaqachon ishlaydi — ya'ni bu chetlanish emas, mavjud
+> arxitekturaga rioya. ROADMAP 6.3 dagi `nuqs` eslatmasi hujjatlar orasidagi nomuvofiqlik
+> edi. Qo'shimcha paket ham, `NuqsAdapter` ham kerak bo'lmadi.
+
+> ⛔ **Virtualizatsiya qilinmadi va "100+ qator" sharti yuzaga kelmaydi.** Server sahifani
+> **10 tadan** beradi (`PAGE_SIZE`), ya'ni DOM'ga yuz qator hech qachon tushmaydi.
+> `@tanstack/react-virtual` ni qo'shish sodir bo'lmaydigan holat uchun bundle to'lash
+> bo'lardi. Sahifa hajmi sozlanadigan qilinsa qayta ko'riladi.
+
+### 6.4. `pages/_auth/patients/` ✅ BAJARILDI (2026-08-25)
+- [x] `index.tsx` — ro'yxat, `validateSearch` bilan URL holati
+- [x] `$patientId.tsx` — kartochka (butun son param, `ADR-013`)
+- [x] Sidebar'dagi "Bemorlar" o'lik `<span>` dan haqiqiy `<Link>` ga aylandi
+
+> 🔴 **URL sxemasida `search` maydoni yo'q va bu qasddan.** Hamkasbga "to'lanmagan
+> bemorlar, 2-sahifa" havolasini yuborish mumkin; bemor **ismini** manzil qatoriga
+> yozib bo'lmaydi. Test buni qulflaydi: qidiruvdan keyin `window.location.href`
+> o'zgarmaganini tekshiradi.
+
+### 6.5. Testlar — qisman
+- [x] Unit: sxema, mapper, sana ajratish, telefon formatlash, `useDebounce`
+- [x] Komponent (RTL + MSW): forma yuborish, server xatosi maydonga, `Can` gate,
+      qidiruv, hover prefetch, bo'sh/xato/yuklanish holatlari
+- [ ] ⏸️ E2E: **bloklangan** — Playwright `pnpm build && pnpm preview` ustida ishlaydi,
+      production build'da esa MSW yo'q va backend endpointlari hali ishonchsiz (Faza 5.5.3)
+
+---
+
+## 📏 Bundle budjeti o'lchovidagi xato tuzatildi (2026-08-25)
+
+`.size-limit.json` dagi `dist/assets/index-*.js` glob'i **route chunk'larini ham** ushlab
+turgan ekan. `pages/_auth/patients/index.tsx` → `assets/index-<hash>.js`, va budjet uni
+"initial JS" deb hisobladi: haqiqiy 161 kB o'rniga **177 kB** ko'rsatdi.
+
+Keyingi route qo'shilganda budjet hech kim oshirmagan chegarada "yiqilardi" va sabab
+topilmasdi. Tuzatish: `entryFileNames: 'assets/entry-[hash].js'` va budjet endi aynan
+entry'ga ishora qiladi.
+
+| | Initial JS (gzip) |
+|---|---|
+| Faza 6 dan oldin | 159.87 kB |
+| Butun bemorlar moduli bilan | **160.56 kB** |
+
+Ya'ni modul boshlang'ich yo'lga **0.69 kB** qo'shdi — qolgani route chunk'larida
+(`patients` 16.75 kB, `_auth` 11.83 kB), va bu `autoCodeSplitting` to'g'ri ishlayotganini
+ko'rsatadi.
+
+**Natija:** 200 test (34 fayl) · 4 tilda 91 kalit · initial JS **160.56 kB** / 180 kB
 
 ### 6.5. Testlar
 - [ ] Unit: Zod schema, mapper, telefon formatlash
@@ -527,23 +681,46 @@ Har biri Faza 6 namunasini takrorlaydi: entity → feature → widget → page �
 
 ---
 
-## Faza 8 — Bemor portali va SuperAdmin (86 → 94%)
+## Faza 8 — SuperAdmin paneli (86 → 90%)
 
-### 8.1. Bemor portali (`/portal/*`) — 6 kun
-> 🔴 **Alohida route daraxti, butunlay boshqa layout.** Admin panel bilan aralashtirmaslik — xato ruxsat = bemor boshqa bemorni ko'radi (§9.3).
-- [ ] O'z navbatlari, tarixi, hujjatlari
-- [ ] Online yozilish
-- [ ] Mobil-birinchi dizayn
+### 8.1. ~~Bemor portali (`/portal/*`)~~ ⛔ BEKOR QILINDI (2026-08-25)
+
+> **Mahsulot qarori: bemor uchun veb-interfeys bo'lmaydi.** Bemor o'z navbatlari,
+> retseptlari va tarixiga **faqat Telegram bot** orqali kiradi. Bu ilova butunlay
+> klinika xodimlari uchun.
+
+Bu qaror ishni kamaytiribgina qolmay, **hujum yuzasini ham qisqartiradi**. Bekor qilingan
+reja "alohida route daraxti, butunlay boshqa layout" talab qilardi va o'z ogohlantirishi
+bilan kelardi: *"xato ruxsat = bemor boshqa bemorni ko'radi"*. Backend'da esa hozir per-view
+avtorizatsiya umuman yo'q (§A3), ya'ni o'sha xavf nazariy emas edi. Endi u yo'q.
+
+**Frontend'da bajarildi (2026-08-25):**
+- [x] `_auth` guard `role: 'patient'` ni rad etadi, tokenni va keshni tozalab `/login` ga
+      qaytaradi va botga yo'naltiruvchi izoh ko'rsatadi
+- [x] Ikkita test buni qulflaydi — jumladan "rad etilgan bemor tizimda qolmasligi"
+- [x] `permissionsForRole('patient')` bo'sh to'plam — ikkinchi qator himoya
+
+> ⚠️ **Nega guard kerak:** bemor `User` jadvalidagi oddiy qator va **o'sha login
+> endpoint'iga** autentifikatsiya qiladi. Backend "bemor kira olmaydi" degan qoidani
+> majburlamaydi — `DEFAULT_PERMISSION_CLASSES` faqat `IsAuthenticated`. Ya'ni bu yerda
+> frontend guard'i haqiqiy eshikni yopyapti, garchi §9.1 bo'yicha u hamon xavfsizlik
+> emas: paroli bor bemor token oladi va API'ga to'g'ridan-to'g'ri murojaat qila oladi.
+> **Buni yopish backend ishi.**
 
 ### 8.2. SuperAdmin panel — 6 kun
 - [ ] Klinikalar ro'yxati, tarif/obuna, platforma sozlamalari
 - [ ] ⛔ SuperAdmin ham bemor PHI'siga sukut bo'yicha kira olmaydi — audit log bilan
 
-**Chiqish mezoni:** bemor boshqa bemorning ma'lumotini ko'ra olmasligi E2E test bilan isbotlangan.
+> ⚠️ Hozirgi backend'da `superadmin` roli **klinika hisobining o'zi** (`User.clinic`
+> shunga ishora qiladi), ya'ni "platforma egasi" degan alohida daraja yo'q. Bu panelni
+> qurishdan oldin backend'da yangi rol yoki alohida model kerak bo'ladi.
+
+**Chiqish mezoni:** SuperAdmin paneli ishlaydi · bemor roli veb-ilovaga kira olmasligi
+test bilan isbotlangan.
 
 ---
 
-## Faza 9 — Production hardening (94 → 100%)
+## Faza 9 — Production hardening (90 → 100%)
 
 ### 9.1. Performance (§14.1)
 - [ ] Boshlang'ich JS ≤ 180 KB gzip · route chunk ≤ 90 KB · CSS ≤ 40 KB
