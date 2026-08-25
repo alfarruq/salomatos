@@ -51,6 +51,18 @@ export default defineConfig({
     rollupOptions: {
       output: {
         /*
+         * The entry gets a name of its own so the bundle budget can point at
+         * it precisely.
+         *
+         * Rollup names a chunk after its source file, so `pages/_auth/
+         * patients/index.tsx` produced `assets/index-<hash>.js` — which the
+         * `index-*` glob in .size-limit.json counted as initial JS. The
+         * patients route alone made the budget read 177 kB against a true
+         * 161 kB, and the next route would have "failed" a limit nothing had
+         * actually exceeded.
+         */
+        entryFileNames: 'assets/entry-[hash].js',
+        /*
          * React only, and matched by path rather than by package name:
          * `react-dom/client` is a different module id from `react-dom`, so the
          * name-based form in §8.3 left React DOM in the entry chunk and
