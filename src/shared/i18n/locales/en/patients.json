@@ -1,0 +1,63 @@
+{
+  "status": {
+    "in_progress": "In treatment",
+    "completed": "Completed",
+    "none": "No treatment"
+  },
+  "form": {
+    "fullName": "Full name",
+    "phoneNumber": "Phone number",
+    "birthDate": "Date of birth",
+    "birthDatePlaceholder": "Select a date",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "address": "Address",
+    "office": "Office"
+  },
+  "create": {
+    "title": "New patient",
+    "description": "Name and phone number are required.",
+    "submit": "Add patient",
+    "failed": "Could not add the patient. Please try again."
+  },
+  "edit": {
+    "title": "Edit patient",
+    "description": "Changes are saved immediately.",
+    "failed": "Could not save the changes. Please try again."
+  },
+  "search": {
+    "label": "Search patients",
+    "placeholder": "Name",
+    "clear": "Clear search"
+  },
+  "title": "Patients",
+  "column": {
+    "fullName": "Name",
+    "phoneNumber": "Phone",
+    "status": "Status",
+    "doctor": "Doctor",
+    "lastAppointment": "Last visit",
+    "remaining": "Outstanding"
+  },
+  "empty": {
+    "title": "No patients yet",
+    "description": "Add the first patient to start.",
+    "noMatch": "Nothing found",
+    "searchDescription": "Try a different name.",
+    "showAll": "Show all patients"
+  },
+  "pagination": {
+    "summary": "{{from}}–{{to}} of {{count}}"
+  },
+  "detail": {
+    "backToList": "← All patients",
+    "notFound": "Patient not found",
+    "notFoundBody": "This link points to a patient that does not exist.",
+    "birthDateWithAge": "{{date}} ({{age}})",
+    "visitNumber": "Visits",
+    "totalCost": "Treatment total",
+    "totalPaid": "Paid",
+    "treatments": "Treatments",
+    "treatmentWithTooth": "{{name}} · tooth {{tooth}}"
+  }
+}

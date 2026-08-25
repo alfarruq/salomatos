@@ -1,0 +1,140 @@
+import * as v from 'valibot'
+import { pageSchema } from '@/shared/api/pagination'
+import { parseCalendarDate } from '@/shared/lib/calendarDate'
+import type { AppointmentSlot, Patient, PatientListItem, PatientTreatment } from './types'
+
+/**
+ * The wire contract for `/api/patients/`, validated at runtime (ADR-006).
+ *
+ * Only the fields the interface uses are declared; Valibot ignores the rest, so
+ * the detail response's `gallery` and `recipe` arrays pass through untouched
+ * until phase 7.2 needs them.
+ */
+
+const nullableString = v.nullable(v.string())
+const statusSchema = v.nullable(v.picklist(['in_progress', 'completed']))
+
+export const patientListItemSchema = v.object({
+  id: v.pipe(v.number(), v.integer()),
+  full_name: v.string(),
+  phone_number: nullableString,
+  birth_date: nullableString,
+  address: nullableString,
+  office: nullableString,
+  doctor: nullableString,
+  status: statusSchema,
+  treatment_type: nullableString,
+  appointment_date: nullableString,
+  remaining: v.nullable(v.number()),
+  total_remaining: v.number(),
+})
+
+export const patientPageSchema = pageSchema(patientListItemSchema)
+
+const treatmentSchema = v.object({
+  id: v.pipe(v.number(), v.integer()),
+  name: v.string(),
+  tooth_number: v.nullable(v.number()),
+})
+
+export const patientDetailSchema = v.object({
+  id: v.pipe(v.number(), v.integer()),
+  full_name: v.string(),
+  phone_number: nullableString,
+  birth_date: nullableString,
+  address: nullableString,
+  office: nullableString,
+  doctor: nullableString,
+  image: nullableString,
+  age: v.nullable(v.number()),
+  status: statusSchema,
+  treatment_type: v.array(treatmentSchema),
+  total_treatment_cost: v.number(),
+  total_paid: v.number(),
+  remaining: v.number(),
+  total_remaining: v.number(),
+  visit_number: v.number(),
+})
+
+export type PatientListItemResponse = v.InferOutput<typeof patientListItemSchema>
+export type PatientDetailResponse = v.InferOutput<typeof patientDetailSchema>
+
+/** `dd.MM.yyyy HH:mm`, which is what `get_appointment_date` formats. */
+const FORMATTED_APPOINTMENT = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/
+
+/**
+ * Recovers date parts from the string the serializer already formatted.
+ *
+ * `PatientListSerializer.get_appointment_date` returns `"24.08.2026 14:30"`
+ * rather than a machine-readable value, so the day and the hour arrive already
+ * committed to one presentation. Rendering that verbatim would put a
+ * `dd.MM.yyyy` date in front of an English or Russian interface, which §12.4
+ * exists to prevent — so the parts are recovered and left for the UI to format.
+ *
+ * Returns null when the shape is anything else, including a real date that
+ * does not exist (`31.02.2026`), rather than guessing. The caller shows
+ * nothing, which is honest: the value is a convenience field, and the
+ * appointments endpoint sends a proper `date` and `time` when it matters.
+ */
+export function parseFormattedAppointment(value: string | null): AppointmentSlot | null {
+  if (value === null) return null
+
+  const match = FORMATTED_APPOINTMENT.exec(value)
+  if (match === null) return null
+
+  const [, day, month, year, hour, minute] = match
+  const date = `${year}-${month}-${day}`
+
+  if (parseCalendarDate(date) === null) return null
+  if (Number(hour) > 23 || Number(minute) > 59) return null
+
+  return { date, time: `${hour}:${minute}` }
+}
+
+/** `null` for anything the backend sent that is not a real calendar date. */
+function toCalendarDateOrNull(value: string | null): string | null {
+  if (value === null) return null
+  return parseCalendarDate(value) === null ? null : value
+}
+
+export function toPatientListItem(response: PatientListItemResponse): PatientListItem {
+  return {
+    id: response.id,
+    fullName: response.full_name,
+    phoneNumber: response.phone_number,
+    birthDate: toCalendarDateOrNull(response.birth_date),
+    address: response.address,
+    office: response.office,
+    doctorName: response.doctor,
+    status: response.status,
+    treatmentType: response.treatment_type,
+    lastAppointment: parseFormattedAppointment(response.appointment_date),
+    remaining: response.remaining,
+    totalRemaining: response.total_remaining,
+  }
+}
+
+function toTreatment(response: v.InferOutput<typeof treatmentSchema>): PatientTreatment {
+  return { id: response.id, name: response.name, toothNumber: response.tooth_number }
+}
+
+export function toPatient(response: PatientDetailResponse): Patient {
+  return {
+    id: response.id,
+    fullName: response.full_name,
+    phoneNumber: response.phone_number,
+    birthDate: toCalendarDateOrNull(response.birth_date),
+    address: response.address,
+    office: response.office,
+    doctorName: response.doctor,
+    imageUrl: response.image,
+    age: response.age,
+    status: response.status,
+    treatments: response.treatment_type.map(toTreatment),
+    totalTreatmentCost: response.total_treatment_cost,
+    totalPaid: response.total_paid,
+    remaining: response.remaining,
+    totalRemaining: response.total_remaining,
+    visitNumber: response.visit_number,
+  }
+}

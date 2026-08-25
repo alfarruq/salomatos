@@ -1,0 +1,63 @@
+{
+  "status": {
+    "in_progress": "Davolanmoqda",
+    "completed": "Yakunlangan",
+    "none": "Davolanish yo'q"
+  },
+  "form": {
+    "fullName": "F. I. Sh.",
+    "phoneNumber": "Telefon raqami",
+    "birthDate": "Tug'ilgan sana",
+    "birthDatePlaceholder": "Sanani tanlang",
+    "previousMonth": "Oldingi oy",
+    "nextMonth": "Keyingi oy",
+    "address": "Manzil",
+    "office": "Kabinet"
+  },
+  "create": {
+    "title": "Yangi bemor",
+    "description": "Ism va telefon raqami majburiy.",
+    "submit": "Bemor qo'shish",
+    "failed": "Bemorni qo'shib bo'lmadi. Qayta urinib ko'ring."
+  },
+  "edit": {
+    "title": "Bemorni tahrirlash",
+    "description": "O'zgarishlar darhol saqlanadi.",
+    "failed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring."
+  },
+  "search": {
+    "label": "Bemorlarni qidirish",
+    "placeholder": "Ism",
+    "clear": "Qidiruvni tozalash"
+  },
+  "title": "Bemorlar",
+  "column": {
+    "fullName": "Ism",
+    "phoneNumber": "Telefon",
+    "status": "Holat",
+    "doctor": "Shifokor",
+    "lastAppointment": "Oxirgi qabul",
+    "remaining": "Qoldiq"
+  },
+  "empty": {
+    "title": "Hozircha bemor yo'q",
+    "description": "Boshlash uchun birinchi bemorni qo'shing.",
+    "noMatch": "Hech narsa topilmadi",
+    "searchDescription": "Boshqa ism bilan urinib ko'ring.",
+    "showAll": "Barcha bemorlarni ko'rsatish"
+  },
+  "pagination": {
+    "summary": "{{count}} tadan {{from}}–{{to}}"
+  },
+  "detail": {
+    "backToList": "← Barcha bemorlar",
+    "notFound": "Bemor topilmadi",
+    "notFoundBody": "Bu havola mavjud bo'lmagan bemorga ishora qiladi.",
+    "birthDateWithAge": "{{date}} ({{age}})",
+    "visitNumber": "Tashriflar",
+    "totalCost": "Davolanish summasi",
+    "totalPaid": "To'langan",
+    "treatments": "Davolanish",
+    "treatmentWithTooth": "{{name}} · {{tooth}}-tish"
+  }
+}

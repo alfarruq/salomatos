@@ -1,0 +1,63 @@
+{
+  "status": {
+    "in_progress": "Даволанмоқда",
+    "completed": "Якунланган",
+    "none": "Даволаниш йўқ"
+  },
+  "form": {
+    "fullName": "Ф. И. Ш.",
+    "phoneNumber": "Телефон рақами",
+    "birthDate": "Туғилган сана",
+    "birthDatePlaceholder": "Санани танланг",
+    "previousMonth": "Олдинги ой",
+    "nextMonth": "Кейинги ой",
+    "address": "Манзил",
+    "office": "Кабинет"
+  },
+  "create": {
+    "title": "Янги бемор",
+    "description": "Исм ва телефон рақами мажбурий.",
+    "submit": "Бемор қўшиш",
+    "failed": "Беморни қўшиб бўлмади. Қайта уриниб кўринг."
+  },
+  "edit": {
+    "title": "Беморни таҳрирлаш",
+    "description": "Ўзгаришлар дарҳол сақланади.",
+    "failed": "Ўзгаришларни сақлаб бўлмади. Қайта уриниб кўринг."
+  },
+  "search": {
+    "label": "Беморларни қидириш",
+    "placeholder": "Исм",
+    "clear": "Қидирувни тозалаш"
+  },
+  "title": "Беморлар",
+  "column": {
+    "fullName": "Исм",
+    "phoneNumber": "Телефон",
+    "status": "Ҳолат",
+    "doctor": "Шифокор",
+    "lastAppointment": "Охирги қабул",
+    "remaining": "Қолдиқ"
+  },
+  "empty": {
+    "title": "Ҳозирча бемор йўқ",
+    "description": "Бошлаш учун биринчи беморни қўшинг.",
+    "noMatch": "Ҳеч нарса топилмади",
+    "searchDescription": "Бошқа исм билан уриниб кўринг.",
+    "showAll": "Барча беморларни кўрсатиш"
+  },
+  "pagination": {
+    "summary": "{{count}} тадан {{from}}–{{to}}"
+  },
+  "detail": {
+    "backToList": "← Барча беморлар",
+    "notFound": "Бемор топилмади",
+    "notFoundBody": "Бу ҳавола мавжуд бўлмаган беморга ишора қилади.",
+    "birthDateWithAge": "{{date}} ({{age}})",
+    "visitNumber": "Ташрифлар",
+    "totalCost": "Даволаниш суммаси",
+    "totalPaid": "Тўланган",
+    "treatments": "Даволаниш",
+    "treatmentWithTooth": "{{name}} · {{tooth}}-тиш"
+  }
+}

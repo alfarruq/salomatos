@@ -1,0 +1,63 @@
+{
+  "status": {
+    "in_progress": "В лечении",
+    "completed": "Завершено",
+    "none": "Без лечения"
+  },
+  "form": {
+    "fullName": "Ф. И. О.",
+    "phoneNumber": "Номер телефона",
+    "birthDate": "Дата рождения",
+    "birthDatePlaceholder": "Выберите дату",
+    "previousMonth": "Предыдущий месяц",
+    "nextMonth": "Следующий месяц",
+    "address": "Адрес",
+    "office": "Кабинет"
+  },
+  "create": {
+    "title": "Новый пациент",
+    "description": "Имя и номер телефона обязательны.",
+    "submit": "Добавить пациента",
+    "failed": "Не удалось добавить пациента. Попробуйте ещё раз."
+  },
+  "edit": {
+    "title": "Изменить пациента",
+    "description": "Изменения сохраняются сразу.",
+    "failed": "Не удалось сохранить изменения. Попробуйте ещё раз."
+  },
+  "search": {
+    "label": "Поиск пациентов",
+    "placeholder": "Имя",
+    "clear": "Очистить поиск"
+  },
+  "title": "Пациенты",
+  "column": {
+    "fullName": "Имя",
+    "phoneNumber": "Телефон",
+    "status": "Статус",
+    "doctor": "Врач",
+    "lastAppointment": "Последний приём",
+    "remaining": "Остаток"
+  },
+  "empty": {
+    "title": "Пациентов пока нет",
+    "description": "Добавьте первого пациента, чтобы начать.",
+    "noMatch": "Ничего не найдено",
+    "searchDescription": "Попробуйте другое имя.",
+    "showAll": "Показать всех пациентов"
+  },
+  "pagination": {
+    "summary": "{{from}}–{{to}} из {{count}}"
+  },
+  "detail": {
+    "backToList": "← Все пациенты",
+    "notFound": "Пациент не найден",
+    "notFoundBody": "Эта ссылка ведёт на несуществующего пациента.",
+    "birthDateWithAge": "{{date}} ({{age}})",
+    "visitNumber": "Визитов",
+    "totalCost": "Сумма лечения",
+    "totalPaid": "Оплачено",
+    "treatments": "Лечение",
+    "treatmentWithTooth": "{{name}} · зуб {{tooth}}"
+  }
+}
