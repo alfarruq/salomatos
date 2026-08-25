@@ -1,11 +1,15 @@
 {
-  "app": { "name": "SalomatOS" },
+  "app": {
+    "name": "SalomatOS"
+  },
   "action": {
     "save": "Saqlash",
     "cancel": "Bekor qilish",
     "retry": "Qayta urinish",
     "close": "Yopish",
-    "signOut": "Chiqish"
+    "signOut": "Chiqish",
+    "next": "Keyingi",
+    "previous": "Oldingi"
   },
   "nav": {
     "skipToContent": "Asosiy qismga o'tish",
@@ -16,7 +20,10 @@
     "patients": "Bemorlar",
     "billing": "To'lovlar"
   },
-  "language": { "label": "Til", "change": "Tilni o'zgartirish" },
+  "language": {
+    "label": "Til",
+    "change": "Tilni o'zgartirish"
+  },
   "error": {
     "pageTitle": "Bu sahifa ochilmadi",
     "pageBody": "Sahifani qayta yuklang yoki boshqa bo'limga o'ting.",

@@ -1,11 +1,15 @@
 {
-  "app": { "name": "SalomatOS" },
+  "app": {
+    "name": "SalomatOS"
+  },
   "action": {
     "save": "Save",
     "cancel": "Cancel",
     "retry": "Try again",
     "close": "Close",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "next": "Next",
+    "previous": "Previous"
   },
   "nav": {
     "skipToContent": "Skip to content",
@@ -16,7 +20,10 @@
     "patients": "Patients",
     "billing": "Billing"
   },
-  "language": { "label": "Language", "change": "Change language" },
+  "language": {
+    "label": "Language",
+    "change": "Change language"
+  },
   "error": {
     "pageTitle": "This page did not open",
     "pageBody": "Reload the page or go to another section.",

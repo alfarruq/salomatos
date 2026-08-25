@@ -1,11 +1,15 @@
 {
-  "app": { "name": "SalomatOS" },
+  "app": {
+    "name": "SalomatOS"
+  },
   "action": {
     "save": "Сохранить",
     "cancel": "Отмена",
     "retry": "Повторить",
     "close": "Закрыть",
-    "signOut": "Выйти"
+    "signOut": "Выйти",
+    "next": "Вперёд",
+    "previous": "Назад"
   },
   "nav": {
     "skipToContent": "Перейти к содержимому",
@@ -16,7 +20,10 @@
     "patients": "Пациенты",
     "billing": "Платежи"
   },
-  "language": { "label": "Язык", "change": "Сменить язык" },
+  "language": {
+    "label": "Язык",
+    "change": "Сменить язык"
+  },
   "error": {
     "pageTitle": "Страница не открылась",
     "pageBody": "Обновите страницу или перейдите в другой раздел.",

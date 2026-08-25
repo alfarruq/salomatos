@@ -1,11 +1,15 @@
 {
-  "app": { "name": "SalomatOS" },
+  "app": {
+    "name": "SalomatOS"
+  },
   "action": {
     "save": "Сақлаш",
     "cancel": "Бекор қилиш",
     "retry": "Қайта уриниш",
     "close": "Ёпиш",
-    "signOut": "Чиқиш"
+    "signOut": "Чиқиш",
+    "next": "Кейинги",
+    "previous": "Олдинги"
   },
   "nav": {
     "skipToContent": "Асосий қисмга ўтиш",
@@ -16,7 +20,10 @@
     "patients": "Беморлар",
     "billing": "Тўловлар"
   },
-  "language": { "label": "Тил", "change": "Тилни ўзгартириш" },
+  "language": {
+    "label": "Тил",
+    "change": "Тилни ўзгартириш"
+  },
   "error": {
     "pageTitle": "Бу саҳифа очилмади",
     "pageBody": "Саҳифани қайта юкланг ёки бошқа бўлимга ўтинг.",
