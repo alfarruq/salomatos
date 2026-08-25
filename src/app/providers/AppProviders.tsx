@@ -1,8 +1,9 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { type ReactNode, Suspense, useEffect, useRef, useState } from 'react'
 import { I18nextProvider } from 'react-i18next'
-import { getActiveClinicId, type Session, sessionKeys, useSessionStore } from '@/entities/session'
+import { type Session, sessionKeys, useSessionStore } from '@/entities/session'
 import { configureApi } from '@/shared/api/httpContext'
+import { clearAccessToken } from '@/shared/api/tokenStore'
 import { createI18n } from '@/shared/i18n'
 import { Toaster, TooltipProvider } from '@/shared/ui'
 import { createQueryClient } from './queryClient'
@@ -24,19 +25,22 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
   if (!isConfigured.current) {
     configureApi({
-      getClinicId: getActiveClinicId,
       onUnauthorized: () => {
         /*
-         * ADR-003: session auth, so there is nothing to refresh — an expired
-         * session is a logout nobody chose.
+         * ADR-003 (revised): bearer tokens with no refresh route, so there is
+         * nothing to exchange — an expired token is a logout nobody chose.
          *
-         * Only the store is cleared here. Clearing the *query cache* in
+         * The token goes first: anything still in flight should stop being
+         * sent as an authenticated request.
+         *
+         * The *query cache* is deliberately not cleared here. Doing so in
          * response to a 401 would cancel the request that reported it, and the
          * guard would see a CancelledError rather than `unauthorized` and show
          * an error screen instead of the login form. The cache is emptied on
          * arrival at /login, which is where the user ends up either way and
          * where nothing is in flight (§13.4).
          */
+        clearAccessToken()
         useSessionStore.getState().clear()
       },
     })

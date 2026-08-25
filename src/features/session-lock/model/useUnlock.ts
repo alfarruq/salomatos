@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { parseSession, type Session, sessionKeys } from '@/entities/session'
+import * as v from 'valibot'
+import { fetchSession, type Session, sessionKeys } from '@/entities/session'
 import { httpClient } from '@/shared/api/httpClient'
+import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
 import { useLockStore } from './lockStore'
 
 /**
@@ -11,16 +13,31 @@ import { useLockStore } from './lockStore'
  * duplication is a few lines and the alternative is a dependency the linter
  * would reject.
  *
- * Re-authenticating rather than merely checking a password also rotates the
- * server session, which is the safer outcome for a screen that was unattended.
+ * Re-authenticating rather than merely checking a password also issues a fresh
+ * token, which is the safer outcome for a screen that was left unattended.
  */
-async function unlockRequest(input: { email: string; password: string }): Promise<Session> {
-  const raw = await httpClient<unknown>('auth/login/', {
+const loginResponseSchema = v.object({
+  result: v.object({
+    access_token: v.pipe(v.string(), v.minLength(1)),
+  }),
+})
+
+async function unlockRequest(input: { username: string; password: string }): Promise<Session> {
+  const raw = await httpClient<unknown>('login/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   })
-  return parseSession(raw)
+
+  const { result } = v.parse(loginResponseSchema, raw)
+  setAccessToken(result.access_token)
+
+  try {
+    return await fetchSession()
+  } catch (error) {
+    clearAccessToken()
+    throw error
+  }
 }
 
 export function useUnlock() {

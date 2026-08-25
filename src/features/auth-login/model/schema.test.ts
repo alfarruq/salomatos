@@ -12,28 +12,36 @@ function issueFor(input: unknown, field: string): string | undefined {
 
 describe('loginSchema', () => {
   it('accepts a filled-in form', () => {
-    const result = v.safeParse(loginSchema, { email: 'a@example.test', password: 'salomat' })
+    const result = v.safeParse(loginSchema, { username: 'chilonzor', password: 'salomat' })
 
     expect(result.success).toBe(true)
   })
 
   it('reports translation keys, not sentences', () => {
     // §10 — the schema does not know which of the four locales is active.
-    expect(issueFor({ email: '', password: '' }, 'email')).toBe('validation.required')
-    expect(issueFor({ email: 'a@example.test', password: '' }, 'password')).toBe(
+    expect(issueFor({ username: '', password: '' }, 'username')).toBe('validation.required')
+    expect(issueFor({ username: 'chilonzor', password: '' }, 'password')).toBe(
       'validation.required',
     )
-    expect(issueFor({ email: 'not-an-email', password: 'x' }, 'email')).toBe('validation.email')
+  })
+
+  it('does not treat the identifier as an email address', () => {
+    /*
+     * `User.USERNAME_FIELD` is `username`, and the accounts in use are names
+     * like "chilonzor". Validating this as an email would reject every real
+     * credential the backend accepts.
+     */
+    expect(v.safeParse(loginSchema, { username: 'chilonzor', password: 'x' }).success).toBe(true)
   })
 
   it('trims before deciding the field is empty', () => {
     // Otherwise a stray space passes the required check and fails at the server.
-    expect(issueFor({ email: '   ', password: 'x' }, 'email')).toBe('validation.required')
+    expect(issueFor({ username: '   ', password: 'x' }, 'username')).toBe('validation.required')
   })
 
   it('hands the trimmed value on', () => {
-    const result = v.parse(loginSchema, { email: '  a@example.test  ', password: 'x' })
+    const result = v.parse(loginSchema, { username: '  chilonzor  ', password: 'x' })
 
-    expect(result.email).toBe('a@example.test')
+    expect(result.username).toBe('chilonzor')
   })
 })

@@ -1,85 +1,58 @@
 import * as v from 'valibot'
-import type { Permission, Session } from './types'
+import { permissionsForRole } from './permissions'
+import type { Session } from './types'
 
 /**
  * The wire contract for `/api/me/`, validated at runtime.
  *
- * §5.1 says API types are generated, not hand-written, and they will be — this
- * schema is not a substitute for that. It answers a different question: does
- * the response actually match what we were promised?
+ * ADR-006 (revised): there are no generated types to lean on. The backend
+ * serves drf-yasg, which emits Swagger 2.0 rather than the OpenAPI 3 Orval
+ * wants, and registers the schema route only under `DEBUG`. So this schema is
+ * not a stopgap ahead of generation — it *is* the contract, and the only place
+ * a serializer change gets caught.
  *
- * Right now that matters because the backend does not exist yet and this schema
- * *is* the specification. It keeps mattering afterwards: generated types are
- * compile-time only, so a serializer that quietly drops `permissions` would
- * otherwise surface as an empty sidebar rather than an error.
- *
- * ⚠️ When `pnpm api:generate` starts producing types, replace the field types
- * here with the generated ones and keep the parse.
+ * It is deliberately strict about `full_name` and `role` and permissive about
+ * everything else, because those two are the fields the interface cannot do
+ * without: one names the user, the other decides what they are shown.
  */
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const nullableString = v.nullable(v.string())
 
-// §5.4 requires UUIDs everywhere: sequential integer ids are open to
-// enumeration (/patients/1, /patients/2, ...).
-const uuid = v.pipe(v.string(), v.regex(UUID, 'expected a UUID'))
-
-const clinicSchema = v.object({
-  id: uuid,
-  name: v.pipe(v.string(), v.minLength(1)),
+export const meResponseSchema = v.object({
+  full_name: v.pipe(v.string(), v.minLength(1)),
+  role: v.picklist(['superadmin', 'admin', 'doctor', 'patient']),
+  phone_number: nullableString,
+  email: nullableString,
+  specialty: nullableString,
+  biography: nullableString,
+  /** A relative media path, not a URL. Absent for most accounts. */
+  image: nullableString,
+  experience: v.nullable(v.number()),
 })
 
-export const sessionResponseSchema = v.object({
-  id: uuid,
-  first_name: v.string(),
-  last_name: v.string(),
-  email: v.string(),
-  role: v.picklist(['SuperAdmin', 'ClinicAdmin', 'Doctor', 'Patient']),
-  permissions: v.array(v.string()),
-  clinics: v.array(clinicSchema),
-  active_clinic_id: v.nullable(uuid),
-})
-
-export type SessionResponse = v.InferOutput<typeof sessionResponseSchema>
-
-const KNOWN_PERMISSIONS: ReadonlySet<string> = new Set<Permission>([
-  'patient:read',
-  'patient:write',
-  'patient:archive',
-  'appointment:read',
-  'appointment:write',
-  'medical-record:read',
-  'medical-record:write',
-  'billing:read',
-  'billing:write',
-  'clinic:manage',
-  'staff:manage',
-])
+export type MeResponse = v.InferOutput<typeof meResponseSchema>
 
 /**
  * Maps the wire shape to the domain shape (§3.1's `model/mapper`).
  *
- * Unknown permissions are dropped rather than rejected: the backend may gain a
- * permission before this frontend deploys, and a UI that refuses to load
- * because it does not recognise a string would be a worse failure than one that
- * hides a button it does not know about yet.
+ * `userId` comes from the caller rather than the response because the response
+ * does not contain one — `UserMeSerializer` lists eight fields and `id` is not
+ * among them. It is read from the access token instead (`fetchSession`).
  */
-export function toSession(response: SessionResponse): Session {
-  const permissions = new Set(
-    response.permissions.filter((value): value is Permission => KNOWN_PERMISSIONS.has(value)),
-  )
-
+export function toSession(response: MeResponse, userId: number): Session {
   return {
-    userId: response.id,
-    firstName: response.first_name,
-    lastName: response.last_name,
+    userId,
+    // Same value, different meaning — see the field's comment in `types.ts`.
+    clinicId: userId,
+    fullName: response.full_name,
+    phoneNumber: response.phone_number,
     email: response.email,
     role: response.role,
-    permissions,
-    clinics: response.clinics,
-    activeClinicId: response.active_clinic_id,
+    specialty: response.specialty,
+    permissions: permissionsForRole(response.role),
   }
 }
 
-export function parseSession(raw: unknown): Session {
-  return toSession(v.parse(sessionResponseSchema, raw))
+export function parseSession(raw: unknown, userId: number): Session {
+  return toSession(v.parse(meResponseSchema, raw), userId)
 }

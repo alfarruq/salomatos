@@ -1,22 +1,38 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSessionStore } from '@/entities/session'
-import { httpClient } from '@/shared/api/httpClient'
+import { clearAccessToken } from '@/shared/api/tokenStore'
 
-async function logout(): Promise<void> {
-  await httpClient<void>('auth/logout/', { method: 'POST' })
-}
-
+/**
+ * Signing out is entirely local, because there is nothing to tell the server.
+ *
+ * The backend has no logout route, and no way to revoke a token even in
+ * principle: `BLACKLIST_AFTER_ROTATION` is configured but
+ * `rest_framework_simplejwt.token_blacklist` is not in `INSTALLED_APPS`, so
+ * simplejwt swallows the blacklist call. The issued token stays valid until it
+ * expires — a day, by default.
+ *
+ * ⚠️ Which means this protects the *screen*, not the credential. Dropping the
+ * token puts it beyond the reach of this page, and that is the realistic threat
+ * on a shared reception machine; a token already captured off the wire is not
+ * something the frontend can call back. Fixing that is server-side (§A5 of the
+ * backend review).
+ *
+ * Still a mutation rather than a plain function: callers already treat signing
+ * out as an async action with a pending state, and keeping the shape means the
+ * call sites do not change when a real endpoint appears.
+ */
 export function useLogout() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: logout,
+    mutationFn: async () => {
+      clearAccessToken()
+    },
 
     /*
-     * `onSettled`, not `onSuccess`: if the request fails the user still asked
-     * to leave, and the next member of staff at a shared reception desk must
-     * not find the previous one's patients on screen (§13.4). The server-side
-     * session may outlive this, but the browser keeps nothing either way.
+     * `onSettled`, not `onSuccess`: the user asked to leave, and the next
+     * member of staff at a shared reception desk must not find the previous
+     * one's patients on screen (§13.4).
      */
     onSettled: () => {
       useSessionStore.getState().clear()

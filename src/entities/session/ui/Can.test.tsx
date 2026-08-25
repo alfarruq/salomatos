@@ -6,14 +6,16 @@ import { Can } from './Can'
 
 function signIn(permissions: Session['permissions']) {
   useSessionStore.getState().setSession({
-    userId: 'a1b2c3d4-0000-4000-8000-000000000001',
-    firstName: 'Dilnoza',
-    lastName: 'Rahimova',
+    userId: 1,
+    clinicId: 1,
+    fullName: 'Dilnoza Rahimova',
+    phoneNumber: '+998901112233',
     email: 'a@example.test',
-    role: 'ClinicAdmin',
+    role: 'admin',
+    specialty: null,
+    // Set explicitly rather than derived from the role: these tests are about
+    // what <Can> does with a permission set, not about ADR-012's table.
     permissions,
-    clinics: [],
-    activeClinicId: null,
   })
 }
 

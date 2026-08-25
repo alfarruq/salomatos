@@ -2,121 +2,128 @@ import { HttpResponse, http } from 'msw'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError } from '@/shared/api/errors'
 import { configureApi, resetApiContext } from '@/shared/api/httpContext'
-import { setMockSession } from '@/shared/api/mocks/handlers'
+import { accessTokenFor } from '@/shared/api/mocks/fixtures'
 import { server } from '@/shared/api/mocks/server'
+import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
 import { fetchSession } from './queries'
 
 /**
  * Runs against the MSW handlers rather than a stubbed fetch, so the real
- * httpClient is exercised: the tenant header, DRF error normalisation and the
- * 401 hand-off all have to actually work.
+ * httpClient is exercised: the bearer header, the error envelope and the 401
+ * hand-off all have to actually work.
  */
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 afterEach(() => {
   server.resetHandlers()
   resetApiContext()
-  setMockSession(null)
+  clearAccessToken()
 })
 afterAll(() => server.close())
 
+/** The eight fields `UserMeSerializer` actually returns. */
+const ME_RESPONSE = {
+  full_name: 'Dilnoza Rahimova',
+  specialty: null,
+  phone_number: '+998901112233',
+  email: 'clinic@example.test',
+  experience: null,
+  biography: null,
+  image: null,
+  role: 'superadmin',
+}
+
 describe('fetchSession', () => {
-  beforeEach(() => setMockSession('admin'))
+  beforeEach(() => setAccessToken(accessTokenFor('clinic')))
 
   it('maps the wire shape to the domain shape', async () => {
     const session = await fetchSession()
 
-    expect(session.firstName).toBe('Dilnoza')
-    expect(session.role).toBe('ClinicAdmin')
-    expect(session.clinics).toHaveLength(2)
-    expect(session.activeClinicId).toBe(session.clinics[0]?.id)
+    expect(session.fullName).toBe('Dilnoza Rahimova')
+    expect(session.role).toBe('superadmin')
+    expect(session.phoneNumber).toBe('+998901112233')
   })
 
-  it('turns permissions into a set for lookup', async () => {
+  it('takes the user id from the token, because the response has none', async () => {
     const session = await fetchSession()
 
-    expect(session.permissions.has('patient:archive')).toBe(true)
+    expect(session.userId).toBe(1)
+    // §6.2 — this is what every query key is scoped by.
+    expect(session.clinicId).toBe(1)
+  })
+
+  it('derives permissions from the role (ADR-012)', async () => {
+    const session = await fetchSession()
+
     expect(session.permissions.has('billing:write')).toBe(true)
+    expect(session.permissions.has('patient:archive')).toBe(true)
   })
 
-  it('carries only the permissions the server granted', async () => {
-    setMockSession('doctor')
+  it('gives a doctor a narrower set than a clinic account', async () => {
+    setAccessToken(accessTokenFor('doctor'))
     const session = await fetchSession()
 
-    // A doctor may write records but not archive patients or touch billing.
+    expect(session.role).toBe('doctor')
     expect(session.permissions.has('medical-record:write')).toBe(true)
-    expect(session.permissions.has('patient:archive')).toBe(false)
     expect(session.permissions.has('billing:write')).toBe(false)
-  })
-
-  it('ignores a permission it does not recognise instead of refusing to load', async () => {
-    server.use(
-      http.get('/api/me/', () =>
-        HttpResponse.json({
-          id: 'a1b2c3d4-0000-4000-8000-000000000001',
-          first_name: 'Dilnoza',
-          last_name: 'Rahimova',
-          email: 'a@example.test',
-          role: 'ClinicAdmin',
-          // The backend may ship a new permission before this frontend does.
-          permissions: ['patient:read', 'lab:order'],
-          clinics: [],
-          active_clinic_id: null,
-        }),
-      ),
-    )
-
-    const session = await fetchSession()
-
-    expect(session.permissions.has('patient:read')).toBe(true)
-    expect(session.permissions.size).toBe(1)
+    expect(session.permissions.has('patient:archive')).toBe(false)
   })
 
   it('fails loudly when the contract is broken', async () => {
     server.use(
-      http.get('/api/me/', () =>
-        HttpResponse.json({
-          id: 'a1b2c3d4-0000-4000-8000-000000000001',
-          first_name: 'Dilnoza',
-          last_name: 'Rahimova',
-          email: 'a@example.test',
-          role: 'ClinicAdmin',
-          // `permissions` dropped by a serializer change. Rendering an empty
-          // sidebar would look like "this user may do nothing" — an error is
-          // the honest outcome.
-          clinics: [],
-          active_clinic_id: null,
-        }),
-      ),
+      http.get('/api/me/', () => {
+        // `role` dropped by a serializer change. Rendering an application with
+        // every control hidden would look like "this user may do nothing" — an
+        // error is the honest outcome.
+        const { role: _role, ...withoutRole } = ME_RESPONSE
+        return HttpResponse.json(withoutRole)
+      }),
     )
 
     await expect(fetchSession()).rejects.toThrow()
   })
 
-  it('rejects a sequential id, which §5.4 forbids', async () => {
-    server.use(
-      http.get('/api/me/', () =>
-        HttpResponse.json({
-          id: '1',
-          first_name: 'A',
-          last_name: 'B',
-          email: 'a@example.test',
-          role: 'Doctor',
-          permissions: [],
-          clinics: [],
-          active_clinic_id: null,
-        }),
-      ),
-    )
+  it('rejects a role the permission table does not cover', async () => {
+    server.use(http.get('/api/me/', () => HttpResponse.json({ ...ME_RESPONSE, role: 'nurse' })))
 
     await expect(fetchSession()).rejects.toThrow()
   })
 })
 
-describe('when the session is gone', () => {
+describe('when there is no usable token', () => {
+  it('reports unauthorized without asking the server', async () => {
+    let calls = 0
+    server.use(
+      http.get('/api/me/', () => {
+        calls += 1
+        return HttpResponse.json(ME_RESPONSE)
+      }),
+    )
+
+    // The state every page reload starts in: the token lived in memory only.
+    await expect(fetchSession()).rejects.toBeInstanceOf(ApiError)
+    expect(calls).toBe(0)
+  })
+})
+
+describe('when the server rejects the token', () => {
+  beforeEach(() => setAccessToken(accessTokenFor('clinic')))
+
   it('reports unauthorized and hands off exactly once', async () => {
     const onUnauthorized = vi.fn()
     configureApi({ onUnauthorized })
-    setMockSession(null)
+    server.use(
+      http.get('/api/me/', () =>
+        HttpResponse.json(
+          {
+            message: 'Given token not valid for any token type',
+            message_key: 'unauthorized',
+            errors: {},
+            exception_class: 'InvalidToken',
+          },
+          { status: 401 },
+        ),
+      ),
+    )
 
     await expect(fetchSession()).rejects.toBeInstanceOf(ApiError)
     expect(onUnauthorized).toHaveBeenCalledOnce()
@@ -127,39 +134,31 @@ describe('when the session is gone', () => {
     server.use(
       http.get('/api/me/', () => {
         calls += 1
-        return HttpResponse.json({ detail: 'unauthorized' }, { status: 401 })
+        return HttpResponse.json({ message_key: 'unauthorized' }, { status: 401 })
       }),
     )
     configureApi({ onUnauthorized: () => {} })
 
     await expect(fetchSession()).rejects.toBeInstanceOf(ApiError)
-    // ADR-003: no refresh flow, so a retry would only delay the redirect.
+    // There is no refresh route to retry against, so a retry only delays /login.
     expect(calls).toBe(1)
   })
 })
 
-describe('tenant header', () => {
-  it('sends the active clinic on every request', async () => {
+describe('the bearer header', () => {
+  it('carries the token on every request', async () => {
     const seen: (string | null)[] = []
     server.use(
       http.get('/api/me/', ({ request }) => {
-        seen.push(request.headers.get('X-Clinic-Id'))
-        return HttpResponse.json({
-          id: 'a1b2c3d4-0000-4000-8000-000000000001',
-          first_name: 'A',
-          last_name: 'B',
-          email: 'a@example.test',
-          role: 'Doctor',
-          permissions: [],
-          clinics: [],
-          active_clinic_id: null,
-        })
+        seen.push(request.headers.get('Authorization'))
+        return HttpResponse.json(ME_RESPONSE)
       }),
     )
-    configureApi({ getClinicId: () => '4f7b2e91-3a5c-4d18-9f60-1c2a8b7d4e33' })
+    setAccessToken(accessTokenFor('clinic'))
 
     await fetchSession()
 
-    expect(seen).toEqual(['4f7b2e91-3a5c-4d18-9f60-1c2a8b7d4e33'])
+    expect(seen).toHaveLength(1)
+    expect(seen[0]).toBe(`Bearer ${accessTokenFor('clinic')}`)
   })
 })

@@ -1,26 +1,18 @@
 import ky, { HTTPError, TimeoutError } from 'ky'
 import { ApiError, normalizeDrfError } from './errors'
 import { getApiContext } from './httpContext'
-
-const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
-
-/** Django's CSRF cookie is deliberately readable by JS; the session cookie is not. */
-export function readCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`))
-  return match?.[1] === undefined ? null : decodeURIComponent(match[1])
-}
+import { getAccessToken } from './tokenStore'
 
 /*
- * §1.2 — the API is always same-origin behind nginx. The origin is read from
- * the page rather than configured, so there is no environment variable that
- * could ever point this at another host and reintroduce CORS and cross-site
- * cookies. ky 2 parses the prefix as a URL and rejects a bare `/api`.
+ * §1.2 — the API is same-origin behind nginx, so the origin is read from the
+ * page rather than configured. There is no environment variable that could
+ * point this at another host and reintroduce CORS and cross-site cookies.
+ * ky 2 parses the prefix as a URL and rejects a bare `/api`.
  */
 const API_PREFIX = `${globalThis.location.origin}/api`
 
 export const api = ky.create({
   prefix: API_PREFIX,
-  credentials: 'same-origin',
   timeout: 20_000,
 
   retry: {
@@ -34,22 +26,30 @@ export const api = ky.create({
   hooks: {
     beforeRequest: [
       ({ request }) => {
-        if (UNSAFE_METHODS.has(request.method.toUpperCase())) {
-          const csrf = readCookie('csrftoken')
-          if (csrf !== null) request.headers.set('X-CSRFToken', csrf)
-        }
-
-        const clinicId = getApiContext().getClinicId()
-        if (clinicId !== null) request.headers.set('X-Clinic-Id', clinicId)
+        /*
+         * ADR-003 (revised): the backend authenticates with a bearer token, not
+         * a session cookie. `DEFAULT_AUTHENTICATION_CLASSES` is simplejwt's, so
+         * Django's CSRF middleware does not apply to these views and no CSRF
+         * header is sent — there is no cookie-borne credential for a
+         * cross-site request to abuse.
+         *
+         * No `X-Clinic-Id` header either, though §5.2 asks for one: this
+         * backend derives the tenant from `request.user` and reads no such
+         * header anywhere. Sending it would look like it protected something.
+         * The tenant still scopes the *cache* — that is what §6.2 requires —
+         * via the clinic id in every query key.
+         */
+        const token = getAccessToken()
+        if (token !== null) request.headers.set('Authorization', `Bearer ${token}`)
       },
     ],
 
     afterResponse: [
       ({ response }) => {
         /*
-         * ADR-003: the web client uses Django session authentication, so there
-         * is no refresh endpoint to call and nothing to retry. A 401 means the
-         * session is gone — hand off once and let the error surface.
+         * A 401 is terminal. The backend exposes no token refresh route, so
+         * there is nothing to retry with — the `refresh_token` it issues at
+         * login has nowhere to be sent. Hand off once and let the error surface.
          *
          * Deferred to a microtask so application code never runs inside this
          * request's own promise chain. A handler that touched the query cache
@@ -70,9 +70,6 @@ export const api = ky.create({
 
 /**
  * Every request goes through here, so the UI only ever sees `ApiError`.
- *
- * Also the mutator Orval is configured to use (§5.1), which is why the
- * signature is `(url, options) => Promise<T>`.
  */
 export async function httpClient<T>(url: string, options?: RequestInit): Promise<T> {
   try {
@@ -91,7 +88,7 @@ function toApiError(error: unknown): ApiError {
      * `error.data`, not `error.response.json()`. ky 2 pre-parses the body and
      * consumes the response doing so, so reading it again yields nothing —
      * which silently emptied every field error and left users with "something
-     * went wrong" instead of the message DRF sent (§10).
+     * went wrong" instead of the message the server sent (§10).
      */
     return normalizeDrfError({
       status: error.response.status,

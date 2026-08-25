@@ -1,11 +1,12 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from '@tanstack/react-router'
 import { LogOut } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Can, fullName, sessionQueries, useSession } from '@/entities/session'
+import { Can, sessionQueries, useSession } from '@/entities/session'
 import { useLogout } from '@/features/auth-logout'
 import { LanguageSwitcher } from '@/features/language-switch'
 import { LockScreen, useIdleLock, useLockStore } from '@/features/session-lock'
 import { ApiError } from '@/shared/api/errors'
+import { clearAccessToken } from '@/shared/api/tokenStore'
 import {
   AppShell,
   Avatar,
@@ -38,11 +39,36 @@ export const Route = createFileRoute('/_auth')({
         throw error
       })
 
-    if (session.clinics.length === 0) {
-      throw redirect({ to: '/onboarding' })
+    /*
+     * 🔴 This application is for clinic staff. Patients reach their own
+     * records through the Telegram bot (`/api/telegram/*`) and have no account
+     * here at all — there is no patient portal, by product decision.
+     *
+     * The check matters because patients are rows in the same `User` table and
+     * authenticate against the same endpoint, so one with a password set can
+     * sign in. What they would get is an empty shell they could still type
+     * `/patients` into. The server returns nothing for them — every queryset
+     * filters by `clinic=request.user` — so this closes a door rather than
+     * plugging a leak, but a door that opens onto staff software is not one to
+     * leave ajar.
+     *
+     * Both the token and the cache go before the redirect: `/login` decides
+     * whether to show its form by asking whether a session exists, so leaving
+     * one cached would bounce the user straight back here.
+     */
+    if (session.role === 'patient') {
+      clearAccessToken()
+      context.queryClient.clear()
+      throw redirect({ to: '/login', search: { denied: 'patient' } })
     }
 
-    return { session, clinicId: session.activeClinicId }
+    /*
+     * The tenant every child route scopes its queries by (§6.2). Never null:
+     * it is the authenticated user's own id, read from the token, so a
+     * resolved session always has one — which is what lets the patient routes
+     * take a plain `number` instead of guarding a nullable id on every screen.
+     */
+    return { session, clinicId: session.clinicId }
   },
 
   component: AuthenticatedLayout,
@@ -88,12 +114,12 @@ function AuthenticatedLayout() {
             <LanguageSwitcher />
             <DropdownMenu
               trigger={
-                <button aria-label={fullName(session)} className="rounded-full" type="button">
-                  <Avatar name={fullName(session)} />
+                <button aria-label={session.fullName} className="rounded-full" type="button">
+                  <Avatar name={session.fullName} />
                 </button>
               }
             >
-              <DropdownMenuLabel>{session.email}</DropdownMenuLabel>
+              <DropdownMenuLabel>{session.email ?? session.fullName}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 disabled={isPending}
@@ -124,9 +150,12 @@ function AuthenticatedLayout() {
           {/* Nothing here is a permission check that matters — Django's is. */}
           <Can permission="patient:read">
             <li>
-              <span className="block px-3 py-2 text-body text-text-tertiary">
+              <Link
+                className="block rounded-control px-3 py-2 text-body text-text-secondary hover:bg-sunken hover:text-text"
+                to="/patients"
+              >
                 {t('nav.patients')}
-              </span>
+              </Link>
             </li>
           </Can>
           <Can permission="billing:read">

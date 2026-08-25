@@ -1,0 +1,62 @@
+/**
+ * Reads the payload of a JWT access token.
+ *
+ * ⚠️ **This does not verify anything.** The signature is not checked and cannot
+ * be — the key lives on the server. Everything returned here is attacker-
+ * controlled in principle, so it may only be used for things that are already
+ * the client's own business: which cache bucket to put a response in, which
+ * tenant header to send. Django re-derives the user from the token on every
+ * request and is the only thing that decides what may be read or written.
+ *
+ * It exists because `/api/me/` returns neither the user's id nor their clinic
+ * (see `UserMeSerializer`), and query keys have to be scoped by tenant (§6.2).
+ * The token already carries `user_id` — simplejwt puts it there and the
+ * backend's own `CustomJwtAuthentication` reads exactly that claim — so this
+ * avoids asking for a serializer change to learn something we were already
+ * handed.
+ */
+
+export interface JwtPayload {
+  /**
+   * simplejwt's `USER_ID_CLAIM`. Doubles as the tenant id: in this backend a
+   * clinic *is* a user row (`User.clinic` points at a `superadmin` account),
+   * so a clinic login's own id is the scope its data hangs off.
+   */
+  userId: number
+}
+
+function decodePayloadSegment(segment: string): unknown {
+  const base64 = segment.replace(/-/g, '+').replace(/_/g, '/')
+  // base64url drops the padding that atob insists on.
+  const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')
+  const binary = atob(padded)
+  // atob yields one char per byte; the payload is UTF-8, and a non-ASCII name
+  // in a claim would otherwise come back mojibake.
+  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0))
+  return JSON.parse(new TextDecoder().decode(bytes))
+}
+
+/**
+ * Returns null for anything that is not a readable token, rather than throwing.
+ * A malformed token is a signed-out user, which is a state the app already
+ * handles — not a crash.
+ */
+export function readJwtPayload(token: string): JwtPayload | null {
+  const segments = token.split('.')
+  const payload = segments[1]
+  if (segments.length !== 3 || payload === undefined) return null
+
+  let decoded: unknown
+  try {
+    decoded = decodePayloadSegment(payload)
+  } catch {
+    return null
+  }
+
+  if (typeof decoded !== 'object' || decoded === null) return null
+
+  const userId = (decoded as Record<string, unknown>)['user_id']
+  if (typeof userId !== 'number' || !Number.isInteger(userId)) return null
+
+  return { userId }
+}

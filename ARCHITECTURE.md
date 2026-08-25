@@ -1577,6 +1577,39 @@ veb SPA'ga emas. Amaliy oqibati: `httpClient` da (`§5.2`) refresh oqimi **yo'q*
 401 kelganda `refreshSession()` chaqirilmaydi, to'g'ridan-to'g'ri `hardLogout()` bajariladi va
 `/login` ga yo'naltiriladi. Sessiya muddatini Django uzaytiradi, frontend emas.
 
+**Qayta ko'rib chiqildi (2026-08-25) — `Bearer` token, xotirada.**
+> ⚠️ Bu qaror **hujjat tanlovi bilan emas, mavjud backend bilan** almashtirildi. Backend
+> tahlili ko'rsatdiki, Django `simplejwt` ni ishlatadi: `DEFAULT_AUTHENTICATION_CLASSES` —
+> `CustomJwtAuthentication`, `POST /api/login/` esa tokenlarni **javob tanasida** qaytaradi
+> (`{message, result: {access_token, refresh_token}}`). `httpOnly` cookie yo'q, sessiya
+> autentifikatsiyasi API uchun ishlatilmaydi.
+
+**Yangi qaror.** `Authorization: Bearer <access_token>`, token **faqat RAM'da**
+(`shared/api/tokenStore.ts`).
+
+**P0 saqlanadi.** ADR-007 va `§13.2` o'z kuchida: token brauzer xotirasiga **yozilmaydi**.
+Bu yerda tanlov yo'q edi — `localStorage` variantini foydalanuvchi so'rasa ham bajarilmaydi.
+
+**Narxi, ochiq aytilgan.** Sahifa yangilanishi = tizimdan chiqish. Token xotirada, backend esa
+cookie o'rnatmaydi, ya'ni tiklanadigan manba yo'q. Umumiy registratura kompyuterida bu
+xatti-harakat **to'g'ri**, lekin xodimlar uni nuqson deb hisoblaydi. Yagona to'g'ri yechim —
+backend tokenni `httpOnly` cookie'da bersa; bu backend o'zgarishi va ataylab qilinmadi.
+
+**Refresh oqimi baribir yo'q.** Sabab endi boshqa: backend'da refresh route'i **umuman
+mavjud emas** (`login/`, `me/`, `update/<pk>/` — boshqa hech narsa), shuning uchun
+`refresh_token` yuboriladigan joy yo'q va u o'qilmaydi ham. 401 — terminal holat.
+
+**Chiqish ham lokal.** Logout endpoint'i yo'q, va token bekor qilinmaydi:
+`BLACKLIST_AFTER_ROTATION: True` yozilgan, lekin `token_blacklist` `INSTALLED_APPS` da
+yo'q — `simplejwt` bu chaqiruvni jimgina yutadi. Ya'ni `useLogout` **ekranni** himoya qiladi,
+**hisob ma'lumotini** emas. Berilgan token muddati tugaguncha (sukut bo'yicha **1 kun**)
+amal qiladi. Buni yopish server tomonda.
+
+**`X-Clinic-Id` header'i olib tashlandi** (`§5.2` dan chetlanish). Backend uni hech qayerda
+o'qimaydi — tenant `request.user` dan olinadi. Header'ni qoldirish "u nimadir himoya
+qilyapti" degan noto'g'ri taassurot berardi. Tenant izolyatsiyasi query key'larda qoladi
+(`§6.2`), va bu P0 talabining haqiqiy mazmuni.
+
 ---
 
 ### ADR-004 — TanStack Query, Redux emas
@@ -1611,6 +1644,27 @@ veb SPA'ga emas. Amaliy oqibati: `httpClient` da (`§5.2`) refresh oqimi **yo'q*
 **Qaror.** `drf-spectacular` → OpenAPI → Orval. `api:check` CI qadamlaridan biri.
 
 **Oqibat.** Backend kontrakti o'zgarsa — **build yiqiladi**, production emas. Evaziga: backend jamoasi schema sifatiga mas'ul bo'ladi (`§5.4`).
+
+**Qayta ko'rib chiqildi (2026-08-25) — generatsiya yo'q, qo'lda yozilgan sxemalar.**
+> Backend `drf-yasg` ni ishlatadi (`drf-spectacular` emas). U **Swagger 2.0** chiqaradi,
+> Orval esa OpenAPI 3 kutadi. Bundan ham muhimi: schema route'i `config/urls.py` da
+> **`if settings.DEBUG:`** ichida ro'yxatdan o'tadi, ya'ni to'g'ri sozlangan production'da
+> u umuman mavjud bo'lmaydi. Generatsiyani CI qadami sifatida bog'lab bo'lmaydi.
+
+**Yangi qaror.** Tiplar **qo'lda**, Valibot sxemalari sifatida (`ADR-011`), va ular
+kompilyatsiya vaqtidagi tip emas — **ishga tushirish paytidagi tekshiruv**. `parse` qoladi.
+
+**Nega bu yomonroq emas, balki boshqacha.** Generatsiya qilingan tiplar faqat kompilyatsiya
+vaqtida ishlaydi: serializer jimgina maydonni tashlab ketsa, TypeScript buni bilmaydi va
+xato production'da chiqadi. `v.parse` esa aynan o'sha holatni ushlaydi. Yo'qotilgani —
+avtomatik sinxronizatsiya; qo'lga olingani — haqiqiy javob ustidan nazorat.
+
+**Nima o'zgarganda qaytariladi.** Backend `drf-spectacular` ga o'tsa **va** `/api/schema/`
+ni `DEBUG` dan chiqarsa: `orval.config.ts` qo'shiladi, sxemalardagi maydon tiplari
+generatsiya qilinganlariga almashtiriladi, `parse` **qoladi**.
+
+**`pnpm api:generate` va `api:check`** hozircha ishlamaydi. CI'dagi `api:check` qadami
+`hashFiles('orval.config.ts') != ''` sharti ostida, ya'ni o'zini avtomatik o'chirib turadi.
 
 ---
 
@@ -1731,6 +1785,65 @@ TanStack Router bilan ham ishlaydi.
 
 **Qachon qayta ko'riladi.** Agar Orval Valibot chiqara olmasa va qo'lda ko'prik
 yozish narxi 14 kB dan qimmatga tushsa.
+
+---
+
+### ADR-012 — Ruxsatlar roldan olinadi (frontend'da)
+**Status:** Qabul qilingan (2026-08-25) · **`§9.2` dan ongli chetlanish**
+
+**Kontekst.** `§9.2` frontend'da rol→ruxsat xaritasini **taqiqlaydi**, va sabab to'g'ri:
+agar ruxsatlar serverda bo'lsa, ularni roldan chiqaradigan frontend ertami-kechmi server
+bilan kelishmay qoladi va foydalanuvchiga nima mumkinligi haqida **yolg'on gapiradi**.
+
+**Muammo.** Bu backend'da kelishmaydigan narsaning o'zi yo'q. `/api/me/` faqat `role`
+satrini qaytaradi. Ruxsat modeli yo'q, `ViewSet`larda per-view avtorizatsiya yo'q,
+`DEFAULT_PERMISSION_CLASSES` — yolg'iz `IsAuthenticated`. Server admin bilan doktorni
+**umuman ajratmaydi**.
+
+**Qaror.** `entities/session/model/permissions.ts` da rol→ruxsat jadvali. `Can` va `useCan`
+interfeysi o'zgarmaydi.
+
+**⚠️ Buni to'g'ri tushunish muhim.** `§9.1` "frontend hech narsani himoya qilmaydi" deydi;
+bu yerda holat bir daraja yomonroq: jadval **serverdagi qoidalarning aksi ham emas**, chunki
+server qoidalari yo'q. U interfeysni tartibga soladi — doktorga billing tugmalari
+ko'rsatilmaydi — va shundan nariga o'tmaydi. DevTools bilan besh soniyada aylanib o'tiladi
+va server so'ralganini beradi. Buni yopish backend ishi.
+
+**Nega baribir yoziladi.** Ikki sabab. Birinchisi — UI izchilligi: 10 ta modul `Can` ni
+ishlatishga mo'ljallangan va uni olib tashlash har bir modulda alohida shartlar yozishga
+olib keladi. Ikkinchisi — bu **o'rnini bosuvchi shakl**: `/api/me/` `permissions[]` massivini
+chiqara boshlaganda **faqat shu fayl** o'chiriladi, chaqiruv joylari tegilmaydi.
+
+**Oqibat.** `sessionSchema` da `role` yopiq `picklist` — noma'lum rol **rad etiladi**.
+Bu ataylab: `Roles` modeldagi `TextChoices`, uni o'zgartirish migratsiya talab qiladi, ya'ni
+kutilmaganda paydo bo'lmaydi. Jimgina bo'sh ruxsat to'plami berish esa foydalanuvchiga
+butunlay bo'sh ilova ko'rsatardi.
+
+---
+
+### ADR-013 — ID'lar butun son, UUID emas
+**Status:** Majburan qabul qilingan (2026-08-25) · **`§5.4` dan chetlanish**
+
+**Kontekst.** `§5.4` barcha ID'lar UUID bo'lishini talab qiladi, sababi `§13`: ketma-ket
+butun son enumeratsiyaga ochiq — `/patients/1`, `/patients/2`, va hokazo.
+
+**Haqiqat.** Backend'da bironta UUID yo'q. Barcha modellar Django'ning standart
+`AutoField` ini ishlatadi, barcha route'lar `<int:pk>` shaklida.
+
+**Qaror.** Frontend butun sonni qabul qiladi. `sessionSchema` dagi UUID regex olib
+tashlandi, `Session.userId` va `clinicId` — `number`.
+
+**Bu xavfni yopmaydi, faqat qayd etadi.** Enumeratsiya xavfi joyida qoladi va u
+frontend'da hal qilinmaydi. Backend tahlilida (§A3) ko'rsatilgan IDOR zaifliklari bilan
+birga u ancha jiddiy: `get_user(user_id)`, `get_appointment(appointment_id)` va shu
+naqshdagi metodlar tenant tekshiruvisiz ishlaydi, ketma-ket ID esa ularni tizimli
+ravishda aylanib chiqishni oson qiladi.
+
+**Nima qilinishi kerak (backend).** Avval har bir `get_<obyekt>(id)` ga tenant filtri —
+bu ID turidan qat'i nazar majburiy. UUID migratsiyasi ikkinchi darajali va kattaroq ish.
+
+**Qachon qayta ko'riladi.** Backend UUID'ga o'tsa: sxemalarda tip almashtiriladi va
+`§5.4` tiklanadi. Frontend tomonda bu bir necha qatorlik o'zgarish.
 
 ---
 

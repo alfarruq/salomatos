@@ -1,11 +1,15 @@
 /**
- * DRF returns errors in at least four shapes (§5.3). The UI never sees a raw
- * one — everything arrives as an `ApiError` with the same fields, so a form can
- * always ask "which field?" and a boundary can always ask "is this retryable?".
+ * The backend wraps every error in one envelope (`apps/core/exceptions.py`):
  *
- * ⛔ An ApiError must not carry PHI: it ends up in Sentry (§13.4). The backend
- * is required not to put names or phone numbers in error text, and nothing here
- * copies the response body wholesale.
+ *   { message, message_key, errors, exception_class }
+ *
+ * so the UI never sees a raw one — everything arrives as an `ApiError` with the
+ * same fields, and a form can always ask "which field?" while a boundary can
+ * always ask "is this retryable?".
+ *
+ * ⛔ An ApiError must not carry PHI: it ends up in Sentry (§13.4). Nothing here
+ * copies the response body wholesale, and `exception_class` — an internal
+ * Django class name — is deliberately dropped rather than surfaced.
  */
 
 export type ApiErrorKind =
@@ -28,6 +32,7 @@ interface ApiErrorInit {
   message?: string | undefined
   fieldErrors?: FieldErrors | undefined
   detail?: string | undefined
+  messageKey?: string | undefined
   requestId?: string | undefined
   status?: number | undefined
 }
@@ -35,7 +40,19 @@ interface ApiErrorInit {
 export class ApiError extends Error {
   readonly kind: ApiErrorKind
   readonly fieldErrors: FieldErrors
+  /** The server's own prose. Always English — see `messageKey`. */
   readonly detail: string | undefined
+  /**
+   * The server's stable identifier for what went wrong (`invalid_credentials`,
+   * `object_not_found`, ...).
+   *
+   * Worth carrying separately because the backend renders `message` through
+   * `gettext` with `LANGUAGE_CODE = "en-us"` and never reads `Accept-Language`,
+   * so the prose is English whatever the staff member's interface is set to.
+   * The UI translates this key when it recognises it and falls back to
+   * `detail` when it does not.
+   */
+  readonly messageKey: string | undefined
   /** Correlates with the Django log (§5.4). Safe to show; it is not PHI. */
   readonly requestId: string | undefined
   readonly status: number | undefined
@@ -46,6 +63,7 @@ export class ApiError extends Error {
     this.kind = init.kind
     this.fieldErrors = init.fieldErrors ?? {}
     this.detail = init.detail
+    this.messageKey = init.messageKey
     this.requestId = init.requestId
     this.status = init.status
   }
@@ -75,29 +93,31 @@ export function kindFromStatus(status: number): ApiErrorKind {
   }
 }
 
-/** DRF nests errors arbitrarily deep; this flattens to `a.b[0].c` style keys. */
-function collect(value: unknown, path: string, into: FieldErrors): void {
-  if (typeof value === 'string') {
-    into[path] = [...(into[path] ?? []), value]
+/**
+ * Field errors arrive as DRF *codes*, not prose.
+ *
+ * `APIExceptionFormatter` replaces each `ErrorDetail` with its `.code`, so a
+ * missing name comes back as `{"full_name": "required"}`. That is more useful
+ * than the English sentence it replaced: prefixed with `validation.` it becomes
+ * the same kind of translation key Valibot produces on the client, so §10's
+ * "server errors land on the field" works in all four locales through one code
+ * path.
+ */
+function toValidationKey(code: string): string {
+  return `validation.${code}`
+}
+
+function collectFieldErrors(source: unknown, path: string, into: FieldErrors): void {
+  if (typeof source === 'string') {
+    into[path] = [...(into[path] ?? []), toValidationKey(source)]
     return
   }
 
-  if (Array.isArray(value)) {
-    // A list of plain strings is the common case: { "email": ["Required."] }
-    if (value.every((entry) => typeof entry === 'string')) {
-      into[path] = [...(into[path] ?? []), ...(value as string[])]
-      return
-    }
-    // A list of objects means a nested serializer: { "items": [{ "qty": [...] }] }
-    value.forEach((entry, index) => {
-      collect(entry, `${path}[${index}]`, into)
-    })
-    return
-  }
-
-  if (typeof value === 'object' && value !== null) {
-    for (const [key, child] of Object.entries(value)) {
-      collect(child, path ? `${path}.${key}` : key, into)
+  // A nested serializer keeps its dict shape, so `items.quantity` stays
+  // addressable by react-hook-form's dotted paths.
+  if (typeof source === 'object' && source !== null && !Array.isArray(source)) {
+    for (const [key, value] of Object.entries(source)) {
+      collectFieldErrors(value, path === '' ? key : `${path}.${key}`, into)
     }
   }
 }
@@ -109,41 +129,42 @@ export interface DrfErrorSource {
 }
 
 /**
- * Turns any DRF error body into an ApiError.
+ * Turns the backend's error envelope into an ApiError.
  *
- * Handles the four documented shapes:
- *   { "field": ["msg"] }          → fieldErrors.field
- *   { "detail": "msg" }           → detail
- *   { "non_field_errors": [...] } → fieldErrors.non_field_errors
- *   nested serializers            → fieldErrors["items[0].qty"]
+ * Survives the shapes that are not the envelope, because two exist:
+ * `drf_exception_handler` answers a 404 with an empty body, and with
+ * `DEBUG = True` an unhandled 500 returns Django's HTML traceback page rather
+ * than JSON at all.
  */
 export function normalizeDrfError({ status, body, requestId }: DrfErrorSource): ApiError {
   const kind = kindFromStatus(status)
   const fieldErrors: FieldErrors = {}
   let detail: string | undefined
+  let messageKey: string | undefined
 
+  /*
+   * Only an object is read. A string body here is Django's HTML traceback
+   * (DEBUG is on in production, see the backend review) and §13.4 keeps that
+   * out of the interface and out of Sentry, so it is dropped rather than
+   * surfaced as `detail`.
+   */
   if (typeof body === 'object' && body !== null && !Array.isArray(body)) {
-    const record = body as Record<string, unknown>
+    const envelope = body as Record<string, unknown>
 
-    for (const [key, value] of Object.entries(record)) {
-      // `detail` is DRF's generic message and is not a field.
-      if (key === 'detail' && typeof value === 'string') {
-        detail = value
-        continue
-      }
-      collect(value, key, fieldErrors)
-    }
-  } else if (typeof body === 'string' && body.length > 0) {
-    detail = body
+    if (typeof envelope.message === 'string') detail = envelope.message
+    if (typeof envelope.message_key === 'string') messageKey = envelope.message_key
+
+    collectFieldErrors(envelope.errors, '', fieldErrors)
   }
 
   return new ApiError({
     kind,
     status,
     detail,
+    messageKey,
     fieldErrors,
     requestId,
-    message: detail ?? kind,
+    message: messageKey ?? kind,
   })
 }
 

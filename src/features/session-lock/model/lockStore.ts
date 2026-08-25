@@ -9,18 +9,18 @@ interface LockState {
    * ⛔ Identity only — never anything about a patient. This is the one thing
    * that survives a lock, and it is on screen in a public room.
    */
-  lockedEmail: string | null
+  lockedUsername: string | null
   lockedName: string | null
-  lock: (user: { email: string; name: string }) => void
+  lock: (user: { username: string; name: string }) => void
   unlock: () => void
 }
 
 export const useLockStore = create<LockState>((set) => ({
   isLocked: false,
-  lockedEmail: null,
+  lockedUsername: null,
   lockedName: null,
 
-  lock: ({ email, name }) => set({ isLocked: true, lockedEmail: email, lockedName: name }),
+  lock: ({ username, name }) => set({ isLocked: true, lockedUsername: username, lockedName: name }),
 
-  unlock: () => set({ isLocked: false, lockedEmail: null, lockedName: null }),
+  unlock: () => set({ isLocked: false, lockedUsername: null, lockedName: null }),
 }))

@@ -2,7 +2,6 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { createMemoryHistory, createRouter, RouterProvider } from '@tanstack/react-router'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { HttpResponse, http } from 'msw'
 import { Suspense } from 'react'
 import { I18nextProvider } from 'react-i18next'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -10,8 +9,9 @@ import { useSessionStore } from '@/entities/session'
 import { useLockStore } from '@/features/session-lock'
 import { routeTree } from '@/routeTree.gen'
 import { configureApi, resetApiContext } from '@/shared/api/httpContext'
-import { setMockSession } from '@/shared/api/mocks/handlers'
+import { accessTokenFor, MOCK_USERS } from '@/shared/api/mocks/fixtures'
 import { server } from '@/shared/api/mocks/server'
+import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
 import { createI18n } from '@/shared/i18n'
 import { IDLE_TIMEOUT_MS, IDLE_WARNING_MS } from '@/shared/lib/useIdleTimer'
 import { Toaster } from '@/shared/ui'
@@ -28,10 +28,13 @@ import { createQueryClient } from './providers/queryClient'
 function renderApp(initialPath = '/') {
   const queryClient = createQueryClient()
 
-  // Mirrors AppProviders: the store only. Clearing the query cache here would
-  // cancel the request that reported the 401.
+  // Mirrors AppProviders: token and store only. Clearing the query cache here
+  // would cancel the request that reported the 401.
   configureApi({
-    onUnauthorized: () => useSessionStore.getState().clear(),
+    onUnauthorized: () => {
+      clearAccessToken()
+      useSessionStore.getState().clear()
+    },
   })
 
   const router = createRouter({
@@ -61,11 +64,23 @@ function renderApp(initialPath = '/') {
   return { queryClient, router }
 }
 
+/**
+ * Stands in for a completed sign-in: the token in memory and the username
+ * beside it, which is exactly the pair `useLogin` leaves behind.
+ *
+ * Set directly rather than typed into the form because these tests are about
+ * what happens *after* authentication; the form itself is covered above.
+ */
+function signedIn(user: keyof typeof MOCK_USERS = 'clinic') {
+  setAccessToken(accessTokenFor(user))
+  useSessionStore.getState().setUsername(MOCK_USERS[user].username)
+}
+
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 afterEach(() => {
   server.resetHandlers()
   resetApiContext()
-  setMockSession(null)
+  clearAccessToken()
   useSessionStore.getState().clear()
   useLockStore.getState().unlock()
 })
@@ -82,7 +97,7 @@ describe('authentication flow', () => {
   it('signs in and lands on the dashboard', async () => {
     renderApp('/login')
 
-    await userEvent.type(await screen.findByLabelText('Email'), 'admin@example.test')
+    await userEvent.type(await screen.findByLabelText('Foydalanuvchi nomi'), 'chilonzor')
     await userEvent.type(screen.getByLabelText('Parol'), 'salomat')
     await userEvent.click(screen.getByRole('button', { name: 'Kirish' }))
 
@@ -92,50 +107,59 @@ describe('authentication flow', () => {
   it('puts the server`s rejection on the form rather than in a toast', async () => {
     renderApp('/login')
 
-    await userEvent.type(await screen.findByLabelText('Email'), 'admin@example.test')
+    await userEvent.type(await screen.findByLabelText('Foydalanuvchi nomi'), 'chilonzor')
     await userEvent.type(screen.getByLabelText('Parol'), 'wrong')
     await userEvent.click(screen.getByRole('button', { name: 'Kirish' }))
 
-    // §10: the message DRF returned, shown where the user is looking.
-    expect(await screen.findByRole('alert')).toHaveTextContent('Email yoki parol xato.')
+    /*
+     * §10, and the reason `message_key` is carried on ApiError: the server
+     * says "Invalid username or password" in English whatever locale the staff
+     * member is using, so the key is translated and the prose is only a
+     * fallback.
+     */
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      "Foydalanuvchi nomi yoki parol noto'g'ri",
+    )
   })
 
   it('does not show the login form to someone already signed in', async () => {
-    setMockSession('admin')
+    signedIn()
     renderApp('/login')
 
     expect(await screen.findByRole('heading', { name: 'Boshqaruv paneli' })).toBeInTheDocument()
   })
 
-  it('sends a user with no clinic to onboarding instead of an empty dashboard', async () => {
-    server.use(
-      http.get('/api/me/', () =>
-        HttpResponse.json({
-          id: 'a1b2c3d4-0000-4000-8000-000000000001',
-          first_name: 'Dilnoza',
-          last_name: 'Rahimova',
-          email: 'admin@example.test',
-          role: 'ClinicAdmin',
-          permissions: [],
-          // Signed in, but belongs to no clinic yet.
-          clinics: [],
-          active_clinic_id: null,
-        }),
-      ),
-    )
-
+  it('turns a patient away and points them at the bot', async () => {
+    /*
+     * 🔴 This application is clinic staff software. Patients are rows in the
+     * same `User` table and can hold a valid token, so "they cannot log in" is
+     * not something the backend enforces — the guard is what does.
+     */
+    signedIn('patient')
     renderApp('/dashboard')
 
-    expect(
-      await screen.findByRole('heading', { name: 'Sizga hali klinika biriktirilmagan' }),
-    ).toBeInTheDocument()
+    expect(await screen.findByText('Bu klinika xodimlari uchun panel')).toBeInTheDocument()
+    // Back at the form, not inside the shell.
+    expect(screen.getByLabelText('Parol')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Boshqaruv paneli' })).not.toBeInTheDocument()
+  })
+
+  it('does not leave a rejected patient signed in', async () => {
+    signedIn('patient')
+    renderApp('/dashboard')
+
+    await screen.findByText('Bu klinika xodimlari uchun panel')
+
+    // Otherwise /login would see a cached session and bounce them back into
+    // the guard, which would bounce them out again.
+    expect(useSessionStore.getState().session).toBeNull()
   })
 })
 
 describe('logout', () => {
-  beforeEach(() => setMockSession('admin'))
+  beforeEach(() => signedIn())
 
-  it('clears the cache so the next member of staff sees nothing', async () => {
+  it('clears the cache and the token so the next member of staff sees nothing', async () => {
     const { queryClient } = renderApp('/dashboard')
 
     await screen.findByRole('heading', { name: 'Boshqaruv paneli' })
@@ -152,34 +176,6 @@ describe('logout', () => {
   })
 })
 
-describe('clinic switching', () => {
-  beforeEach(() => setMockSession('admin'))
-
-  it('empties the cache so no data from the previous clinic can surface', async () => {
-    const { queryClient } = renderApp('/dashboard')
-
-    await screen.findByRole('heading', { name: 'Boshqaruv paneli' })
-
-    // Something cached that belongs to the clinic being left.
-    queryClient.setQueryData(
-      ['clinics', '4f7b2e91-3a5c-4d18-9f60-1c2a8b7d4e33', 'patients'],
-      ['Vali Aliyev'],
-    )
-
-    await userEvent.click(screen.getByRole('button', { name: 'Salomat Dental — Yunusobod' }))
-
-    /*
-     * 🔴 The point of §6.2. Showing one clinic's patients to another clinic's
-     * staff is a data leak with legal consequences, not a display bug.
-     */
-    await waitFor(() => {
-      expect(
-        queryClient.getQueryData(['clinics', '4f7b2e91-3a5c-4d18-9f60-1c2a8b7d4e33', 'patients']),
-      ).toBeUndefined()
-    })
-  })
-})
-
 describe('idle lock', () => {
   /*
    * Fake timers must be in place before the component mounts, or the idle
@@ -191,7 +187,7 @@ describe('idle lock', () => {
 
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
-    setMockSession('admin')
+    signedIn()
   })
   afterEach(() => vi.useRealTimers())
 
@@ -207,7 +203,8 @@ describe('idle lock', () => {
     const { queryClient } = renderApp('/dashboard')
     await screen.findByRole('heading', { name: 'Boshqaruv paneli' })
 
-    const patientsKey = ['clinics', '4f7b2e91-3a5c-4d18-9f60-1c2a8b7d4e33', 'patients']
+    // Keyed the way §6.2 requires, with the tenant id the session resolved to.
+    const patientsKey = ['clinics', MOCK_USERS.clinic.id, 'patients']
     queryClient.setQueryData(patientsKey, ['Vali Aliyev'])
 
     await act(async () => {

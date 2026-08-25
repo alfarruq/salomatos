@@ -20,7 +20,7 @@ export interface LockScreenProps {
  */
 export function LockScreen({ onSignOut }: LockScreenProps) {
   const { t } = useTranslation(['auth', 'common'])
-  const email = useLockStore((state) => state.lockedEmail)
+  const username = useLockStore((state) => state.lockedUsername)
   const name = useLockStore((state) => state.lockedName)
   const { mutate: unlock, isPending } = useUnlock()
 
@@ -36,11 +36,11 @@ export function LockScreen({ onSignOut }: LockScreenProps) {
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    if (email === null) return
+    if (username === null) return
 
     setError(null)
     unlock(
-      { email, password },
+      { username, password },
       {
         onError: (cause) => {
           setPassword('')
@@ -73,7 +73,7 @@ export function LockScreen({ onSignOut }: LockScreenProps) {
           <div className="flex flex-col gap-1">
             <h1 className="text-title2 text-text">{t('auth:lock.title')}</h1>
             <p className="text-callout text-text-secondary">
-              {t('auth:lock.subtitle', { name: name ?? email })}
+              {t('auth:lock.subtitle', { name: name ?? username })}
             </p>
           </div>
         </div>

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import * as v from 'valibot'
 import { sessionQueries } from '@/entities/session'
 import { LoginForm } from '@/features/auth-login'
-import { Card } from '@/shared/ui'
+import { Alert, Card } from '@/shared/ui'
 
 const searchSchema = v.object({
   /**
@@ -16,6 +16,14 @@ const searchSchema = v.object({
    * read as protocol-relative and would resolve off-site.
    */
   redirect: v.optional(v.pipe(v.string(), v.regex(/^\/(?!\/)/, 'must be an app-relative path'))),
+  /**
+   * Why the guard sent them back, when it did.
+   *
+   * A closed set rather than a message: anything the URL carries is
+   * attacker-controlled, and rendering arbitrary text from a search parameter
+   * is how a login page ends up displaying someone else's instructions.
+   */
+  denied: v.optional(v.picklist(['patient'])),
 })
 
 export const Route = createFileRoute('/login')({
@@ -52,6 +60,19 @@ function LoginPage() {
           <h1 className="text-title1 text-text">{t('login.title')}</h1>
           <p className="text-callout text-text-secondary">{t('login.subtitle')}</p>
         </div>
+
+        {/*
+         * Informational, not an error: the credentials were correct. This
+         * application is for clinic staff, and a patient's own records live
+         * in the Telegram bot.
+         */}
+        {search.denied === 'patient' ? (
+          <div className="mb-6">
+            <Alert title={t('login.patientDenied')} tone="info">
+              {t('login.patientDeniedBody')}
+            </Alert>
+          </div>
+        ) : null}
 
         <LoginForm
           onSuccess={() => {

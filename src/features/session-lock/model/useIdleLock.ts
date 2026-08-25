@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Session } from '@/entities/session'
-import { fullName } from '@/entities/session'
+import { useSessionStore } from '@/entities/session'
 import { IDLE_WARNING_MS, useIdleTimer } from '@/shared/lib/useIdleTimer'
 import { toast } from '@/shared/ui'
 import { useLockStore } from './lockStore'
@@ -29,10 +29,14 @@ export function useIdleLock(session: Session | undefined): void {
 
   const handleIdle = useCallback(() => {
     const current = sessionRef.current
-    if (current === undefined) return
+    // The username is what the login endpoint takes, and it is not on the
+    // session — see the session store. Without it there is nothing to unlock
+    // with, so locking would strand the user at a form they cannot submit.
+    const username = useSessionStore.getState().username
+    if (current === undefined || username === null) return
 
     // Identity first: clearing the cache takes the session with it.
-    useLockStore.getState().lock({ email: current.email, name: fullName(current) })
+    useLockStore.getState().lock({ username, name: current.fullName })
     queryClient.clear()
     toast.dismiss(WARNING_TOAST_ID)
   }, [queryClient])

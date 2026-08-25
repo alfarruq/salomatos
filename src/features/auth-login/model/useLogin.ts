@@ -1,15 +1,48 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { parseSession, type Session, sessionKeys } from '@/entities/session'
+import * as v from 'valibot'
+import { fetchSession, type Session, sessionKeys, useSessionStore } from '@/entities/session'
 import { httpClient } from '@/shared/api/httpClient'
+import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
 import type { LoginInput } from './schema'
 
+/**
+ * `UserService.login` wraps its payload in the project's default response
+ * serializer, so the tokens arrive one level down under `result`.
+ *
+ * ⛔ `refresh_token` is deliberately not read. The backend exposes no route to
+ * exchange it, so keeping it would mean holding a credential that can do
+ * nothing but leak.
+ */
+const loginResponseSchema = v.object({
+  result: v.object({
+    access_token: v.pipe(v.string(), v.minLength(1)),
+  }),
+})
+
 async function login(input: LoginInput): Promise<Session> {
-  const raw = await httpClient<unknown>('auth/login/', {
+  const raw = await httpClient<unknown>('login/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: input.email, password: input.password }),
+    body: JSON.stringify({ username: input.username, password: input.password }),
   })
-  return parseSession(raw)
+
+  const { result } = v.parse(loginResponseSchema, raw)
+  setAccessToken(result.access_token)
+
+  try {
+    /*
+     * A second request, because the login response contains only tokens — no
+     * user at all. `fetchSession` is also what reads the user id out of the
+     * token, so going through it keeps one definition of what a session is.
+     */
+    return await fetchSession()
+  } catch (error) {
+    // Signed in as far as the server is concerned, but the app has no usable
+    // session. Holding the token would leave the UI in a state where it looks
+    // logged out yet sends authenticated requests.
+    clearAccessToken()
+    throw error
+  }
 }
 
 export function useLogin() {
@@ -20,13 +53,11 @@ export function useLogin() {
     // retry is already false globally (§6.4); repeating a failed sign-in would
     // walk the user into a rate limit.
 
-    onSuccess: (session) => {
-      /*
-       * Seeds the cache instead of invalidating it: the login response is the
-       * same payload `/api/me/` returns, so refetching it immediately would be
-       * a second round trip for data already in hand.
-       */
+    onSuccess: (session, input) => {
       queryClient.setQueryData(sessionKeys.me(), session)
+      // The lock screen re-authenticates and the server wants a username;
+      // this is the only moment one is available. See the store's comment.
+      useSessionStore.getState().setUsername(input.username)
     },
   })
 }

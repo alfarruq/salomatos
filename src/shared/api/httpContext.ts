@@ -1,26 +1,26 @@
 /**
- * The two things the HTTP client needs from the rest of the app, injected
+ * The one thing the HTTP client needs from the rest of the app, injected
  * rather than imported.
  *
- * §5.2 sketches `httpClient` reading `useSessionStore` directly, but that store
- * lives in `entities/session` and `shared` may not import upwards (§3.3) — the
- * boundaries linter rejects it. Inverting the dependency keeps the rule intact
- * and, usefully, makes the client trivial to drive from a test.
+ * The 401 handler has to clear state that lives in `entities/session`, and
+ * `shared` may not import upwards (§3.3) — the boundaries linter rejects it.
+ * Inverting the dependency keeps the rule intact and, usefully, makes the
+ * client trivial to drive from a test.
+ *
+ * The access token is *not* here: it lives in `tokenStore`, one layer over, so
+ * the request layer can read it without a round trip through the application.
  */
 
 interface ApiContext {
-  /** Tenant header for every request. Backend re-checks it — this is not security. */
-  getClinicId: () => string | null
   /**
-   * Called once when the server says the session is gone. Per ADR-003 the web
-   * client uses Django session auth and has no refresh flow, so this is a hard
-   * logout: clear the cache, send the user to /login.
+   * Called once when the server says the session is gone. The backend has no
+   * token refresh route (ADR-003, revised), so this is a hard logout: drop the
+   * token, send the user to /login.
    */
   onUnauthorized: () => void
 }
 
 const noop: ApiContext = {
-  getClinicId: () => null,
   onUnauthorized: () => {},
 }
 
