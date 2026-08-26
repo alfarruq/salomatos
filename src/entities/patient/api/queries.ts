@@ -51,7 +51,7 @@ export async function fetchPatients(
   signal?: AbortSignal,
 ): Promise<Page<PatientListItem>> {
   const raw = await httpClient<unknown>(
-    `patients/${toQueryString(filters)}`,
+    `v1/clinic/patients/${toQueryString(filters)}`,
     signal === undefined ? {} : { signal },
   )
 
@@ -61,7 +61,7 @@ export async function fetchPatients(
 
 export async function fetchPatient(patientId: PatientId, signal?: AbortSignal): Promise<Patient> {
   const raw = await httpClient<unknown>(
-    `patients/${patientId}/`,
+    `v1/clinic/patients/${patientId}/`,
     signal === undefined ? {} : { signal },
   )
   return toPatient(v.parse(patientDetailSchema, raw))

@@ -53,7 +53,7 @@ export const handlers = [
    * return: no id, no clinic, no permissions. That absence is the reason the
    * tenant id is read from the token instead.
    */
-  http.get('/api/me/', ({ request }) => {
+  http.get('/api/v1/authentication/me/', ({ request }) => {
     const user = authenticate(request)
     if (user === null) return unauthorized()
 
@@ -61,7 +61,7 @@ export const handlers = [
     return HttpResponse.json(serialized)
   }),
 
-  http.post('/api/login/', async ({ request }) => {
+  http.post('/api/v1/authentication/login/', async ({ request }) => {
     const body = (await request.json().catch(() => ({}))) as {
       username?: string
       password?: string
@@ -100,7 +100,7 @@ export const handlers = [
    * here rather than simplified, so a test that checks searching is checking
    * the thing the server actually does.
    */
-  http.get('/api/patients/', ({ request }) => {
+  http.get('/api/v1/clinic/patients/', ({ request }) => {
     if (authenticate(request) === null) return unauthorized()
 
     const url = new URL(request.url)
@@ -121,8 +121,8 @@ export const handlers = [
 
     return HttpResponse.json({
       count: matched.length,
-      next: start + PAGE_SIZE < matched.length ? `/api/patients/?page=${page + 1}` : null,
-      previous: page > 1 ? `/api/patients/?page=${page - 1}` : null,
+      next: start + PAGE_SIZE < matched.length ? `/api/v1/clinic/patients/?page=${page + 1}` : null,
+      previous: page > 1 ? `/api/v1/clinic/patients/?page=${page - 1}` : null,
       results,
     })
   }),
@@ -134,7 +134,7 @@ export const handlers = [
    * a receptionist actually hits: registering someone who is already on file.
    * DRF reports it as the code `unique`, not as a sentence.
    */
-  http.post('/api/patients/', async ({ request }) => {
+  http.post('/api/v1/clinic/patients/', async ({ request }) => {
     if (authenticate(request) === null) return unauthorized()
 
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
@@ -176,7 +176,7 @@ export const handlers = [
    * writing client code against a defect instead of a contract; the mismatch is
    * documented on `useUpdatePatient` instead.
    */
-  http.patch('/api/patients/:patientId/', async ({ request, params }) => {
+  http.patch('/api/v1/clinic/patients/:patientId/', async ({ request, params }) => {
     if (authenticate(request) === null) return unauthorized()
 
     const id = Number(params['patientId'])
@@ -187,7 +187,7 @@ export const handlers = [
     return HttpResponse.json({ ...existing, ...body })
   }),
 
-  http.get('/api/patients/:patientId/', ({ request, params }) => {
+  http.get('/api/v1/clinic/patients/:patientId/', ({ request, params }) => {
     if (authenticate(request) === null) return unauthorized()
 
     const detail = MOCK_PATIENT_DETAILS[Number(params['patientId'])]

@@ -70,7 +70,7 @@ describe('fetchSession', () => {
 
   it('fails loudly when the contract is broken', async () => {
     server.use(
-      http.get('/api/me/', () => {
+      http.get('/api/v1/authentication/me/', () => {
         // `role` dropped by a serializer change. Rendering an application with
         // every control hidden would look like "this user may do nothing" — an
         // error is the honest outcome.
@@ -83,7 +83,11 @@ describe('fetchSession', () => {
   })
 
   it('rejects a role the permission table does not cover', async () => {
-    server.use(http.get('/api/me/', () => HttpResponse.json({ ...ME_RESPONSE, role: 'nurse' })))
+    server.use(
+      http.get('/api/v1/authentication/me/', () =>
+        HttpResponse.json({ ...ME_RESPONSE, role: 'nurse' }),
+      ),
+    )
 
     await expect(fetchSession()).rejects.toThrow()
   })
@@ -93,7 +97,7 @@ describe('when there is no usable token', () => {
   it('reports unauthorized without asking the server', async () => {
     let calls = 0
     server.use(
-      http.get('/api/me/', () => {
+      http.get('/api/v1/authentication/me/', () => {
         calls += 1
         return HttpResponse.json(ME_RESPONSE)
       }),
@@ -112,7 +116,7 @@ describe('when the server rejects the token', () => {
     const onUnauthorized = vi.fn()
     configureApi({ onUnauthorized })
     server.use(
-      http.get('/api/me/', () =>
+      http.get('/api/v1/authentication/me/', () =>
         HttpResponse.json(
           {
             message: 'Given token not valid for any token type',
@@ -132,7 +136,7 @@ describe('when the server rejects the token', () => {
   it('does not retry a 401', async () => {
     let calls = 0
     server.use(
-      http.get('/api/me/', () => {
+      http.get('/api/v1/authentication/me/', () => {
         calls += 1
         return HttpResponse.json({ message_key: 'unauthorized' }, { status: 401 })
       }),
@@ -149,7 +153,7 @@ describe('the bearer header', () => {
   it('carries the token on every request', async () => {
     const seen: (string | null)[] = []
     server.use(
-      http.get('/api/me/', ({ request }) => {
+      http.get('/api/v1/authentication/me/', ({ request }) => {
         seen.push(request.headers.get('Authorization'))
         return HttpResponse.json(ME_RESPONSE)
       }),

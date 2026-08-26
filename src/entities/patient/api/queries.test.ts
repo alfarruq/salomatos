@@ -65,7 +65,7 @@ describe('fetchPatients', () => {
   it('omits parameters that are not set', async () => {
     let requested: string | undefined
     server.events.on('request:start', ({ request }) => {
-      if (request.url.includes('/api/patients/')) requested = request.url
+      if (request.url.includes('/api/v1/clinic/patients/')) requested = request.url
     })
 
     await fetchPatients(defaultPatientFilters)

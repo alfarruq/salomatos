@@ -36,12 +36,27 @@ export default defineConfig({
   },
 
   server: {
-    // §1.2 — production is same-origin behind nginx. The dev proxy reproduces
-    // that shape so no CORS or absolute-URL handling ever enters the code.
+    /*
+     * §1.2 — production is same-origin behind nginx. The dev proxy reproduces
+     * that shape so no CORS or absolute-URL handling ever enters the code.
+     *
+     * The target is configurable because there are two of them: a backend
+     * running locally, and the deployed one. Pointing at the deployed backend
+     * is how the client's reading of the contract gets checked against the
+     * server that actually answers —
+     *
+     *   API_PROXY_TARGET=https://salomatos.uz pnpm dev
+     *
+     * ⚠️ That is production data. Use it to check shapes, not to browse
+     * records, and never with a screen recorder running (§13.4).
+     */
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
-        changeOrigin: false,
+        target: process.env['API_PROXY_TARGET'] ?? 'http://localhost:8000',
+        // Required when the target is a real host: Django checks Host against
+        // ALLOWED_HOSTS, and forwarding localhost:5173 would be rejected.
+        changeOrigin: process.env['API_PROXY_TARGET'] !== undefined,
+        secure: true,
       },
     },
   },

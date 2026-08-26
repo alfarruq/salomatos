@@ -11,7 +11,7 @@ import {
 import { httpClient } from '@/shared/api/httpClient'
 
 async function createPatient(input: PatientFormInput): Promise<PatientListItem> {
-  const raw = await httpClient<unknown>('patients/', {
+  const raw = await httpClient<unknown>('v1/clinic/patients/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(toPatientPayload(input)),

@@ -34,7 +34,10 @@ export async function fetchSession(signal?: AbortSignal): Promise<Session> {
     throw new ApiError({ kind: 'unauthorized', message: 'no_access_token' })
   }
 
-  const raw = await httpClient<unknown>('me/', signal === undefined ? {} : { signal })
+  const raw = await httpClient<unknown>(
+    'v1/authentication/me/',
+    signal === undefined ? {} : { signal },
+  )
   // Parsed, not cast: a serializer that drops `role` should fail loudly here
   // rather than render an application with every control hidden.
   return parseSession(raw, payload.userId)

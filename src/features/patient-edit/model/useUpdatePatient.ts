@@ -32,7 +32,7 @@ async function updatePatient({
   patientId: PatientId
   input: PatientFormInput
 }): Promise<PatientListItem> {
-  const raw = await httpClient<unknown>(`patients/${patientId}/`, {
+  const raw = await httpClient<unknown>(`v1/clinic/patients/${patientId}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(toPatientPayload(input)),
