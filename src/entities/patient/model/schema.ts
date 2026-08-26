@@ -13,7 +13,28 @@ import type { AppointmentSlot, Patient, PatientListItem, PatientTreatment } from
 
 /** Absent or null both mean "nothing here" — see `sessionSchema` for why. */
 const optionalString = v.optional(v.nullable(v.string()), null)
-const optionalNumber = v.optional(v.nullable(v.number()), null)
+
+/**
+ * A number the server may send as a string.
+ *
+ * Every figure on a patient row — `remaining`, `total_remaining`, `age`,
+ * `visit_number` — is a `SerializerMethodField`, and drf-yasg types all of
+ * them `string` because it cannot see what the method returns. The Python
+ * returns integers. One of the two is wrong and the schema cannot say which,
+ * so the client accepts both rather than betting the patient table on the
+ * guess: getting it wrong means the list does not render at all.
+ *
+ * Anything that is not a finite number after coercion becomes null, which the
+ * table renders as a dash. A blank cell is a better failure than a blank page.
+ */
+const optionalNumber = v.pipe(
+  v.optional(v.nullable(v.union([v.number(), v.string()])), null),
+  v.transform((value) => {
+    if (value === null || value === '') return null
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : null
+  }),
+)
 
 /**
  * Treatment state.
@@ -45,7 +66,7 @@ export const patientListItemSchema = v.object({
   treatment_type: optionalString,
   appointment_date: optionalString,
   remaining: optionalNumber,
-  total_remaining: v.optional(v.number(), 0),
+  total_remaining: optionalNumber,
 })
 
 export const patientPageSchema = pageSchema(patientListItemSchema)
@@ -78,11 +99,11 @@ export const patientDetailSchema = v.object({
 
   // Money, and the counters beside it. Zero is the server's own default when
   // a patient has no treatment on record.
-  total_treatment_cost: v.optional(v.number(), 0),
-  total_paid: v.optional(v.number(), 0),
-  remaining: v.optional(v.number(), 0),
-  total_remaining: v.optional(v.number(), 0),
-  visit_number: v.optional(v.number(), 0),
+  total_treatment_cost: optionalNumber,
+  total_paid: optionalNumber,
+  remaining: optionalNumber,
+  total_remaining: optionalNumber,
+  visit_number: optionalNumber,
 })
 
 export type PatientListItemResponse = v.InferOutput<typeof patientListItemSchema>
@@ -139,7 +160,7 @@ export function toPatientListItem(response: PatientListItemResponse): PatientLis
     treatmentType: response.treatment_type,
     lastAppointment: parseFormattedAppointment(response.appointment_date),
     remaining: response.remaining,
-    totalRemaining: response.total_remaining,
+    totalRemaining: response.total_remaining ?? 0,
   }
 }
 
@@ -160,10 +181,12 @@ export function toPatient(response: PatientDetailResponse): Patient {
     age: response.age,
     status: response.status,
     treatments: response.treatment_type.map(toTreatment),
-    totalTreatmentCost: response.total_treatment_cost,
-    totalPaid: response.total_paid,
-    remaining: response.remaining,
-    totalRemaining: response.total_remaining,
-    visitNumber: response.visit_number,
+    // Zero, not null: these are counters and the server's own default is 0
+    // when a patient has no treatment on record.
+    totalTreatmentCost: response.total_treatment_cost ?? 0,
+    totalPaid: response.total_paid ?? 0,
+    remaining: response.remaining ?? 0,
+    totalRemaining: response.total_remaining ?? 0,
+    visitNumber: response.visit_number ?? 0,
   }
 }

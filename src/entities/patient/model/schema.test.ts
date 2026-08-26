@@ -77,6 +77,33 @@ describe('toPatientListItem', () => {
     expect(item.totalRemaining).toBe(0)
   })
 
+  it('takes a figure whichever way the server types it', () => {
+    /*
+     * drf-yasg types every SerializerMethodField `string`; the Python returns
+     * integers. The schema cannot say which is right, so the row survives
+     * either — betting on one and losing means the table does not render.
+     */
+    const asNumber = toPatientListItem(
+      v.parse(patientListItemSchema, { id: 1, full_name: 'A', total_remaining: 1200000 }),
+    )
+    const asString = toPatientListItem(
+      v.parse(patientListItemSchema, { id: 1, full_name: 'A', total_remaining: '1200000' }),
+    )
+
+    expect(asNumber.totalRemaining).toBe(1_200_000)
+    expect(asString.totalRemaining).toBe(1_200_000)
+  })
+
+  it('shows a dash rather than NaN for a figure it cannot read', () => {
+    const item = toPatientListItem(
+      v.parse(patientListItemSchema, { id: 1, full_name: 'A', remaining: 'not a number' }),
+    )
+
+    // null renders as "—"; NaN would reach the currency formatter and print
+    // something that looks like a real amount.
+    expect(item.remaining).toBeNull()
+  })
+
   it('ignores a treatment status it does not recognise', () => {
     // A third TextChoices member is a server migration, not a reason to refuse
     // to draw the table.
