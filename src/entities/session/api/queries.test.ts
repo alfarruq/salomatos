@@ -68,6 +68,21 @@ describe('fetchSession', () => {
     expect(session.permissions.has('patient:archive')).toBe(false)
   })
 
+  it('survives a serializer that stopped sending an optional field', async () => {
+    server.use(
+      http.get('/api/v1/authentication/me/', () =>
+        // Only the two fields the interface actually needs.
+        HttpResponse.json({ full_name: 'Dilnoza Rahimova', role: 'superadmin' }),
+      ),
+    )
+
+    const session = await fetchSession()
+
+    expect(session.fullName).toBe('Dilnoza Rahimova')
+    expect(session.phoneNumber).toBeNull()
+    expect(session.email).toBeNull()
+  })
+
   it('fails loudly when the contract is broken', async () => {
     server.use(
       http.get('/api/v1/authentication/me/', () => {

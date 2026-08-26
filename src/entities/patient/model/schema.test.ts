@@ -1,6 +1,7 @@
+import * as v from 'valibot'
 import { describe, expect, it } from 'vitest'
 import { MOCK_PATIENTS } from '@/shared/api/mocks/fixtures'
-import { parseFormattedAppointment, toPatientListItem } from './schema'
+import { parseFormattedAppointment, patientListItemSchema, toPatientListItem } from './schema'
 
 describe('parseFormattedAppointment', () => {
   it('recovers the parts the serializer already formatted away', () => {
@@ -58,6 +59,36 @@ describe('toPatientListItem', () => {
     expect(item.remaining).toBeNull()
     // Not null — the aggregate defaults to 0 on the server.
     expect(item.totalRemaining).toBe(0)
+  })
+
+  it('renders a row from the two fields it cannot do without', () => {
+    /*
+     * Strictness is spent on `id` and `full_name`; everything else may be
+     * absent. A serializer that stops sending `office` should not empty a
+     * clinic's patient table.
+     */
+    const item = toPatientListItem(
+      v.parse(patientListItemSchema, { id: 7, full_name: 'Nodira Karimova' }),
+    )
+
+    expect(item.id).toBe(7)
+    expect(item.fullName).toBe('Nodira Karimova')
+    expect(item.phoneNumber).toBeNull()
+    expect(item.totalRemaining).toBe(0)
+  })
+
+  it('ignores a treatment status it does not recognise', () => {
+    // A third TextChoices member is a server migration, not a reason to refuse
+    // to draw the table.
+    const item = toPatientListItem(
+      v.parse(patientListItemSchema, {
+        id: 7,
+        full_name: 'Nodira Karimova',
+        status: 'on_hold',
+      }),
+    )
+
+    expect(item.status).toBeNull()
   })
 
   it('drops a birth date the backend should not have sent', () => {

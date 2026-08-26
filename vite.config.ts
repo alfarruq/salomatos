@@ -64,7 +64,20 @@ export default defineConfig({
   },
 
   build: {
-    sourcemap: true,
+    /*
+     * 'hidden', not true: the maps are still written, so an error reporter can
+     * be given them, but nothing in the shipped JavaScript points at them.
+     *
+     * A published source map is the whole source, comments included. This
+     * codebase's comments now say which endpoints are unauthenticated, which
+     * repository methods skip their tenant check and what the server does not
+     * enforce — notes written for the team that would otherwise be readable by
+     * anyone who opened devtools on the production site.
+     *
+     * Deploy `dist/assets/*.js` without the `.map` files beside them, or
+     * upload the maps to the error reporter and delete them from the bundle.
+     */
+    sourcemap: 'hidden',
     rollupOptions: {
       output: {
         /*

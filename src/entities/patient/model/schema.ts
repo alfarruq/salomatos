@@ -11,22 +11,41 @@ import type { AppointmentSlot, Patient, PatientListItem, PatientTreatment } from
  * until phase 7.2 needs them.
  */
 
-const nullableString = v.nullable(v.string())
-const statusSchema = v.nullable(v.picklist(['in_progress', 'completed']))
+/** Absent or null both mean "nothing here" — see `sessionSchema` for why. */
+const optionalString = v.optional(v.nullable(v.string()), null)
+const optionalNumber = v.optional(v.nullable(v.number()), null)
+
+/**
+ * Treatment state.
+ *
+ * Unknown values are dropped rather than rejected. `Treatment.Status` is a
+ * `TextChoices` with two members today, but a third would be a migration on
+ * the server and a table of patients is not worth refusing to render over a
+ * badge this client does not recognise.
+ */
+const statusSchema = v.optional(
+  v.fallback(v.nullable(v.picklist(['in_progress', 'completed'])), null),
+  null,
+)
 
 export const patientListItemSchema = v.object({
+  /*
+   * The two the row cannot exist without: one identifies the record, the
+   * other is what a receptionist reads. Everything else may be missing.
+   */
   id: v.pipe(v.number(), v.integer()),
   full_name: v.string(),
-  phone_number: nullableString,
-  birth_date: nullableString,
-  address: nullableString,
-  office: nullableString,
-  doctor: nullableString,
+
+  phone_number: optionalString,
+  birth_date: optionalString,
+  address: optionalString,
+  office: optionalString,
+  doctor: optionalString,
   status: statusSchema,
-  treatment_type: nullableString,
-  appointment_date: nullableString,
-  remaining: v.nullable(v.number()),
-  total_remaining: v.number(),
+  treatment_type: optionalString,
+  appointment_date: optionalString,
+  remaining: optionalNumber,
+  total_remaining: v.optional(v.number(), 0),
 })
 
 export const patientPageSchema = pageSchema(patientListItemSchema)
@@ -34,26 +53,36 @@ export const patientPageSchema = pageSchema(patientListItemSchema)
 const treatmentSchema = v.object({
   id: v.pipe(v.number(), v.integer()),
   name: v.string(),
-  tooth_number: v.nullable(v.number()),
+  tooth_number: optionalNumber,
 })
 
 export const patientDetailSchema = v.object({
   id: v.pipe(v.number(), v.integer()),
   full_name: v.string(),
-  phone_number: nullableString,
-  birth_date: nullableString,
-  address: nullableString,
-  office: nullableString,
-  doctor: nullableString,
-  image: nullableString,
-  age: v.nullable(v.number()),
+
+  phone_number: optionalString,
+  birth_date: optionalString,
+  address: optionalString,
+  office: optionalString,
+  doctor: optionalString,
+  image: optionalString,
+  age: optionalNumber,
   status: statusSchema,
-  treatment_type: v.array(treatmentSchema),
-  total_treatment_cost: v.number(),
-  total_paid: v.number(),
-  remaining: v.number(),
-  total_remaining: v.number(),
-  visit_number: v.number(),
+  /*
+   * `get_treatment_type` builds a list of objects. drf-yasg reports it as a
+   * plain string because it cannot infer a SerializerMethodField's return
+   * type — the Python is the better source here, and the fallback covers the
+   * case where it is right and this is wrong.
+   */
+  treatment_type: v.optional(v.fallback(v.array(treatmentSchema), []), []),
+
+  // Money, and the counters beside it. Zero is the server's own default when
+  // a patient has no treatment on record.
+  total_treatment_cost: v.optional(v.number(), 0),
+  total_paid: v.optional(v.number(), 0),
+  remaining: v.optional(v.number(), 0),
+  total_remaining: v.optional(v.number(), 0),
+  visit_number: v.optional(v.number(), 0),
 })
 
 export type PatientListItemResponse = v.InferOutput<typeof patientListItemSchema>

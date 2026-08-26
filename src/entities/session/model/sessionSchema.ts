@@ -16,18 +16,33 @@ import type { Session } from './types'
  * without: one names the user, the other decides what they are shown.
  */
 
-const nullableString = v.nullable(v.string())
+/**
+ * Absent or null, both meaning "nothing here".
+ *
+ * `v.nullable` alone still requires the key to be present, and a serializer
+ * that stops sending a field it never had a value for is not a reason to
+ * refuse to load the application. Strictness is spent where it buys
+ * something — see `full_name` and `role` below.
+ */
+const optionalString = v.optional(v.nullable(v.string()), null)
 
 export const meResponseSchema = v.object({
+  /*
+   * The two fields the interface genuinely cannot work without: one names the
+   * user on screen, the other decides what they are shown. If either is
+   * missing the honest outcome is an error, not an application with a blank
+   * header and every control hidden.
+   */
   full_name: v.pipe(v.string(), v.minLength(1)),
   role: v.picklist(['superadmin', 'admin', 'doctor', 'patient']),
-  phone_number: nullableString,
-  email: nullableString,
-  specialty: nullableString,
-  biography: nullableString,
+
+  phone_number: optionalString,
+  email: optionalString,
+  specialty: optionalString,
+  biography: optionalString,
   /** A relative media path, not a URL. Absent for most accounts. */
-  image: nullableString,
-  experience: v.nullable(v.number()),
+  image: optionalString,
+  experience: v.optional(v.nullable(v.number()), null),
 })
 
 export type MeResponse = v.InferOutput<typeof meResponseSchema>
