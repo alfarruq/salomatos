@@ -81,7 +81,7 @@ jobs:
       # already happened once and was caught by the size budget, not by review.
       - name: Mock backend is not shipped
         run: |
-          if grep -rIlE "setupWorker|admin@example\.test" dist/; then
+          if grep -rIlE "setupWorker|setupServer|@example\.test" dist/; then
             echo "::error::The MSW mock backend or its fixtures leaked into the production build"
             exit 1
           fi

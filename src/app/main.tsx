@@ -13,21 +13,17 @@ if (!container) {
 }
 
 /*
- * Both conditions sit outside the import, not inside the imported function.
+ * ⛔ There is no mock backend here any more, and there must not be one again.
  *
- * A guard *inside* `startMockApi` would not keep msw out of the bundle: the
- * static import is evaluated regardless, and a module with import-time side
- * effects cannot be tree-shaken out of dead code. That is how the mock backend
- * — and its fabricated patient records — ended up in a production build,
- * caught by the size budget at 198 kB against a 180 kB limit.
+ * The app talks to Django, in development as in production — the dev server
+ * proxies `/api` at it (see vite.config.ts). A mock that can be switched on is
+ * a mock that can be switched on by accident, and what it serves is invented
+ * patient records that look exactly like real ones.
  *
- * Constant-folded to `false` in a production build, so Rollup emits no chunk
- * for it at all. Awaited so the first request cannot outrun the worker.
+ * It also hid a real defect: every endpoint path was wrong for weeks, and the
+ * mocks did not notice because the same misreading produced both them and the
+ * client. Only a real server disagreed.
  */
-if (import.meta.env.DEV && import.meta.env['VITE_USE_MOCKS'] === 'true') {
-  const { startMockApi } = await import('@/shared/api/mocks/browser')
-  await startMockApi()
-}
 
 createRoot(container).render(
   <StrictMode>
