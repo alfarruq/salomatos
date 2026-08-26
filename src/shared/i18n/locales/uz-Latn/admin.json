@@ -21,5 +21,30 @@
     "saveFailed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring.",
     "empty": "Hozircha shifokor yo'q",
     "emptyDescription": "Bemor va qabullarga biriktirish uchun shifokor qo'shing."
+  },
+  "service": {
+    "name": "Xizmat",
+    "price": "Narx",
+    "priceHint": "Butun so'm, faqat raqam. Narx kelishilsa, bo'sh qoldiring.",
+    "noPrice": "Kelishilgan holda",
+    "description": "Klinika ko'rsatadigan xizmatlar va ularning narxi.",
+    "create": "Xizmat qo'shish",
+    "createTitle": "Yangi xizmat",
+    "createDescription": "Nomi majburiy, narx ixtiyoriy.",
+    "createFailed": "Xizmatni qo'shib bo'lmadi. Qayta urinib ko'ring.",
+    "editTitle": "Xizmatni tahrirlash",
+    "saveFailed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring.",
+    "empty": "Hozircha xizmat yo'q",
+    "emptyDescription": "Davolanish va narxlar unga murojaat qila olishi uchun xizmat qo'shing."
+  },
+  "clinic": {
+    "name": "Klinika nomi",
+    "phoneNumber": "Telefon raqami",
+    "email": "Email",
+    "about": "Klinika haqida",
+    "descriptionHint": "Bemorlarga ko'rinadi. Ixtiyoriy.",
+    "description": "Klinikaning o'z ma'lumotlari.",
+    "saved": "Saqlandi.",
+    "saveFailed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring."
   }
 }

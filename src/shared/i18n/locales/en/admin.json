@@ -21,5 +21,30 @@
     "saveFailed": "Could not save the changes. Please try again.",
     "empty": "No doctors yet",
     "emptyDescription": "Add a doctor so they can be assigned to patients and appointments."
+  },
+  "service": {
+    "name": "Service",
+    "price": "Price",
+    "priceHint": "Whole so'm, digits only. Leave empty if quoted per case.",
+    "noPrice": "On request",
+    "description": "Services this clinic offers, and what they cost.",
+    "create": "Add service",
+    "createTitle": "New service",
+    "createDescription": "A name is required; a price is optional.",
+    "createFailed": "Could not add the service. Please try again.",
+    "editTitle": "Edit service",
+    "saveFailed": "Could not save the changes. Please try again.",
+    "empty": "No services yet",
+    "emptyDescription": "Add a service so treatments and prices can refer to it."
+  },
+  "clinic": {
+    "name": "Clinic name",
+    "phoneNumber": "Phone number",
+    "email": "Email",
+    "about": "About",
+    "descriptionHint": "Shown to patients. Optional.",
+    "description": "The clinic's own details.",
+    "saved": "Saved.",
+    "saveFailed": "Could not save the changes. Please try again."
   }
 }

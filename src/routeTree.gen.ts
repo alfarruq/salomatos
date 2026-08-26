@@ -15,7 +15,9 @@ import { Route as LoginRouteImport } from './pages/login'
 import { Route as AuthAdminRouteImport } from './pages/_auth/admin'
 import { Route as AuthDashboardRouteImport } from './pages/_auth/dashboard'
 import { Route as AuthAdminIndexRouteImport } from './pages/_auth/admin/index'
+import { Route as AuthAdminClinicRouteImport } from './pages/_auth/admin/clinic'
 import { Route as AuthAdminDoctorsRouteImport } from './pages/_auth/admin/doctors'
+import { Route as AuthAdminServicesRouteImport } from './pages/_auth/admin/services'
 import { Route as AuthPatientsIndexRouteImport } from './pages/_auth/patients/index'
 import { Route as AuthPatientsPatientIdRouteImport } from './pages/_auth/patients/$patientId'
 
@@ -48,9 +50,19 @@ const AuthAdminIndexRoute = AuthAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthAdminRoute,
 } as any)
+const AuthAdminClinicRoute = AuthAdminClinicRouteImport.update({
+  id: '/clinic',
+  path: '/clinic',
+  getParentRoute: () => AuthAdminRoute,
+} as any)
 const AuthAdminDoctorsRoute = AuthAdminDoctorsRouteImport.update({
   id: '/doctors',
   path: '/doctors',
+  getParentRoute: () => AuthAdminRoute,
+} as any)
+const AuthAdminServicesRoute = AuthAdminServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
   getParentRoute: () => AuthAdminRoute,
 } as any)
 const AuthPatientsIndexRoute = AuthPatientsIndexRouteImport.update({
@@ -69,7 +81,9 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/admin': typeof AuthAdminRouteWithChildren
   '/dashboard': typeof AuthDashboardRoute
+  '/admin/clinic': typeof AuthAdminClinicRoute
   '/admin/doctors': typeof AuthAdminDoctorsRoute
+  '/admin/services': typeof AuthAdminServicesRoute
   '/patients/$patientId': typeof AuthPatientsPatientIdRoute
   '/admin/': typeof AuthAdminIndexRoute
   '/patients/': typeof AuthPatientsIndexRoute
@@ -78,7 +92,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthDashboardRoute
+  '/admin/clinic': typeof AuthAdminClinicRoute
   '/admin/doctors': typeof AuthAdminDoctorsRoute
+  '/admin/services': typeof AuthAdminServicesRoute
   '/patients/$patientId': typeof AuthPatientsPatientIdRoute
   '/admin': typeof AuthAdminIndexRoute
   '/patients': typeof AuthPatientsIndexRoute
@@ -90,7 +106,9 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_auth/admin': typeof AuthAdminRouteWithChildren
   '/_auth/dashboard': typeof AuthDashboardRoute
+  '/_auth/admin/clinic': typeof AuthAdminClinicRoute
   '/_auth/admin/doctors': typeof AuthAdminDoctorsRoute
+  '/_auth/admin/services': typeof AuthAdminServicesRoute
   '/_auth/patients/$patientId': typeof AuthPatientsPatientIdRoute
   '/_auth/admin/': typeof AuthAdminIndexRoute
   '/_auth/patients/': typeof AuthPatientsIndexRoute
@@ -102,7 +120,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/admin'
     | '/dashboard'
+    | '/admin/clinic'
     | '/admin/doctors'
+    | '/admin/services'
     | '/patients/$patientId'
     | '/admin/'
     | '/patients/'
@@ -111,7 +131,9 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/dashboard'
+    | '/admin/clinic'
     | '/admin/doctors'
+    | '/admin/services'
     | '/patients/$patientId'
     | '/admin'
     | '/patients'
@@ -122,7 +144,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/_auth/admin'
     | '/_auth/dashboard'
+    | '/_auth/admin/clinic'
     | '/_auth/admin/doctors'
+    | '/_auth/admin/services'
     | '/_auth/patients/$patientId'
     | '/_auth/admin/'
     | '/_auth/patients/'
@@ -178,11 +202,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAdminIndexRouteImport
       parentRoute: typeof AuthAdminRoute
     }
+    '/_auth/admin/clinic': {
+      id: '/_auth/admin/clinic'
+      path: '/clinic'
+      fullPath: '/admin/clinic'
+      preLoaderRoute: typeof AuthAdminClinicRouteImport
+      parentRoute: typeof AuthAdminRoute
+    }
     '/_auth/admin/doctors': {
       id: '/_auth/admin/doctors'
       path: '/doctors'
       fullPath: '/admin/doctors'
       preLoaderRoute: typeof AuthAdminDoctorsRouteImport
+      parentRoute: typeof AuthAdminRoute
+    }
+    '/_auth/admin/services': {
+      id: '/_auth/admin/services'
+      path: '/services'
+      fullPath: '/admin/services'
+      preLoaderRoute: typeof AuthAdminServicesRouteImport
       parentRoute: typeof AuthAdminRoute
     }
     '/_auth/patients/': {
@@ -203,12 +241,16 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthAdminRouteChildren {
+  AuthAdminClinicRoute: typeof AuthAdminClinicRoute
   AuthAdminDoctorsRoute: typeof AuthAdminDoctorsRoute
+  AuthAdminServicesRoute: typeof AuthAdminServicesRoute
   AuthAdminIndexRoute: typeof AuthAdminIndexRoute
 }
 
 const AuthAdminRouteChildren: AuthAdminRouteChildren = {
+  AuthAdminClinicRoute: AuthAdminClinicRoute,
   AuthAdminDoctorsRoute: AuthAdminDoctorsRoute,
+  AuthAdminServicesRoute: AuthAdminServicesRoute,
   AuthAdminIndexRoute: AuthAdminIndexRoute,
 }
 

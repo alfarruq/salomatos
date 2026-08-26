@@ -8,6 +8,7 @@ import {
   MOCK_PASSWORD,
   MOCK_PATIENT_DETAILS,
   MOCK_PATIENTS,
+  MOCK_TREATMENT_TYPES,
   MOCK_USERS,
   type MockUserKey,
 } from './fixtures'
@@ -186,6 +187,42 @@ export const handlers = [
 
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
     return HttpResponse.json({ ...existing, ...body })
+  }),
+
+  /** `TreatmentTypeService.get_treatment_types` — a plain array, not a page. */
+  http.get('/api/v1/clinic/treatment-types/', ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+    return HttpResponse.json(MOCK_TREATMENT_TYPES)
+  }),
+
+  http.post('/api/v1/clinic/treatment-types/', async ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
+    return HttpResponse.json({
+      id: 800,
+      name: body['name'] ?? '',
+      price: body['price'] ?? null,
+    })
+  }),
+
+  http.patch('/api/v1/clinic/treatment-types/:id/', async ({ request, params }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const id = Number(params['id'])
+    const existing = MOCK_TREATMENT_TYPES.find((service) => service.id === id)
+    if (existing === undefined) return new HttpResponse(null, { status: 404 })
+
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
+    return HttpResponse.json({ ...existing, ...body })
+  }),
+
+  /** `UserService.update` — the clinic's own record. */
+  http.patch('/api/v1/authentication/update/:userId/', async ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
+    return HttpResponse.json(body)
   }),
 
   /** `DoctorService.get_doctors` — a plain array, not a page. */

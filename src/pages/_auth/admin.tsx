@@ -9,7 +9,11 @@ import { cn } from '@/shared/lib/cn'
  * ordering and the active state all read from this. Kept deliberately small so
  * that it stays the only place a section is declared.
  */
-const SECTIONS = [{ to: '/admin/doctors', labelKey: 'admin:nav.doctors' }] as const
+const SECTIONS = [
+  { to: '/admin/doctors', labelKey: 'admin:nav.doctors' },
+  { to: '/admin/services', labelKey: 'admin:nav.services' },
+  { to: '/admin/clinic', labelKey: 'admin:nav.clinic' },
+] as const
 
 /**
  * Clinic administration, for the clinic account only.

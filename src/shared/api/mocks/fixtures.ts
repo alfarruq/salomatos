@@ -230,3 +230,11 @@ export const MOCK_DOCTORS = [
     email: null,
   },
 ] as const
+
+/** The clinic's price list, as `TreatmentTypeListSerializer` emits it. */
+export const MOCK_TREATMENT_TYPES = [
+  { id: 7, name: 'Implantatsiya', price: 4_000_000 },
+  { id: 8, name: 'Tozalash', price: 250_000 },
+  // Quoted per case — a real state, and not the same as free.
+  { id: 9, name: 'Ortodontik davolash', price: null },
+] as const
