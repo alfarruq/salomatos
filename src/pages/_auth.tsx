@@ -165,6 +165,17 @@ function AuthenticatedLayout() {
               </span>
             </li>
           </Can>
+          {/* `clinic:manage` is the clinic account alone (ADR-012). */}
+          <Can permission="clinic:manage">
+            <li>
+              <Link
+                className="block rounded-control px-3 py-2 text-body text-text-secondary hover:bg-sunken hover:text-text"
+                to="/admin"
+              >
+                {t('nav.admin')}
+              </Link>
+            </li>
+          </Can>
         </ul>
       }
     >

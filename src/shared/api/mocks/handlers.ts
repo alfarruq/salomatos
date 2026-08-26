@@ -4,6 +4,7 @@ import { readJwtPayload } from '@/shared/lib/jwt'
 import {
   accessTokenFor,
   errorEnvelope,
+  MOCK_DOCTORS,
   MOCK_PASSWORD,
   MOCK_PATIENT_DETAILS,
   MOCK_PATIENTS,
@@ -181,6 +182,51 @@ export const handlers = [
 
     const id = Number(params['patientId'])
     const existing = MOCK_PATIENTS.find((patient) => patient.id === id)
+    if (existing === undefined) return new HttpResponse(null, { status: 404 })
+
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
+    return HttpResponse.json({ ...existing, ...body })
+  }),
+
+  /** `DoctorService.get_doctors` — a plain array, not a page. */
+  http.get('/api/v1/clinic/doctors/', ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+    return HttpResponse.json(MOCK_DOCTORS)
+  }),
+
+  http.post('/api/v1/clinic/doctors/', async ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
+    const phone = typeof body['phone_number'] === 'string' ? body['phone_number'] : ''
+
+    if (MOCK_DOCTORS.some((doctor) => doctor.phone_number === phone)) {
+      return HttpResponse.json(
+        errorEnvelope({
+          message: 'Validation error',
+          messageKey: 'validation_error',
+          errors: { phone_number: 'unique' },
+          exceptionClass: 'ValidationError',
+        }),
+        { status: 400 },
+      )
+    }
+
+    // The server assigns role and clinic itself.
+    return HttpResponse.json({
+      id: 900,
+      full_name: body['full_name'] ?? '',
+      specialty: body['specialty'] ?? null,
+      phone_number: phone,
+      email: body['email'] ?? null,
+    })
+  }),
+
+  http.patch('/api/v1/clinic/doctors/:doctorId/', async ({ request, params }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const id = Number(params['doctorId'])
+    const existing = MOCK_DOCTORS.find((doctor) => doctor.id === id)
     if (existing === undefined) return new HttpResponse(null, { status: 404 })
 
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>

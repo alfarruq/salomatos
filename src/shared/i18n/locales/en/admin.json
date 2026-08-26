@@ -1,0 +1,25 @@
+{
+  "title": "Administration",
+  "subtitle": "Clinic data only the clinic account can change.",
+  "nav": {
+    "doctors": "Doctors",
+    "services": "Services",
+    "clinic": "Clinic"
+  },
+  "doctor": {
+    "fullName": "Full name",
+    "specialty": "Specialty",
+    "specialtyPlaceholder": "Orthodontist",
+    "phoneNumber": "Phone number",
+    "email": "Email",
+    "description": "Doctors who see patients at this clinic.",
+    "create": "Add doctor",
+    "createTitle": "New doctor",
+    "createDescription": "Name and phone number are required.",
+    "createFailed": "Could not add the doctor. Please try again.",
+    "editTitle": "Edit doctor",
+    "saveFailed": "Could not save the changes. Please try again.",
+    "empty": "No doctors yet",
+    "emptyDescription": "Add a doctor so they can be assigned to patients and appointments."
+  }
+}

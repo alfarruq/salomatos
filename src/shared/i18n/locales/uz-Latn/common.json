@@ -9,7 +9,8 @@
     "close": "Yopish",
     "signOut": "Chiqish",
     "next": "Keyingi",
-    "previous": "Oldingi"
+    "previous": "Oldingi",
+    "edit": "Tahrirlash"
   },
   "nav": {
     "skipToContent": "Asosiy qismga o'tish",
@@ -18,7 +19,8 @@
     "breadcrumb": "Sahifalar zanjiri",
     "dashboard": "Boshqaruv paneli",
     "patients": "Bemorlar",
-    "billing": "To'lovlar"
+    "billing": "To'lovlar",
+    "admin": "Boshqaruv"
   },
   "language": {
     "label": "Til",

@@ -206,3 +206,27 @@ export function errorEnvelope({
     exception_class: exceptionClass,
   }
 }
+
+/**
+ * The clinic's doctors, in the shape `DoctorListSerializer` emits.
+ *
+ * A plain array on the wire — this endpoint does not paginate, unlike
+ * patients. The published schema does not say so; the Python does.
+ */
+export const MOCK_DOCTORS = [
+  {
+    id: 2,
+    full_name: 'Sardor Usmonov',
+    specialty: 'Ortodont',
+    phone_number: '+998901112244',
+    email: 'doctor@example.test',
+  },
+  {
+    // Everything optional absent: a doctor added in a hurry at reception.
+    id: 4,
+    full_name: 'Malika Yusupova',
+    specialty: null,
+    phone_number: null,
+    email: null,
+  },
+] as const

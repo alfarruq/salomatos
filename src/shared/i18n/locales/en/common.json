@@ -9,7 +9,8 @@
     "close": "Close",
     "signOut": "Sign out",
     "next": "Next",
-    "previous": "Previous"
+    "previous": "Previous",
+    "edit": "Edit"
   },
   "nav": {
     "skipToContent": "Skip to content",
@@ -18,7 +19,8 @@
     "breadcrumb": "Breadcrumb",
     "dashboard": "Dashboard",
     "patients": "Patients",
-    "billing": "Billing"
+    "billing": "Billing",
+    "admin": "Administration"
   },
   "language": {
     "label": "Language",

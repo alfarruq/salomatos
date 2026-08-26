@@ -9,7 +9,8 @@
     "close": "Ёпиш",
     "signOut": "Чиқиш",
     "next": "Кейинги",
-    "previous": "Олдинги"
+    "previous": "Олдинги",
+    "edit": "Таҳрирлаш"
   },
   "nav": {
     "skipToContent": "Асосий қисмга ўтиш",
@@ -18,7 +19,8 @@
     "breadcrumb": "Саҳифалар занжири",
     "dashboard": "Бошқарув панели",
     "patients": "Беморлар",
-    "billing": "Тўловлар"
+    "billing": "Тўловлар",
+    "admin": "Бошқарув"
   },
   "language": {
     "label": "Тил",

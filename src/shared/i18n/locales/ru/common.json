@@ -9,7 +9,8 @@
     "close": "Закрыть",
     "signOut": "Выйти",
     "next": "Вперёд",
-    "previous": "Назад"
+    "previous": "Назад",
+    "edit": "Изменить"
   },
   "nav": {
     "skipToContent": "Перейти к содержимому",
@@ -18,7 +19,8 @@
     "breadcrumb": "Хлебные крошки",
     "dashboard": "Панель управления",
     "patients": "Пациенты",
-    "billing": "Платежи"
+    "billing": "Платежи",
+    "admin": "Администрирование"
   },
   "language": {
     "label": "Язык",
