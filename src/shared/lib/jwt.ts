@@ -55,8 +55,26 @@ export function readJwtPayload(token: string): JwtPayload | null {
 
   if (typeof decoded !== 'object' || decoded === null) return null
 
-  const userId = (decoded as Record<string, unknown>)['user_id']
-  if (typeof userId !== 'number' || !Number.isInteger(userId)) return null
+  /*
+   * A number *or* a numeric string.
+   *
+   * simplejwt writes the claim as `user_id = getattr(user, USER_ID_FIELD)` and
+   * only stringifies it when it is not an int — but which of the two arrives
+   * depends on the version and on how the pk is declared, and getting it wrong
+   * meant the session could not be built at all. Accepting both costs nothing
+   * and removes a failure mode that looked, from the login form, like a wrong
+   * password.
+   *
+   * Still strict about the value: it has to be a whole number. `"3.5"` and
+   * `"abc"` are rejected rather than coerced into a cache key.
+   */
+  const claim = (decoded as Record<string, unknown>)['user_id']
+  if (typeof claim !== 'number' && typeof claim !== 'string') return null
+
+  const userId = Number(claim)
+  if (!Number.isInteger(userId)) return null
+  // `Number('')` is 0, and an empty claim is not user zero.
+  if (typeof claim === 'string' && claim.trim() === '') return null
 
   return { userId }
 }

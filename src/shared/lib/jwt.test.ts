@@ -35,11 +35,25 @@ describe('readJwtPayload', () => {
     expect(readJwtPayload('a.!!!not-base64!!!.c')).toBeNull()
   })
 
+  it('accepts a claim the server sent as a string', () => {
+    /*
+     * simplejwt writes `user_id` straight from the pk and stringifies it in
+     * some versions. Rejecting the string form meant the session could not be
+     * built at all — and from the login form that looked like a wrong
+     * password, which is how it went unnoticed.
+     */
+    expect(readJwtPayload(token({ user_id: '42' }))).toEqual({ userId: 42 })
+  })
+
   it('refuses a payload without a usable user id', () => {
     expect(readJwtPayload(token({ token_type: 'access' }))).toBeNull()
-    // A string id would sail through and poison every query key it reached.
-    expect(readJwtPayload(token({ user_id: '42' }))).toBeNull()
-    expect(readJwtPayload(token({ user_id: 4.2 }))).toBeNull()
     expect(readJwtPayload(token(null))).toBeNull()
+    // Numeric, but not a whole number — not an id.
+    expect(readJwtPayload(token({ user_id: 4.2 }))).toBeNull()
+    expect(readJwtPayload(token({ user_id: '4.2' }))).toBeNull()
+    expect(readJwtPayload(token({ user_id: 'abc' }))).toBeNull()
+    // `Number('')` is 0, and an empty claim is not user zero.
+    expect(readJwtPayload(token({ user_id: '' }))).toBeNull()
+    expect(readJwtPayload(token({ user_id: '  ' }))).toBeNull()
   })
 })

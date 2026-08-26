@@ -28,10 +28,25 @@ export async function fetchSession(signal?: AbortSignal): Promise<Session> {
    * /login without waiting on a request that is certain to 401.
    */
   const token = getAccessToken()
-  const payload = token === null ? null : readJwtPayload(token)
 
+  // No token is the ordinary case: it lives in memory, so every page reload
+  // starts here and the guard redirects to /login without a round trip.
+  if (token === null) {
+    throw new ApiError({ kind: 'unauthorized', messageKey: 'no_access_token' })
+  }
+
+  /*
+   * A token that cannot be read is a different thing entirely, and has to say
+   * so. It means the server issued something this client does not understand
+   * — a missing or unexpected `user_id` claim — and the tenant every query key
+   * is scoped by cannot be established.
+   *
+   * Reported separately because the two are indistinguishable from the login
+   * form otherwise, and the second one looked exactly like a wrong password.
+   */
+  const payload = readJwtPayload(token)
   if (payload === null) {
-    throw new ApiError({ kind: 'unauthorized', message: 'no_access_token' })
+    throw new ApiError({ kind: 'unauthorized', messageKey: 'unreadable_token' })
   }
 
   const raw = await httpClient<unknown>(
