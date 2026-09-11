@@ -11,23 +11,30 @@ import {
 } from '@/entities/doctor'
 import { httpClient } from '@/shared/api/httpClient'
 
-/**
- * ⚠️ `update_doctor` calls `get_doctor(user_id)` without a tenant argument, so
- * the server will happily edit a doctor belonging to another clinic if given
- * their id. Nothing the client can fix — it is item 3 in the backend review —
- * and worth knowing before this screen is trusted as a boundary.
- */
 async function updateDoctor({
   doctorId,
   input,
+  includeDoctorType,
 }: {
   doctorId: DoctorId
   input: DoctorFormInput
+  /**
+   * `toDoctorForm` cannot fill `doctorTypeId` from the server — the list
+   * response has no such field, only create/update accept one — so the
+   * select always opens unset regardless of what is actually assigned. Saving
+   * that unconditionally would silently clear a real assignment nobody meant
+   * to touch. `false` unless the dialog reports the select itself was
+   * changed this session (`formState.dirtyFields.doctorTypeId`).
+   */
+  includeDoctorType: boolean
 }): Promise<Doctor> {
+  const payload = toDoctorPayload(input)
+  if (!includeDoctorType) delete payload['doctor_type']
+
   const raw = await httpClient<unknown>(`v1/clinic/doctors/${doctorId}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(toDoctorPayload(input)),
+    body: JSON.stringify(payload),
   })
 
   return toDoctor(v.parse(doctorSchema, raw))

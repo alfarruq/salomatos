@@ -19,7 +19,9 @@
     "editTitle": "Edit doctor",
     "saveFailed": "Could not save the changes. Please try again.",
     "empty": "No doctors yet",
-    "emptyDescription": "Add a doctor so they can be assigned to patients and appointments."
+    "emptyDescription": "Add a doctor so they can be assigned to patients and appointments.",
+    "type": "Type",
+    "typePlaceholder": "Not assigned"
   },
   "service": {
     "name": "Service",

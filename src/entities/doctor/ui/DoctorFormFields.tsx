@@ -1,11 +1,17 @@
 import { Controller, type UseFormReturn } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { Field, Input, PhoneInput } from '@/shared/ui'
+import { Field, Input, PhoneInput, Select, type SelectOption } from '@/shared/ui'
 import type { DoctorFormInput } from '../model/formSchema'
 
 export interface DoctorFormFieldsProps {
   form: UseFormReturn<DoctorFormInput>
   isDisabled?: boolean
+  /**
+   * Doctor-type choices, as plain `{value, label}` pairs rather than the
+   * `entities/doctor-type` shape — an entity may not import another entity
+   * (§4), so the feature that fetches the list converts it before it gets here.
+   */
+  doctorTypeOptions: SelectOption[]
 }
 
 /**
@@ -14,7 +20,11 @@ export interface DoctorFormFieldsProps {
  * Passive, so it stays an entity (§3.2), and shared so that creating and
  * editing cannot drift apart without either feature importing the other.
  */
-export function DoctorFormFields({ form, isDisabled = false }: DoctorFormFieldsProps) {
+export function DoctorFormFields({
+  form,
+  isDisabled = false,
+  doctorTypeOptions,
+}: DoctorFormFieldsProps) {
   const { t } = useTranslation(['admin', 'validation'])
 
   /** Valibot and the server both speak `validation.<code>` — see §10. */
@@ -56,6 +66,23 @@ export function DoctorFormFields({ form, isDisabled = false }: DoctorFormFieldsP
 
       <Field error={message(errors.email?.message)} label={t('admin:doctor.email')}>
         <Input autoComplete="off" disabled={isDisabled} type="email" {...form.register('email')} />
+      </Field>
+
+      <Field label={t('admin:doctor.type')}>
+        <Controller
+          control={form.control}
+          name="doctorTypeId"
+          render={({ field }) => (
+            <Select
+              disabled={isDisabled}
+              name={field.name}
+              onValueChange={field.onChange}
+              options={doctorTypeOptions}
+              placeholder={t('admin:doctor.typePlaceholder')}
+              value={field.value}
+            />
+          )}
+        />
       </Field>
     </div>
   )

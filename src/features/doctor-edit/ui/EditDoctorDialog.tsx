@@ -1,4 +1,5 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
+import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -10,6 +11,7 @@ import {
   doctorFormSchema,
   toDoctorForm,
 } from '@/entities/doctor'
+import { doctorTypeQueries } from '@/entities/doctor-type'
 import { ApiError } from '@/shared/api/errors'
 import { Alert, Button, Dialog } from '@/shared/ui'
 import { useUpdateDoctor } from '../model/useUpdateDoctor'
@@ -44,9 +46,21 @@ export function EditDoctorDialog({ clinicId, doctor, open, onOpenChange }: EditD
 
   const { mutate, isPending } = useUpdateDoctor(clinicId)
 
+  const doctorTypesQuery = useQuery(doctorTypeQueries.list(clinicId))
+  const doctorTypeOptions = (doctorTypesQuery.data ?? []).map((doctorType) => ({
+    value: String(doctorType.id),
+    label: doctorType.name,
+  }))
+
   const handleSubmit = form.handleSubmit((values) =>
     mutate(
-      { doctorId: doctor.id, input: values },
+      {
+        doctorId: doctor.id,
+        input: values,
+        // See `useUpdateDoctor`: the select cannot show what is already
+        // assigned, so it must only be saved when the person actually used it.
+        includeDoctorType: Boolean(form.formState.dirtyFields.doctorTypeId),
+      },
       {
         onSuccess: () => onOpenChange(false),
         onError: (error) => {
@@ -92,7 +106,11 @@ export function EditDoctorDialog({ clinicId, doctor, open, onOpenChange }: EditD
     >
       <form className="flex flex-col gap-4" id={FORM_ID} noValidate onSubmit={handleSubmit}>
         {rootError ? <Alert title={rootError} tone="danger" /> : null}
-        <DoctorFormFields form={form} isDisabled={isPending} />
+        <DoctorFormFields
+          doctorTypeOptions={doctorTypeOptions}
+          form={form}
+          isDisabled={isPending}
+        />
       </form>
     </Dialog>
   )

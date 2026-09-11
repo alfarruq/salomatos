@@ -19,7 +19,9 @@
     "editTitle": "Shifokorni tahrirlash",
     "saveFailed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring.",
     "empty": "Hozircha shifokor yo'q",
-    "emptyDescription": "Bemor va qabullarga biriktirish uchun shifokor qo'shing."
+    "emptyDescription": "Bemor va qabullarga biriktirish uchun shifokor qo'shing.",
+    "type": "Turi",
+    "typePlaceholder": "Tayinlanmagan"
   },
   "service": {
     "name": "Xizmat",

@@ -1,4 +1,5 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
+import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
@@ -8,6 +9,7 @@ import {
   doctorFormSchema,
   emptyDoctorForm,
 } from '@/entities/doctor'
+import { doctorTypeQueries } from '@/entities/doctor-type'
 import { ApiError } from '@/shared/api/errors'
 import { Alert, Button, Dialog } from '@/shared/ui'
 import { useCreateDoctor } from '../model/useCreateDoctor'
@@ -36,6 +38,14 @@ export function CreateDoctorDialog({
   })
 
   const { mutate, isPending } = useCreateDoctor(clinicId)
+
+  // `static` (§6.3) via `doctorTypeQueries` — this list changes as rarely as
+  // the price list, and this dialog is the reason it exists.
+  const doctorTypesQuery = useQuery(doctorTypeQueries.list(clinicId))
+  const doctorTypeOptions = (doctorTypesQuery.data ?? []).map((doctorType) => ({
+    value: String(doctorType.id),
+    label: doctorType.name,
+  }))
 
   const handleSubmit = form.handleSubmit((values) =>
     mutate(values, {
@@ -89,7 +99,11 @@ export function CreateDoctorDialog({
     >
       <form className="flex flex-col gap-4" id={FORM_ID} noValidate onSubmit={handleSubmit}>
         {rootError ? <Alert title={rootError} tone="danger" /> : null}
-        <DoctorFormFields form={form} isDisabled={isPending} />
+        <DoctorFormFields
+          doctorTypeOptions={doctorTypeOptions}
+          form={form}
+          isDisabled={isPending}
+        />
       </form>
     </Dialog>
   )
