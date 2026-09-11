@@ -34,5 +34,14 @@
     "unknown": "That did not work. Please try again."
   },
   "patientCount_one": "{{count}} patient",
-  "patientCount_other": "{{count}} patients"
+  "patientCount_other": "{{count}} patients",
+  "weekday": {
+    "mon": "Monday",
+    "tue": "Tuesday",
+    "wed": "Wednesday",
+    "thu": "Thursday",
+    "fri": "Friday",
+    "sat": "Saturday",
+    "sun": "Sunday"
+  }
 }

@@ -34,5 +34,14 @@
     "unknown": "Амал бажарилмади. Қайта уриниб кўринг."
   },
   "patientCount_one": "{{count}} бемор",
-  "patientCount_other": "{{count}} бемор"
+  "patientCount_other": "{{count}} бемор",
+  "weekday": {
+    "mon": "Душанба",
+    "tue": "Сешанба",
+    "wed": "Чоршанба",
+    "thu": "Пайшанба",
+    "fri": "Жума",
+    "sat": "Шанба",
+    "sun": "Якшанба"
+  }
 }

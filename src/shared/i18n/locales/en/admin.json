@@ -39,12 +39,15 @@
   "clinic": {
     "name": "Clinic name",
     "phoneNumber": "Phone number",
-    "email": "Email",
-    "about": "About",
-    "descriptionHint": "Shown to patients. Optional.",
-    "description": "The clinic's own details.",
-    "saved": "Saved.",
-    "saveFailed": "Could not save the changes. Please try again."
+    "address": "Address",
+    "hours": "Working hours",
+    "opensAt": "{{day}} opening time",
+    "closesAt": "{{day}} closing time",
+    "closed": "Closed",
+    "setupTitle": "Set up your clinic",
+    "setupDescription": "This is shown once. Name, phone number and address are required.",
+    "createFailed": "Could not save the clinic. Please try again.",
+    "editUnavailable": "Editing isn't available yet — ask the development team about it."
   },
   "doctorType": {
     "name": "Name",

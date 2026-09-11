@@ -39,12 +39,15 @@
   "clinic": {
     "name": "Klinika nomi",
     "phoneNumber": "Telefon raqami",
-    "email": "Email",
-    "about": "Klinika haqida",
-    "descriptionHint": "Bemorlarga ko'rinadi. Ixtiyoriy.",
-    "description": "Klinikaning o'z ma'lumotlari.",
-    "saved": "Saqlandi.",
-    "saveFailed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring."
+    "address": "Manzil",
+    "hours": "Ish vaqti",
+    "opensAt": "{{day}} ochilish vaqti",
+    "closesAt": "{{day}} yopilish vaqti",
+    "closed": "Yopiq",
+    "setupTitle": "Klinikani sozlang",
+    "setupDescription": "Bu bir martalik sozlash. Nomi, telefon raqami va manzil majburiy.",
+    "createFailed": "Klinikani saqlab bo'lmadi. Qayta urinib ko'ring.",
+    "editUnavailable": "Tahrirlash hozircha mavjud emas — dasturchilar jamoasidan so'rang."
   },
   "doctorType": {
     "name": "Nomi",

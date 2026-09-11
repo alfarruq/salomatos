@@ -36,5 +36,14 @@
   "patientCount_one": "{{count}} пациент",
   "patientCount_few": "{{count}} пациента",
   "patientCount_many": "{{count}} пациентов",
-  "patientCount_other": "{{count}} пациента"
+  "patientCount_other": "{{count}} пациента",
+  "weekday": {
+    "mon": "Понедельник",
+    "tue": "Вторник",
+    "wed": "Среда",
+    "thu": "Четверг",
+    "fri": "Пятница",
+    "sat": "Суббота",
+    "sun": "Воскресенье"
+  }
 }

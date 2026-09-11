@@ -260,6 +260,33 @@ export const handlers = [
     return HttpResponse.json(body)
   }),
 
+  /**
+   * `ClinicService.get_clinics` — a plain array filtered to the caller's own
+   * clinic, and, like every list here, `many=True` behind a schema that shows
+   * a single object. Empty by default: the account has not set one up yet,
+   * the more useful default state to develop the "first-time setup" screen
+   * against.
+   */
+  http.get('/api/v1/clinic/', ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+    return HttpResponse.json([])
+  }),
+
+  http.post('/api/v1/clinic/', async ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
+    // `ClinicListSerializer` — note what it does not have: an id. Neither does
+    // this response, on purpose; see `entities/clinic/model/schema.ts`.
+    return HttpResponse.json({
+      name: body['name'] ?? '',
+      phone_number: body['phone_number'] ?? '',
+      address: body['address'] ?? '',
+      logo: null,
+      working_hours: body['working_hours'] ?? null,
+    })
+  }),
+
   /** `DoctorService.get_doctors` — a plain array, not a page. */
   http.get('/api/v1/clinic/doctors/', ({ request }) => {
     if (authenticate(request) === null) return unauthorized()

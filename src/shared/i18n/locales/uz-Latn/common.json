@@ -34,5 +34,14 @@
     "unknown": "Amal bajarilmadi. Qayta urinib ko'ring."
   },
   "patientCount_one": "{{count}} bemor",
-  "patientCount_other": "{{count}} bemor"
+  "patientCount_other": "{{count}} bemor",
+  "weekday": {
+    "mon": "Dushanba",
+    "tue": "Seshanba",
+    "wed": "Chorshanba",
+    "thu": "Payshanba",
+    "fri": "Juma",
+    "sat": "Shanba",
+    "sun": "Yakshanba"
+  }
 }
