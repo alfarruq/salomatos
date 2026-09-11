@@ -54,7 +54,5 @@ export interface Session {
   phoneNumber: string | null
   email: string | null
   role: Role
-  /** Doctors only; null for everyone else. */
-  specialty: string | null
   permissions: ReadonlySet<Permission>
 }

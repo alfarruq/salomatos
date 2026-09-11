@@ -5,9 +5,9 @@ import type { Session } from '@/entities/session'
  * The clinic's own record, as `UserUpdateSerializer` accepts it.
  *
  * A clinic is a `User` row here, so this is the user-update endpoint — which
- * is why the serializer also offers `specialty` and `experience`. Those are
- * doctor fields and are deliberately not shown: a clinic has no years of
- * experience, and an input that means nothing invites data that means nothing.
+ * is why the serializer also offers `experience`. That is a doctor field and
+ * is deliberately not shown: a clinic has no years of experience, and an
+ * input that means nothing invites data that means nothing.
  *
  * `biography` is offered as a description, which is the one thing on that
  * serializer a clinic plausibly wants to write about itself.

@@ -4,12 +4,11 @@
   "nav": {
     "doctors": "Doctors",
     "services": "Services",
-    "clinic": "Clinic"
+    "clinic": "Clinic",
+    "doctorTypes": "Doctor types"
   },
   "doctor": {
     "fullName": "Full name",
-    "specialty": "Specialty",
-    "specialtyPlaceholder": "Orthodontist",
     "phoneNumber": "Phone number",
     "email": "Email",
     "description": "Doctors who see patients at this clinic.",
@@ -46,5 +45,21 @@
     "description": "The clinic's own details.",
     "saved": "Saved.",
     "saveFailed": "Could not save the changes. Please try again."
+  },
+  "doctorType": {
+    "name": "Name",
+    "namePlaceholder": "Stomatolog",
+    "description": "Categories doctors can be assigned to, such as \"Stomatolog\" or \"Ortodont\".",
+    "create": "Add type",
+    "createTitle": "New doctor type",
+    "createDescription": "A name is required.",
+    "createFailed": "Could not add the type. Please try again.",
+    "editTitle": "Edit doctor type",
+    "saveFailed": "Could not save the changes. Please try again.",
+    "empty": "No doctor types yet",
+    "emptyDescription": "Add a type so it can be assigned to doctors and services.",
+    "deleteTitle": "Delete doctor type",
+    "deleteDescription": "Delete “{{name}}”? Doctors and services using it keep their other details.",
+    "deleteFailed": "Could not delete the type. Please try again."
   }
 }

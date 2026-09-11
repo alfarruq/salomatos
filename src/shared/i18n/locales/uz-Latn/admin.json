@@ -4,12 +4,11 @@
   "nav": {
     "doctors": "Shifokorlar",
     "services": "Xizmatlar",
-    "clinic": "Klinika"
+    "clinic": "Klinika",
+    "doctorTypes": "Shifokor turlari"
   },
   "doctor": {
     "fullName": "F. I. Sh.",
-    "specialty": "Mutaxassislik",
-    "specialtyPlaceholder": "Ortodont",
     "phoneNumber": "Telefon raqami",
     "email": "Email",
     "description": "Shu klinikada bemor qabul qiladigan shifokorlar.",
@@ -46,5 +45,21 @@
     "description": "Klinikaning o'z ma'lumotlari.",
     "saved": "Saqlandi.",
     "saveFailed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring."
+  },
+  "doctorType": {
+    "name": "Nomi",
+    "namePlaceholder": "Stomatolog",
+    "description": "Shifokorlarga biriktiriladigan toifalar, masalan \"Stomatolog\" yoki \"Ortodont\".",
+    "create": "Tur qo'shish",
+    "createTitle": "Yangi shifokor turi",
+    "createDescription": "Nomi majburiy.",
+    "createFailed": "Turni qo'shib bo'lmadi. Qayta urinib ko'ring.",
+    "editTitle": "Shifokor turini tahrirlash",
+    "saveFailed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring.",
+    "empty": "Hozircha shifokor turi yo'q",
+    "emptyDescription": "Shifokor va xizmatlarga biriktirish uchun tur qo'shing.",
+    "deleteTitle": "Shifokor turini o'chirish",
+    "deleteDescription": "\"{{name}}\" o'chirilsinmi? Bu turdan foydalanadigan shifokor va xizmatlarning boshqa ma'lumotlari saqlanib qoladi.",
+    "deleteFailed": "Turni o'chirib bo'lmadi. Qayta urinib ko'ring."
   }
 }

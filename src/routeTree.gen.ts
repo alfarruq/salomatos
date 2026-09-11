@@ -16,6 +16,7 @@ import { Route as AuthAdminRouteImport } from './pages/_auth/admin'
 import { Route as AuthDashboardRouteImport } from './pages/_auth/dashboard'
 import { Route as AuthAdminIndexRouteImport } from './pages/_auth/admin/index'
 import { Route as AuthAdminClinicRouteImport } from './pages/_auth/admin/clinic'
+import { Route as AuthAdminDoctorTypesRouteImport } from './pages/_auth/admin/doctor-types'
 import { Route as AuthAdminDoctorsRouteImport } from './pages/_auth/admin/doctors'
 import { Route as AuthAdminServicesRouteImport } from './pages/_auth/admin/services'
 import { Route as AuthPatientsIndexRouteImport } from './pages/_auth/patients/index'
@@ -55,6 +56,11 @@ const AuthAdminClinicRoute = AuthAdminClinicRouteImport.update({
   path: '/clinic',
   getParentRoute: () => AuthAdminRoute,
 } as any)
+const AuthAdminDoctorTypesRoute = AuthAdminDoctorTypesRouteImport.update({
+  id: '/doctor-types',
+  path: '/doctor-types',
+  getParentRoute: () => AuthAdminRoute,
+} as any)
 const AuthAdminDoctorsRoute = AuthAdminDoctorsRouteImport.update({
   id: '/doctors',
   path: '/doctors',
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthAdminRouteWithChildren
   '/dashboard': typeof AuthDashboardRoute
   '/admin/clinic': typeof AuthAdminClinicRoute
+  '/admin/doctor-types': typeof AuthAdminDoctorTypesRoute
   '/admin/doctors': typeof AuthAdminDoctorsRoute
   '/admin/services': typeof AuthAdminServicesRoute
   '/patients/$patientId': typeof AuthPatientsPatientIdRoute
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthDashboardRoute
   '/admin/clinic': typeof AuthAdminClinicRoute
+  '/admin/doctor-types': typeof AuthAdminDoctorTypesRoute
   '/admin/doctors': typeof AuthAdminDoctorsRoute
   '/admin/services': typeof AuthAdminServicesRoute
   '/patients/$patientId': typeof AuthPatientsPatientIdRoute
@@ -107,6 +115,7 @@ export interface FileRoutesById {
   '/_auth/admin': typeof AuthAdminRouteWithChildren
   '/_auth/dashboard': typeof AuthDashboardRoute
   '/_auth/admin/clinic': typeof AuthAdminClinicRoute
+  '/_auth/admin/doctor-types': typeof AuthAdminDoctorTypesRoute
   '/_auth/admin/doctors': typeof AuthAdminDoctorsRoute
   '/_auth/admin/services': typeof AuthAdminServicesRoute
   '/_auth/patients/$patientId': typeof AuthPatientsPatientIdRoute
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/admin/clinic'
+    | '/admin/doctor-types'
     | '/admin/doctors'
     | '/admin/services'
     | '/patients/$patientId'
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard'
     | '/admin/clinic'
+    | '/admin/doctor-types'
     | '/admin/doctors'
     | '/admin/services'
     | '/patients/$patientId'
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
     | '/_auth/admin'
     | '/_auth/dashboard'
     | '/_auth/admin/clinic'
+    | '/_auth/admin/doctor-types'
     | '/_auth/admin/doctors'
     | '/_auth/admin/services'
     | '/_auth/patients/$patientId'
@@ -209,6 +221,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAdminClinicRouteImport
       parentRoute: typeof AuthAdminRoute
     }
+    '/_auth/admin/doctor-types': {
+      id: '/_auth/admin/doctor-types'
+      path: '/doctor-types'
+      fullPath: '/admin/doctor-types'
+      preLoaderRoute: typeof AuthAdminDoctorTypesRouteImport
+      parentRoute: typeof AuthAdminRoute
+    }
     '/_auth/admin/doctors': {
       id: '/_auth/admin/doctors'
       path: '/doctors'
@@ -242,6 +261,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthAdminRouteChildren {
   AuthAdminClinicRoute: typeof AuthAdminClinicRoute
+  AuthAdminDoctorTypesRoute: typeof AuthAdminDoctorTypesRoute
   AuthAdminDoctorsRoute: typeof AuthAdminDoctorsRoute
   AuthAdminServicesRoute: typeof AuthAdminServicesRoute
   AuthAdminIndexRoute: typeof AuthAdminIndexRoute
@@ -249,6 +269,7 @@ interface AuthAdminRouteChildren {
 
 const AuthAdminRouteChildren: AuthAdminRouteChildren = {
   AuthAdminClinicRoute: AuthAdminClinicRoute,
+  AuthAdminDoctorTypesRoute: AuthAdminDoctorTypesRoute,
   AuthAdminDoctorsRoute: AuthAdminDoctorsRoute,
   AuthAdminServicesRoute: AuthAdminServicesRoute,
   AuthAdminIndexRoute: AuthAdminIndexRoute,

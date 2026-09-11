@@ -19,7 +19,6 @@ export const doctorSchema = v.object({
   id: v.pipe(v.number(), v.integer()),
   full_name: v.string(),
 
-  specialty: optionalString,
   phone_number: optionalString,
   email: optionalString,
 })
@@ -32,7 +31,6 @@ export function toDoctor(response: DoctorResponse): Doctor {
   return {
     id: response.id,
     fullName: response.full_name,
-    specialty: response.specialty,
     phoneNumber: response.phone_number,
     email: response.email,
   }

@@ -35,14 +35,12 @@ describe('fetchDoctors', () => {
 
     expect(doctors).toHaveLength(2)
     expect(doctors[0]?.fullName).toBe('Sardor Usmonov')
-    expect(doctors[0]?.specialty).toBe('Ortodont')
   })
 
   it('carries a doctor with nothing but a name', async () => {
     const doctors = await fetchDoctors()
 
     expect(doctors[1]?.fullName).toBe('Malika Yusupova')
-    expect(doctors[1]?.specialty).toBeNull()
     expect(doctors[1]?.phoneNumber).toBeNull()
   })
 

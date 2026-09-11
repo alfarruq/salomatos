@@ -10,7 +10,8 @@
     "signOut": "Sign out",
     "next": "Next",
     "previous": "Previous",
-    "edit": "Edit"
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "nav": {
     "skipToContent": "Skip to content",

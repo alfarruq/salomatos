@@ -10,7 +10,8 @@
     "signOut": "Chiqish",
     "next": "Keyingi",
     "previous": "Oldingi",
-    "edit": "Tahrirlash"
+    "edit": "Tahrirlash",
+    "delete": "O'chirish"
   },
   "nav": {
     "skipToContent": "Asosiy qismga o'tish",

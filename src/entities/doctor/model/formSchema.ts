@@ -20,7 +20,6 @@ const UZ_PHONE = /^\+998\d{9}$/
 export const doctorFormSchema = v.object({
   fullName: v.pipe(v.string(), v.trim(), v.minLength(2, 'validation.tooShort')),
   phoneNumber: v.pipe(v.string(), v.regex(UZ_PHONE, 'validation.phoneUz')),
-  specialty: v.string(),
   /*
    * Optional, but a wrong address is worse than none: it is where the clinic
    * would send anything that matters. Empty passes; anything else must parse.
@@ -39,7 +38,6 @@ export type DoctorFormInput = v.InferOutput<typeof doctorFormSchema>
 export const emptyDoctorForm: DoctorFormInput = {
   fullName: '',
   phoneNumber: '',
-  specialty: '',
   email: '',
 }
 
@@ -47,7 +45,6 @@ export function toDoctorForm(doctor: Doctor): DoctorFormInput {
   return {
     fullName: doctor.fullName,
     phoneNumber: doctor.phoneNumber ?? '',
-    specialty: doctor.specialty ?? '',
     email: doctor.email ?? '',
   }
 }
@@ -59,7 +56,6 @@ export function toDoctorPayload(input: DoctorFormInput): Record<string, string |
   return {
     full_name: input.fullName,
     phone_number: input.phoneNumber,
-    specialty: orNull(input.specialty),
     email: orNull(input.email),
   }
 }
@@ -67,7 +63,6 @@ export function toDoctorPayload(input: DoctorFormInput): Record<string, string |
 const SERVER_FIELD_NAMES: Record<string, keyof DoctorFormInput> = {
   full_name: 'fullName',
   phone_number: 'phoneNumber',
-  specialty: 'specialty',
   email: 'email',
 }
 

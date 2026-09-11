@@ -12,7 +12,6 @@ function signIn(permissions: Session['permissions']) {
     phoneNumber: '+998901112233',
     email: 'a@example.test',
     role: 'admin',
-    specialty: null,
     // Set explicitly rather than derived from the role: these tests are about
     // what <Can> does with a permission set, not about ADR-012's table.
     permissions,

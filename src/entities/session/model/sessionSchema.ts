@@ -38,7 +38,6 @@ export const meResponseSchema = v.object({
 
   phone_number: optionalString,
   email: optionalString,
-  specialty: optionalString,
   biography: optionalString,
   /** A relative media path, not a URL. Absent for most accounts. */
   image: optionalString,
@@ -63,7 +62,6 @@ export function toSession(response: MeResponse, userId: number): Session {
     phoneNumber: response.phone_number,
     email: response.email,
     role: response.role,
-    specialty: response.specialty,
     permissions: permissionsForRole(response.role),
   }
 }

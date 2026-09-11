@@ -39,7 +39,6 @@ function signIn() {
     phoneNumber: null,
     email: null,
     role: 'superadmin',
-    specialty: null,
     permissions: new Set(['patient:read', 'patient:write']),
   })
 }
@@ -153,7 +152,6 @@ describe('PatientTable', () => {
       phoneNumber: null,
       email: null,
       role: 'doctor',
-      specialty: null,
       // A doctor may read patients but not write them (ADR-012).
       permissions: new Set(['patient:read']),
     })

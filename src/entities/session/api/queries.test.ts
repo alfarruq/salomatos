@@ -23,7 +23,6 @@ afterAll(() => server.close())
 /** The eight fields `UserMeSerializer` actually returns. */
 const ME_RESPONSE = {
   full_name: 'Dilnoza Rahimova',
-  specialty: null,
   phone_number: '+998901112233',
   email: 'clinic@example.test',
   experience: null,

@@ -9,11 +9,17 @@ export type DoctorId = number
  * which is why creating one goes through `/clinic/doctors/` rather than
  * anything resembling an invitation flow: the server sets the role and the
  * clinic itself.
+ *
+ * ⚠️ `specialty` was a plain text field until the server replaced it with a
+ * `doctor_type` foreign key (`entities/doctor-type`). Neither
+ * `DoctorListSerializer` nor `DoctorCreateUpdateSerializer` exposes that field
+ * yet, so a doctor's type cannot be read or set through this endpoint — it
+ * exists on the model but not on the wire. Nothing to show here until the
+ * server catches up.
  */
 export interface Doctor {
   id: DoctorId
   fullName: string
-  specialty: string | null
   phoneNumber: string | null
   email: string | null
 }

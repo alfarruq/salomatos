@@ -4,6 +4,7 @@ import { readJwtPayload } from '@/shared/lib/jwt'
 import {
   accessTokenFor,
   errorEnvelope,
+  MOCK_DOCTOR_TYPES,
   MOCK_DOCTORS,
   MOCK_PASSWORD,
   MOCK_PATIENT_DETAILS,
@@ -189,6 +190,40 @@ export const handlers = [
     return HttpResponse.json({ ...existing, ...body })
   }),
 
+  /** `DoctorService.get_doctor_types` — a plain array, not a page. */
+  http.get('/api/v1/clinic/doctors/types/', ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+    return HttpResponse.json(MOCK_DOCTOR_TYPES)
+  }),
+
+  http.post('/api/v1/clinic/doctors/types/', async ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
+    return HttpResponse.json({ id: 700, name: body['name'] ?? 'Stomatolog' })
+  }),
+
+  http.patch('/api/v1/clinic/doctors/types/:id/', async ({ request, params }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const id = Number(params['id'])
+    const existing = MOCK_DOCTOR_TYPES.find((doctorType) => doctorType.id === id)
+    if (existing === undefined) return new HttpResponse(null, { status: 404 })
+
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
+    return HttpResponse.json({ ...existing, ...body })
+  }),
+
+  http.delete('/api/v1/clinic/doctors/types/:id/', ({ request, params }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const id = Number(params['id'])
+    const existing = MOCK_DOCTOR_TYPES.find((doctorType) => doctorType.id === id)
+    if (existing === undefined) return new HttpResponse(null, { status: 404 })
+
+    return new HttpResponse(null, { status: 204 })
+  }),
+
   /** `TreatmentTypeService.get_treatment_types` — a plain array, not a page. */
   http.get('/api/v1/clinic/treatment-types/', ({ request }) => {
     if (authenticate(request) === null) return unauthorized()
@@ -253,7 +288,6 @@ export const handlers = [
     return HttpResponse.json({
       id: 900,
       full_name: body['full_name'] ?? '',
-      specialty: body['specialty'] ?? null,
       phone_number: phone,
       email: body['email'] ?? null,
     })

@@ -54,15 +54,6 @@ export function DoctorFormFields({ form, isDisabled = false }: DoctorFormFieldsP
         />
       </Field>
 
-      <Field error={message(errors.specialty?.message)} label={t('admin:doctor.specialty')}>
-        <Input
-          autoComplete="off"
-          disabled={isDisabled}
-          placeholder={t('admin:doctor.specialtyPlaceholder')}
-          {...form.register('specialty')}
-        />
-      </Field>
-
       <Field error={message(errors.email?.message)} label={t('admin:doctor.email')}>
         <Input autoComplete="off" disabled={isDisabled} type="email" {...form.register('email')} />
       </Field>

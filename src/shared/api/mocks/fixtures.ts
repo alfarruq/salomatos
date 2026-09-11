@@ -38,7 +38,6 @@ export const MOCK_USERS = {
     id: 1,
     username: 'chilonzor',
     full_name: 'Dilnoza Rahimova',
-    specialty: null,
     phone_number: '+998901112233',
     email: 'clinic@example.test',
     experience: null,
@@ -50,7 +49,6 @@ export const MOCK_USERS = {
     id: 2,
     username: 'sardor',
     full_name: 'Sardor Usmonov',
-    specialty: 'Ortodont',
     phone_number: '+998901112244',
     email: 'doctor@example.test',
     experience: 7,
@@ -70,7 +68,6 @@ export const MOCK_USERS = {
     id: 3,
     username: 'bemor',
     full_name: 'Vali Aliyev',
-    specialty: null,
     phone_number: '+998901234567',
     email: null,
     experience: null,
@@ -217,7 +214,6 @@ export const MOCK_DOCTORS = [
   {
     id: 2,
     full_name: 'Sardor Usmonov',
-    specialty: 'Ortodont',
     phone_number: '+998901112244',
     email: 'doctor@example.test',
   },
@@ -225,7 +221,6 @@ export const MOCK_DOCTORS = [
     // Everything optional absent: a doctor added in a hurry at reception.
     id: 4,
     full_name: 'Malika Yusupova',
-    specialty: null,
     phone_number: null,
     email: null,
   },
@@ -237,4 +232,10 @@ export const MOCK_TREATMENT_TYPES = [
   { id: 8, name: 'Tozalash', price: 250_000 },
   // Quoted per case — a real state, and not the same as free.
   { id: 9, name: 'Ortodontik davolash', price: null },
+] as const
+
+/** The clinic's doctor categories, as `DoctorTypeListSerializer` emits them. */
+export const MOCK_DOCTOR_TYPES = [
+  { id: 5, name: 'Stomatolog' },
+  { id: 6, name: 'Ortodont' },
 ] as const
