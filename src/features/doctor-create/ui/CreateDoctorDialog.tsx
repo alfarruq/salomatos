@@ -1,5 +1,6 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
@@ -22,6 +23,16 @@ export interface CreateDoctorDialogProps {
 }
 
 const FORM_ID = 'create-doctor-form'
+
+/**
+ * The type a new doctor's select opens on, if the clinic has one by this
+ * name — most clinics on this product are dental (§1), and it is also the
+ * server's own fallback when `DoctorTypeCreateUpdateSerializer.name` is left
+ * empty. Purely a starting point: nothing enforces it, and a clinic that
+ * never created a "Stomatolog" type simply gets an unassigned select, same as
+ * today.
+ */
+const DEFAULT_DOCTOR_TYPE_NAME = 'Stomatolog'
 
 export function CreateDoctorDialog({
   clinicId,
@@ -47,10 +58,40 @@ export function CreateDoctorDialog({
     label: doctorType.name,
   }))
 
+  const defaultDoctorTypeId = (doctorTypesQuery.data ?? []).find(
+    (doctorType) => doctorType.name === DEFAULT_DOCTOR_TYPE_NAME,
+  )?.id
+
+  const { setValue } = form
+  /*
+   * Runs once the list arrives and only while the field is untouched —
+   * `dirtyFields`, not `isDirty`, so filling in the name first does not skip
+   * this. `setValue` alone (no `shouldDirty`) keeps the field clean, so a
+   * person who submits without looking at it is not treated as having made a
+   * deliberate choice — same reasoning as the edit dialog's own dirty check.
+   *
+   * `onSuccess` below repeats this on `reset`, because `reset` clears
+   * `dirtyFields` back to what it started as — untouched — and this effect's
+   * dependencies would otherwise not fire again for a second doctor in a row.
+   */
+  useEffect(() => {
+    if (defaultDoctorTypeId === undefined) return
+    if (form.formState.dirtyFields.doctorTypeId) return
+
+    setValue('doctorTypeId', String(defaultDoctorTypeId))
+  }, [defaultDoctorTypeId, form.formState.dirtyFields.doctorTypeId, setValue])
+
   const handleSubmit = form.handleSubmit((values) =>
     mutate(values, {
       onSuccess: () => {
-        form.reset(emptyDoctorForm)
+        // Reset to the default type, not to unassigned — otherwise adding a
+        // second doctor in a row would silently lose the starting point the
+        // first one had, since `reset` is what clears `dirtyFields` back to
+        // untouched and the effect above has nothing left to react to.
+        form.reset({
+          ...emptyDoctorForm,
+          doctorTypeId: defaultDoctorTypeId === undefined ? '' : String(defaultDoctorTypeId),
+        })
         onOpenChange(false)
         onCreated?.()
       },
