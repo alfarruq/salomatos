@@ -216,6 +216,10 @@ export const MOCK_DOCTORS = [
     full_name: 'Sardor Usmonov',
     phone_number: '+998901112244',
     email: 'doctor@example.test',
+    // The server's own field is a name, not the id `MOCK_DOCTOR_TYPES` uses —
+    // `DoctorListSerializer.doctor_type` has no `source`, so it serialises the
+    // foreign key's `__str__`.
+    doctor_type: 'Stomatolog',
   },
   {
     // Everything optional absent: a doctor added in a hurry at reception.
@@ -223,6 +227,7 @@ export const MOCK_DOCTORS = [
     full_name: 'Malika Yusupova',
     phone_number: null,
     email: null,
+    doctor_type: null,
   },
 ] as const
 

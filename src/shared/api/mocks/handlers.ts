@@ -50,6 +50,19 @@ const unauthorized = () =>
     { status: 401 },
   )
 
+/**
+ * `DoctorCreateUpdateSerializer.doctor_type` writes an id (`PrimaryKeyRelated
+ * Field`, since it is a plain `ModelSerializer` field); `DoctorListSerializer.
+ * doctor_type` reads back a name (`CharField()` with no `source`, so it
+ * serialises the FK's own `__str__`). A mock that echoed the id it was given
+ * would look like it worked and then show a number where a name belongs.
+ */
+function doctorTypeNameFor(rawId: unknown): string | null {
+  const id = Number(rawId)
+  if (rawId === null || rawId === undefined || Number.isNaN(id)) return null
+  return MOCK_DOCTOR_TYPES.find((doctorType) => doctorType.id === id)?.name ?? null
+}
+
 export const handlers = [
   /**
    * §9 — the only thing that says who the user is. Note what it does *not*
@@ -317,6 +330,9 @@ export const handlers = [
       full_name: body['full_name'] ?? '',
       phone_number: phone,
       email: body['email'] ?? null,
+      // Written as an id (`doctor_type`), read back as a name — the list
+      // serializer has no `source` and reports the FK's own `__str__`.
+      doctor_type: doctorTypeNameFor(body['doctor_type']),
     })
   }),
 
@@ -328,7 +344,13 @@ export const handlers = [
     if (existing === undefined) return new HttpResponse(null, { status: 404 })
 
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
-    return HttpResponse.json({ ...existing, ...body })
+    const updated: Record<string, unknown> = { ...existing, ...body }
+    // Same id-in, name-out translation as create — otherwise a saved
+    // assignment would echo back as the raw id instead of what the server
+    // actually returns.
+    if ('doctor_type' in body) updated['doctor_type'] = doctorTypeNameFor(body['doctor_type'])
+
+    return HttpResponse.json(updated)
   }),
 
   http.get('/api/v1/clinic/patients/:patientId/', ({ request, params }) => {

@@ -11,15 +11,18 @@ export type DoctorId = number
  * clinic itself.
  *
  * ⚠️ `specialty` was a plain text field until the server replaced it with a
- * `doctor_type` foreign key (`entities/doctor-type`). Neither
- * `DoctorListSerializer` nor `DoctorCreateUpdateSerializer` exposes that field
- * yet, so a doctor's type cannot be read or set through this endpoint — it
- * exists on the model but not on the wire. Nothing to show here until the
- * server catches up.
+ * `doctor_type` foreign key (`entities/doctor-type`). `DoctorListSerializer`
+ * now reports it as `doctor_type = serializers.CharField()` with no `source` —
+ * the FK's own `__str__`, i.e. its **name**, not its id. That is why this is
+ * `doctorTypeName` rather than `doctorTypeId`: a value from here can be shown,
+ * never fed back into the create/update select, which needs the id and gets
+ * it from `entities/doctor-type` instead.
  */
 export interface Doctor {
   id: DoctorId
   fullName: string
   phoneNumber: string | null
   email: string | null
+  /** Null when no type is assigned — see `entities/doctor/model/schema.ts`. */
+  doctorTypeName: string | null
 }

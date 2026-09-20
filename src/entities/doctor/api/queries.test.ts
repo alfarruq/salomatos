@@ -42,6 +42,36 @@ describe('fetchDoctors', () => {
 
     expect(doctors[1]?.fullName).toBe('Malika Yusupova')
     expect(doctors[1]?.phoneNumber).toBeNull()
+    expect(doctors[1]?.doctorTypeName).toBeNull()
+  })
+
+  it('reads the assigned type as a name, not the id it was set with', async () => {
+    // `doctor_type` on this endpoint has no `source` — it is the foreign
+    // key's own `__str__`, i.e. its name.
+    const doctors = await fetchDoctors()
+
+    expect(doctors[0]?.doctorTypeName).toBe('Stomatolog')
+  })
+
+  it('trusts DRF to emit null for an unassigned type, whatever the schema claims', async () => {
+    /*
+     * The published schema marks `doctor_type` required and non-nullable —
+     * drf-yasg cannot see that the field has no `source` and is really a
+     * possibly-empty foreign key. DRF's base `Serializer.to_representation`
+     * emits `null` for a `None` attribute regardless of what the field
+     * declares, so this is what a real unassigned doctor looks like.
+     */
+    server.use(
+      http.get('/api/v1/clinic/doctors/', () =>
+        HttpResponse.json([
+          { id: 9, full_name: 'Nodir Qodirov', phone_number: null, email: null, doctor_type: null },
+        ]),
+      ),
+    )
+
+    const doctors = await fetchDoctors()
+
+    expect(doctors[0]?.doctorTypeName).toBeNull()
   })
 
   it('survives a serializer that stopped sending an optional field', async () => {
@@ -55,6 +85,7 @@ describe('fetchDoctors', () => {
 
     expect(doctors[0]?.fullName).toBe('Nodir Qodirov')
     expect(doctors[0]?.email).toBeNull()
+    expect(doctors[0]?.doctorTypeName).toBeNull()
   })
 
   it('refuses a row with no name, which nothing could render', async () => {

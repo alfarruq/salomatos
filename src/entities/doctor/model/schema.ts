@@ -21,6 +21,17 @@ export const doctorSchema = v.object({
 
   phone_number: optionalString,
   email: optionalString,
+  /*
+   * The published schema marks this required and non-nullable — drf-yasg
+   * cannot see that `CharField()` has no `source`, so it has no idea the
+   * value is actually a possibly-`None` foreign key. DRF's own
+   * `Serializer.to_representation` emits `null` for a `None` attribute before
+   * any field's `to_representation` runs, regardless of what the field
+   * declares, so a doctor with no type assigned is trusted to arrive as
+   * `null` — kept optional here rather than betting the whole table on the
+   * schema being right, the same reasoning as every other field on this row.
+   */
+  doctor_type: optionalString,
 })
 
 export const doctorListSchema = v.array(doctorSchema)
@@ -33,5 +44,6 @@ export function toDoctor(response: DoctorResponse): Doctor {
     fullName: response.full_name,
     phoneNumber: response.phone_number,
     email: response.email,
+    doctorTypeName: response.doctor_type,
   }
 }

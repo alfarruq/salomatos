@@ -74,7 +74,7 @@ export function DoctorTable({ clinicId }: DoctorTableProps) {
         )}
         loading={
           <Table density="compact">
-            <TableSkeleton columns={3} rows={4} />
+            <TableSkeleton columns={4} rows={4} />
           </Table>
         }
         query={query}
@@ -84,6 +84,7 @@ export function DoctorTable({ clinicId }: DoctorTableProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>{t('admin:doctor.fullName')}</TableHead>
+                <TableHead>{t('admin:doctor.type')}</TableHead>
                 <TableHead>{t('admin:doctor.phoneNumber')}</TableHead>
                 <TableHead>{t('admin:doctor.email')}</TableHead>
                 <TableHead align="right">{t('common:action.edit')}</TableHead>
@@ -94,6 +95,7 @@ export function DoctorTable({ clinicId }: DoctorTableProps) {
               {doctors.map((doctor) => (
                 <TableRow key={doctor.id}>
                   <TableCell>{doctor.fullName}</TableCell>
+                  <TableCell>{doctor.doctorTypeName ?? EMPTY}</TableCell>
                   <TableCell>
                     {doctor.phoneNumber === null
                       ? EMPTY
