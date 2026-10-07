@@ -99,7 +99,7 @@ export function DoctorTable({ clinicId }: DoctorTableProps) {
                   <TableCell>
                     {doctor.phoneNumber === null
                       ? EMPTY
-                      : `+998 ${formatSubscriber(subscriberDigitsOf(doctor.phoneNumber))}`}
+                      : `+998-${formatSubscriber(subscriberDigitsOf(doctor.phoneNumber))}`}
                   </TableCell>
                   <TableCell>{doctor.email ?? EMPTY}</TableCell>
                   <TableCell align="right">

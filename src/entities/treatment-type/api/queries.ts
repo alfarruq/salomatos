@@ -2,7 +2,11 @@ import { queryOptions } from '@tanstack/react-query'
 import * as v from 'valibot'
 import { httpClient } from '@/shared/api/httpClient'
 import { cachePolicy } from '@/shared/config/cache'
-import { toTreatmentType, treatmentTypeListSchema } from '../model/schema'
+import {
+  type TreatmentTypeResponse,
+  toTreatmentType,
+  treatmentTypePageSchema,
+} from '../model/schema'
 import type { TreatmentType } from '../model/types'
 
 /** §6.2 — `clinicId` is inside every key, without exception. */
@@ -11,13 +15,34 @@ export const treatmentTypeKeys = {
   list: (clinicId: number) => [...treatmentTypeKeys.scope(clinicId), 'list'] as const,
 }
 
+/** `next`'s own origin and `/api` prefix, which `httpClient` adds back itself. */
+function pathFromNext(next: string): string {
+  const url = new URL(next, globalThis.location.origin)
+  return `${url.pathname.replace(/^\/api\//, '')}${url.search}`
+}
+
+/**
+ * Follows every page rather than exposing pagination to the caller — see the
+ * schema module for why this is paginated at all. A clinic's price list is a
+ * few dozen rows at most (§1), not the thousand-patient case pagination
+ * exists for, so the admin screen wants the whole thing on one request rather
+ * than page-number controls nobody asked for on a settings screen.
+ */
 export async function fetchTreatmentTypes(signal?: AbortSignal): Promise<TreatmentType[]> {
-  const raw = await httpClient<unknown>(
-    'v1/clinic/treatment-types/',
-    signal === undefined ? {} : { signal },
-  )
-  // A plain array — this endpoint does not paginate. See the schema module.
-  return v.parse(treatmentTypeListSchema, raw).map(toTreatmentType)
+  const responses: TreatmentTypeResponse[] = []
+  let path: string | null = 'v1/clinic/treatment-types/'
+
+  while (path !== null) {
+    const raw: unknown = await httpClient(path, signal === undefined ? {} : { signal })
+    const page: v.InferOutput<typeof treatmentTypePageSchema> = v.parse(
+      treatmentTypePageSchema,
+      raw,
+    )
+    responses.push(...page.results)
+    path = page.next === null ? null : pathFromNext(page.next)
+  }
+
+  return responses.map(toTreatmentType)
 }
 
 export const treatmentTypeQueries = {

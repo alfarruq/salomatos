@@ -2,6 +2,9 @@
   "app": {
     "name": "SalomatOS"
   },
+  "currency": {
+    "som": "so'm"
+  },
   "action": {
     "save": "Saqlash",
     "cancel": "Bekor qilish",
@@ -20,6 +23,7 @@
     "breadcrumb": "Sahifalar zanjiri",
     "dashboard": "Boshqaruv paneli",
     "patients": "Bemorlar",
+    "appointments": "Uchrashuvlar",
     "billing": "To'lovlar",
     "admin": "Boshqaruv"
   },

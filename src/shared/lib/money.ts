@@ -12,21 +12,20 @@
  * representation, and the value caps at about 2.1 billion so'm.
  */
 
-const CURRENCY = 'UZS'
-
 /**
- * `1 200 000 so'm`, in whichever way the active locale writes it.
+ * `1 200 000 so'm`, in whichever way the active locale groups the digits.
  *
- * `Intl`, not a hand-rolled thousands separator: Russian groups with a narrow
- * space and puts the symbol last, English groups with a comma and puts it
- * first, and getting that wrong in a bill is the kind of detail staff notice
- * immediately.
+ * `Intl`'s plain `decimal` style, not `currency`: `style: 'currency'` with
+ * `UZS` used to render the bare ISO code ("UZS 1,200,000") because most
+ * runtimes have no localised symbol for it, which is the opposite of what
+ * staff need to read on a bill. `currencyLabel` is the word instead —
+ * `t('common:currency.som')` at the call site, so it comes from `t()` like
+ * every other user-visible string (§11) rather than being hardcoded here.
  */
-export function formatSom(amount: number, locale: string): string {
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency: CURRENCY,
+export function formatSom(amount: number, locale: string, currencyLabel: string): string {
+  const number = new Intl.NumberFormat(locale, {
     // So'm has no subunit in practice; showing `,00` on every price is noise.
     maximumFractionDigits: 0,
   }).format(amount)
+  return `${number} ${currencyLabel}`
 }

@@ -19,14 +19,28 @@ import { httpClient } from '@/shared/api/httpClient'
 async function updateTreatmentType({
   treatmentTypeId,
   input,
+  includeDoctorType,
 }: {
   treatmentTypeId: TreatmentTypeId
   input: TreatmentTypeFormInput
+  /**
+   * `toTreatmentTypeForm` cannot fill `doctorTypeId` from the server — the
+   * response carries a name (`TreatmentType.doctorTypeName`), not the id this
+   * needs — so the select always opens unset regardless of what is actually
+   * assigned. Saving that unconditionally would silently clear a real
+   * assignment nobody meant to touch. `false` unless the dialog reports the
+   * select itself was changed this session (`formState.dirtyFields.doctorTypeId`)
+   * — same guard as `useUpdateDoctor`.
+   */
+  includeDoctorType: boolean
 }): Promise<TreatmentType> {
+  const payload = toTreatmentTypePayload(input)
+  if (!includeDoctorType) delete payload['doctor_type']
+
   const raw = await httpClient<unknown>(`v1/clinic/treatment-types/${treatmentTypeId}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(toTreatmentTypePayload(input)),
+    body: JSON.stringify(payload),
   })
 
   return toTreatmentType(v.parse(treatmentTypeSchema, raw))

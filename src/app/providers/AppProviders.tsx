@@ -2,8 +2,8 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { type ReactNode, Suspense, useEffect, useRef, useState } from 'react'
 import { I18nextProvider } from 'react-i18next'
 import { type Session, sessionKeys, useSessionStore } from '@/entities/session'
+import { clearSession } from '@/shared/api/authSession'
 import { configureApi } from '@/shared/api/httpContext'
-import { clearAccessToken } from '@/shared/api/tokenStore'
 import { createI18n } from '@/shared/i18n'
 import { Toaster, TooltipProvider } from '@/shared/ui'
 import { createQueryClient } from './queryClient'
@@ -31,7 +31,8 @@ export function AppProviders({ children }: { children: ReactNode }) {
          * nothing to exchange — an expired token is a logout nobody chose.
          *
          * The token goes first: anything still in flight should stop being
-         * sent as an authenticated request.
+         * sent as an authenticated request. `clearSession` drops it from
+         * storage too (ADR `auth-session-storage`), not just from memory.
          *
          * The *query cache* is deliberately not cleared here. Doing so in
          * response to a 401 would cancel the request that reported it, and the
@@ -40,7 +41,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
          * arrival at /login, which is where the user ends up either way and
          * where nothing is in flight (§13.4).
          */
-        clearAccessToken()
+        clearSession()
         useSessionStore.getState().clear()
       },
     })

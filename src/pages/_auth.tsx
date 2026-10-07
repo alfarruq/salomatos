@@ -5,8 +5,8 @@ import { Can, sessionQueries, useSession } from '@/entities/session'
 import { useLogout } from '@/features/auth-logout'
 import { LanguageSwitcher } from '@/features/language-switch'
 import { LockScreen, useIdleLock, useLockStore } from '@/features/session-lock'
+import { clearSession } from '@/shared/api/authSession'
 import { ApiError } from '@/shared/api/errors'
-import { clearAccessToken } from '@/shared/api/tokenStore'
 import {
   AppShell,
   Avatar,
@@ -57,7 +57,7 @@ export const Route = createFileRoute('/_auth')({
      * one cached would bounce the user straight back here.
      */
     if (session.role === 'patient') {
-      clearAccessToken()
+      clearSession()
       context.queryClient.clear()
       throw redirect({ to: '/login', search: { denied: 'patient' } })
     }
@@ -155,6 +155,16 @@ function AuthenticatedLayout() {
                 to="/patients"
               >
                 {t('nav.patients')}
+              </Link>
+            </li>
+          </Can>
+          <Can permission="appointment:read">
+            <li>
+              <Link
+                className="block rounded-control px-3 py-2 text-body text-text-secondary hover:bg-sunken hover:text-text"
+                to="/appointments"
+              >
+                {t('nav.appointments')}
               </Link>
             </li>
           </Can>

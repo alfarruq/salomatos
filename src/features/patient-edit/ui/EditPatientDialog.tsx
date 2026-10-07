@@ -1,7 +1,9 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
+import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { doctorQueries } from '@/entities/doctor'
 import {
   type Patient,
   PatientFormFields,
@@ -16,7 +18,12 @@ import { useUpdatePatient } from '../model/useUpdatePatient'
 
 export interface EditPatientDialogProps {
   clinicId: number
-  patient: Patient
+  /**
+   * A `Pick`, not the full `Patient`: the table passes a `PatientListItem`
+   * row directly, and the detail page passes a `Patient` — both carry every
+   * field this dialog reads.
+   */
+  patient: Pick<Patient, 'id' | 'fullName' | 'phoneNumber' | 'birthDate' | 'address' | 'office'>
   open: boolean
   onOpenChange: (open: boolean) => void
   onSaved?: () => void
@@ -54,9 +61,19 @@ export function EditPatientDialog({
 
   const { mutate, isPending } = useUpdatePatient(clinicId)
 
+  const doctorsQuery = useQuery(doctorQueries.list(clinicId))
+  const doctorOptions = (doctorsQuery.data ?? []).map((doctor) => ({
+    value: String(doctor.id),
+    label: doctor.fullName,
+  }))
+
   const handleSubmit = form.handleSubmit((values) =>
     mutate(
-      { patientId: patient.id, input: values },
+      {
+        patientId: patient.id,
+        input: values,
+        includeDoctorId: Boolean(form.formState.dirtyFields.doctorId),
+      },
       {
         onSuccess: () => {
           onOpenChange(false)
@@ -103,7 +120,7 @@ export function EditPatientDialog({
     >
       <form className="flex flex-col gap-4" id={FORM_ID} noValidate onSubmit={handleSubmit}>
         {rootError ? <Alert title={rootError} tone="danger" /> : null}
-        <PatientFormFields form={form} isDisabled={isPending} />
+        <PatientFormFields doctorOptions={doctorOptions} form={form} isDisabled={isPending} />
       </form>
     </Dialog>
   )

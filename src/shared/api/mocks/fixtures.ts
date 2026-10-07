@@ -159,7 +159,10 @@ export const MOCK_PATIENT_DETAILS: Record<number, unknown> = {
     total_remaining: 1_200_000,
     visit_number: 3,
     treatment_type: [{ id: 7, name: 'Implantatsiya', tooth_number: 36 }],
-    gallery: [],
+    gallery: [
+      { id: 1, image: '/media/gallery/before.jpg', created_at: '2026-08-20T09:15:00Z' },
+      { id: 2, image: '/media/gallery/after.jpg', created_at: '2026-08-24T14:40:00Z' },
+    ],
     recipe: [],
   },
   103: {
@@ -182,6 +185,76 @@ export const MOCK_PATIENT_DETAILS: Record<number, unknown> = {
     gallery: [],
     recipe: [],
   },
+}
+
+/**
+ * `TreatmentList`, keyed by `patient_id` the way `/clinic/treatments/` filters
+ * them. A plain array on the wire, confirmed against a real response.
+ */
+export const MOCK_TREATMENTS: Record<number, unknown[]> = {
+  101: [
+    {
+      id: 1,
+      patient: 'Vali Aliyev',
+      patient_id: 101,
+      doctor: 'Sardor Usmonov',
+      treatment_type: 'Implantatsiya',
+      total_treatment_cost: 4_000_000,
+      total_paid: 2_800_000,
+      remaining: '1200000',
+      visit_number: 3,
+      tooth_number: 36,
+      start_date: '2026-08-20',
+      notes: 'Implant o‘rnatildi, keyingi tashrif nazorat uchun.',
+      status: 'in_progress',
+    },
+    {
+      id: 2,
+      patient: 'Vali Aliyev',
+      patient_id: 101,
+      doctor: 'Sardor Usmonov',
+      treatment_type: 'Tozalash',
+      total_treatment_cost: 250_000,
+      total_paid: 250_000,
+      remaining: '0',
+      visit_number: 1,
+      tooth_number: null,
+      start_date: '2026-06-02',
+      notes: '',
+      status: 'completed',
+    },
+  ],
+  103: [],
+}
+
+/**
+ * `RecipeList`, keyed by `patient_id` the way `/core/recipes/` filters them.
+ * A plain array on the wire, confirmed against a real response.
+ */
+export const MOCK_RECIPES: Record<number, unknown[]> = {
+  101: [
+    {
+      id: 1,
+      patient: 'Vali Aliyev',
+      doctor: 'Sardor Usmonov',
+      notes: 'Ovqatdan keyin ichish tavsiya etiladi.',
+      clinic: 'Dilnoza Rahimova',
+      created_at: '2026-08-20T09:30:00Z',
+      medicines: [
+        {
+          id: 1,
+          name: 'Amoksitsillin',
+          dose: '500 mg',
+          type: 'Tablet',
+          frequency: 'Kuniga 2 marta',
+          duration: '7 kun',
+          meal: 'Ovqatdan keyin',
+          minutes: 30,
+        },
+      ],
+    },
+  ],
+  103: [],
 }
 
 /** The envelope `apps/core/exceptions.py` puts around every failure. */
@@ -231,16 +304,71 @@ export const MOCK_DOCTORS = [
   },
 ] as const
 
-/** The clinic's price list, as `TreatmentTypeListSerializer` emits it. */
+/**
+ * The clinic's price list, as `TreatmentTypeListSerializer` emits each row.
+ *
+ * A name, like `MOCK_DOCTORS[].doctor_type` — confirmed against a real
+ * response, which is what corrected the entity's earlier "it's the id" guess.
+ */
 export const MOCK_TREATMENT_TYPES = [
-  { id: 7, name: 'Implantatsiya', price: 4_000_000 },
-  { id: 8, name: 'Tozalash', price: 250_000 },
-  // Quoted per case — a real state, and not the same as free.
-  { id: 9, name: 'Ortodontik davolash', price: null },
+  { id: 7, name: 'Implantatsiya', price: 4_000_000, doctor_type: 'Stomatolog' },
+  { id: 8, name: 'Tozalash', price: 250_000, doctor_type: 'Ortodont' },
+  // Quoted per case — a real state, and not the same as free. Also unassigned.
+  { id: 9, name: 'Ortodontik davolash', price: null, doctor_type: null },
 ] as const
 
 /** The clinic's doctor categories, as `DoctorTypeListSerializer` emits them. */
 export const MOCK_DOCTOR_TYPES = [
   { id: 5, name: 'Stomatolog' },
   { id: 6, name: 'Ortodont' },
+] as const
+
+/**
+ * The clinic's schedule, as `/calendars/appointments/` actually emits it —
+ * confirmed against a real response. There is no `full_name` field on read:
+ * the display name comes back under `patient` alongside the real id in
+ * `patient_id`, and `doctor`/`doctor_id` follow the same pair.
+ */
+export const MOCK_APPOINTMENTS = [
+  {
+    id: 501,
+    patient_id: 101,
+    patient: 'Vali Aliyev',
+    phone_number: '+998901234567',
+    doctor_id: 2,
+    doctor: 'Sardor Usmonov',
+    treatment_type: 'Implantatsiya',
+    date: '2026-09-27',
+    time: '09:30:00',
+    notes: null,
+    status: 'in_progress',
+  },
+  {
+    // A walk-in — `patient_id` is null, but `patient` still carries the name
+    // that was typed (unconfirmed for a real walk-in, see the entity schema).
+    id: 502,
+    patient_id: null,
+    patient: 'Yangi Mijoz',
+    phone_number: '+998907654321',
+    doctor_id: 4,
+    doctor: 'Malika Yusupova',
+    treatment_type: null,
+    date: '2026-09-27',
+    time: '11:00:00',
+    notes: 'Birinchi tashrif',
+    status: 'in_progress',
+  },
+  {
+    id: 503,
+    patient_id: 102,
+    patient: 'Nodira Karimova',
+    phone_number: '+998907654321',
+    doctor_id: null,
+    doctor: null,
+    treatment_type: 'Tozalash',
+    date: '2026-09-28',
+    time: '14:00:00',
+    notes: null,
+    status: 'completed',
+  },
 ] as const

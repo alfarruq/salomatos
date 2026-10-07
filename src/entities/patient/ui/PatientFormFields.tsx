@@ -1,12 +1,18 @@
 import { Controller, type UseFormReturn } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { todayCalendarDate } from '@/shared/lib/calendarDate'
-import { DatePicker, Field, Input, PhoneInput } from '@/shared/ui'
+import { DatePicker, Field, Input, PhoneInput, Select, type SelectOption } from '@/shared/ui'
 import type { PatientFormInput } from '../model/formSchema'
 
 export interface PatientFormFieldsProps {
   form: UseFormReturn<PatientFormInput>
   isDisabled?: boolean
+  /**
+   * Doctor choices, as plain `{value, label}` pairs — an entity may not import
+   * another entity (§4), so the feature fetching the list converts it first,
+   * same as `AppointmentFormFields.doctorOptions`.
+   */
+  doctorOptions: SelectOption[]
 }
 
 /**
@@ -21,7 +27,11 @@ export interface PatientFormFieldsProps {
 // Defaulted rather than forwarded as `boolean | undefined`: under
 // `exactOptionalPropertyTypes` those are different types, and the controls
 // below declare `disabled?: boolean`.
-export function PatientFormFields({ form, isDisabled = false }: PatientFormFieldsProps) {
+export function PatientFormFields({
+  form,
+  isDisabled = false,
+  doctorOptions,
+}: PatientFormFieldsProps) {
   const { t, i18n } = useTranslation(['patients', 'validation'])
 
   /** Valibot and the server both speak `validation.<code>` — see §10. */
@@ -55,6 +65,23 @@ export function PatientFormFields({ form, isDisabled = false }: PatientFormField
               disabled={isDisabled}
               name={field.name}
               onChange={field.onChange}
+              value={field.value}
+            />
+          )}
+        />
+      </Field>
+
+      <Field error={message(errors.doctorId?.message)} isRequired label={t('patients:form.doctor')}>
+        <Controller
+          control={form.control}
+          name="doctorId"
+          render={({ field }) => (
+            <Select
+              disabled={isDisabled}
+              name={field.name}
+              onValueChange={field.onChange}
+              options={doctorOptions}
+              placeholder={t('patients:form.doctorPlaceholder')}
               value={field.value}
             />
           )}

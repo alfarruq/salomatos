@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import * as v from 'valibot'
 import { fetchSession, type Session, sessionKeys } from '@/entities/session'
+import { clearSession, saveSession } from '@/shared/api/authSession'
 import { httpClient } from '@/shared/api/httpClient'
-import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
 import { useLockStore } from './lockStore'
 
 /**
@@ -19,6 +19,7 @@ import { useLockStore } from './lockStore'
 const loginResponseSchema = v.object({
   result: v.object({
     access_token: v.pipe(v.string(), v.minLength(1)),
+    refresh_token: v.pipe(v.string(), v.minLength(1)),
   }),
 })
 
@@ -30,12 +31,12 @@ async function unlockRequest(input: { username: string; password: string }): Pro
   })
 
   const { result } = v.parse(loginResponseSchema, raw)
-  setAccessToken(result.access_token)
+  saveSession(result.access_token, result.refresh_token)
 
   try {
     return await fetchSession()
   } catch (error) {
-    clearAccessToken()
+    clearSession()
     throw error
   }
 }

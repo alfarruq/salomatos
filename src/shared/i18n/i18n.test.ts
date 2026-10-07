@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
+import { storage } from '@/shared/lib/storage'
 import { createI18n } from './config'
 import { DEFAULT_LOCALE, isLocale, LOCALES, resolveLocale } from './locales'
 
@@ -84,6 +85,43 @@ describe('locale resolution', () => {
   it('recognises exactly the four locales from ADR-008', () => {
     expect(LOCALES).toEqual(['uz-Latn', 'uz-Cyrl', 'ru', 'en'])
     expect(isLocale('kaa')).toBe(false)
+  })
+})
+
+describe('locale persistence (§3 allowlist)', () => {
+  afterEach(() => storage.remove('locale'))
+
+  it('starts from the stored locale rather than the browser default', async () => {
+    storage.set('locale', 'ru')
+
+    const i18n = createI18n()
+    if (!i18n.isInitialized) {
+      await new Promise((resolve) => i18n.on('initialized', () => resolve(undefined)))
+    }
+
+    expect(i18n.language).toBe('ru')
+  })
+
+  it('ignores a corrupted stored value rather than crashing', async () => {
+    storage.set('locale', 'not-a-real-locale')
+
+    const i18n = createI18n()
+    if (!i18n.isInitialized) {
+      await new Promise((resolve) => i18n.on('initialized', () => resolve(undefined)))
+    }
+
+    // Falls through to the browser-language resolver, same as an empty store —
+    // never the raw, unvalidated value that was sitting in storage.
+    expect(LOCALES).toContain(i18n.language)
+    expect(i18n.language).not.toBe('not-a-real-locale')
+  })
+
+  it('persists a change made after startup', async () => {
+    const i18n = await ready('uz-Latn')
+
+    await i18n.changeLanguage('en')
+
+    expect(storage.get('locale')).toBe('en')
   })
 })
 

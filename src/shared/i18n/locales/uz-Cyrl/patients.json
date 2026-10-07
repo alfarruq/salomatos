@@ -7,6 +7,8 @@
   "form": {
     "fullName": "Ф. И. Ш.",
     "phoneNumber": "Телефон рақами",
+    "doctor": "Шифокор",
+    "doctorPlaceholder": "Шифокорни танланг",
     "birthDate": "Туғилган сана",
     "birthDatePlaceholder": "Санани танланг",
     "previousMonth": "Олдинги ой",
@@ -16,7 +18,7 @@
   },
   "create": {
     "title": "Янги бемор",
-    "description": "Исм ва телефон рақами мажбурий.",
+    "description": "Исм, телефон рақами ва шифокор мажбурий.",
     "submit": "Бемор қўшиш",
     "failed": "Беморни қўшиб бўлмади. Қайта уриниб кўринг."
   },
@@ -25,10 +27,26 @@
     "description": "Ўзгаришлар дарҳол сақланади.",
     "failed": "Ўзгаришларни сақлаб бўлмади. Қайта уриниб кўринг."
   },
+  "delete": {
+    "title": "Беморни ўчириш",
+    "description": "\"{{name}}\" бемори бутунлай ўчирилсинми?",
+    "warning": "Бу амални ортга қайтариб бўлмайди. Беморнинг даволаш, учрашув ва тўлов тарихи билан нима бўлиши аниқ эмас — улар ҳам ўчиши ёки эгасиз қолиши мумкин.",
+    "wait": "Ўчириш ({{seconds}})",
+    "failed": "Беморни ўчириб бўлмади. Қайта уриниб кўринг."
+  },
   "search": {
     "label": "Беморларни қидириш",
     "placeholder": "Исм",
     "clear": "Қидирувни тозалаш"
+  },
+  "filters": {
+    "treatmentTypeLabel": "Муолажа тури бўйича филтр",
+    "treatmentTypeAll": "Барча муолажа турлари",
+    "statusLabel": "Ҳолат бўйича филтр",
+    "statusAll": "Барча ҳолатлар",
+    "doctorLabel": "Шифокор бўйича филтр",
+    "doctorPlaceholder": "Шифокор",
+    "doctorAll": "Барча шифокорлар"
   },
   "title": "Беморлар",
   "column": {
@@ -58,6 +76,34 @@
     "totalCost": "Даволаниш суммаси",
     "totalPaid": "Тўланган",
     "treatments": "Даволаниш",
-    "treatmentWithTooth": "{{name}} · {{tooth}}-тиш"
+    "treatmentWithTooth": "{{name}} · {{tooth}}-тиш",
+    "newTreatment": "Янги муолажа",
+    "writePrescription": "Рецепт ёзиш",
+    "newAppointment": "Янги учрашув",
+    "comingSoon": "Бу функция тез орада қўшилади.",
+    "toothChart": "Тиш харитаси",
+    "tabGeneral": "Умумий маълумот",
+    "tabTreatments": "Муолажалар",
+    "tabPrescriptions": "Рецептлар",
+    "tabGallery": "Галерея",
+    "noTreatments": "Муолажалар йўқ",
+    "noTreatmentsDescription": "Бу бемор учун ҳали муолажа қайд этилмаган.",
+    "ageYears": "{{age}} ёш",
+    "totalPaidOf": "Жами тўланган: {{paid}} / {{total}}",
+    "visitCount_one": "{{count}} ташриф",
+    "visitCount_other": "{{count}} ташриф",
+    "history": {
+      "date": "Сана",
+      "type": "Муолажа",
+      "tooth": "Тиш",
+      "doctor": "Шифокор",
+      "status": "Ҳолат",
+      "paid": "Тўланган"
+    },
+    "galleryEmpty": "Ҳозирча расм йўқ",
+    "galleryEmptyDescription": "Бу бемор учун қўшилган расмлар шу ерда кўринади.",
+    "galleryImage": "Расм",
+    "prescriptionsEmpty": "Ҳозирча рецепт йўқ",
+    "prescriptionsEmptyDescription": "Бу беморга ёзилган рецептлар шу ерда кўринади."
   }
 }

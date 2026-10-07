@@ -1,7 +1,9 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
+import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { doctorTypeQueries } from '@/entities/doctor-type'
 import {
   type TreatmentType,
   TreatmentTypeFormFields,
@@ -46,9 +48,21 @@ export function EditTreatmentTypeDialog({
 
   const { mutate, isPending } = useUpdateTreatmentType(clinicId)
 
+  const doctorTypesQuery = useQuery(doctorTypeQueries.list(clinicId))
+  const doctorTypeOptions = (doctorTypesQuery.data ?? []).map((doctorType) => ({
+    value: String(doctorType.id),
+    label: doctorType.name,
+  }))
+
   const handleSubmit = form.handleSubmit((values) =>
     mutate(
-      { treatmentTypeId: service.id, input: values },
+      {
+        treatmentTypeId: service.id,
+        input: values,
+        // See `useUpdateTreatmentType`: the select cannot show what is already
+        // assigned, so it must only be saved when the person actually used it.
+        includeDoctorType: Boolean(form.formState.dirtyFields.doctorTypeId),
+      },
       {
         onSuccess: () => onOpenChange(false),
         onError: (error) => {
@@ -96,7 +110,11 @@ export function EditTreatmentTypeDialog({
     >
       <form className="flex flex-col gap-4" id={FORM_ID} noValidate onSubmit={handleSubmit}>
         {rootError ? <Alert title={rootError} tone="danger" /> : null}
-        <TreatmentTypeFormFields form={form} isDisabled={isPending} />
+        <TreatmentTypeFormFields
+          doctorTypeOptions={doctorTypeOptions}
+          form={form}
+          isDisabled={isPending}
+        />
       </form>
     </Dialog>
   )

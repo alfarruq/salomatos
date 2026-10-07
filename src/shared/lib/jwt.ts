@@ -78,3 +78,34 @@ export function readJwtPayload(token: string): JwtPayload | null {
 
   return { userId }
 }
+
+/**
+ * UX-only expiry check for a token pulled back out of storage
+ * (`shared/api/authSession.ts`) — the signature is not verified here, and
+ * cannot be; the backend is what actually rejects an expired token. This only
+ * decides whether it is worth sending at all, to skip a request that would
+ * just 401.
+ *
+ * Returns true (expired) for anything unreadable, same as `readJwtPayload`
+ * returning null: a token this client cannot make sense of is not one it
+ * should hand to the router as a live session.
+ */
+export function isJwtExpired(token: string, skewSec = 30): boolean {
+  const segments = token.split('.')
+  const payload = segments[1]
+  if (segments.length !== 3 || payload === undefined) return true
+
+  let decoded: unknown
+  try {
+    decoded = decodePayloadSegment(payload)
+  } catch {
+    return true
+  }
+
+  if (typeof decoded !== 'object' || decoded === null) return true
+
+  const exp = (decoded as Record<string, unknown>)['exp']
+  if (typeof exp !== 'number') return true
+
+  return exp * 1000 <= Date.now() + skewSec * 1000
+}

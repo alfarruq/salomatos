@@ -7,6 +7,8 @@
   "form": {
     "fullName": "Full name",
     "phoneNumber": "Phone number",
+    "doctor": "Doctor",
+    "doctorPlaceholder": "Select a doctor",
     "birthDate": "Date of birth",
     "birthDatePlaceholder": "Select a date",
     "previousMonth": "Previous month",
@@ -16,7 +18,7 @@
   },
   "create": {
     "title": "New patient",
-    "description": "Name and phone number are required.",
+    "description": "Name, phone number and doctor are required.",
     "submit": "Add patient",
     "failed": "Could not add the patient. Please try again."
   },
@@ -25,10 +27,26 @@
     "description": "Changes are saved immediately.",
     "failed": "Could not save the changes. Please try again."
   },
+  "delete": {
+    "title": "Delete patient",
+    "description": "Delete “{{name}}” entirely?",
+    "warning": "This cannot be undone. What happens to the patient's treatment, appointment and payment history is unknown — it may be deleted too, or left without an owner.",
+    "wait": "Delete ({{seconds}})",
+    "failed": "Could not delete the patient. Please try again."
+  },
   "search": {
     "label": "Search patients",
     "placeholder": "Name",
     "clear": "Clear search"
+  },
+  "filters": {
+    "treatmentTypeLabel": "Filter by treatment",
+    "treatmentTypeAll": "All treatments",
+    "statusLabel": "Filter by status",
+    "statusAll": "All statuses",
+    "doctorLabel": "Filter by doctor",
+    "doctorPlaceholder": "Doctor",
+    "doctorAll": "All doctors"
   },
   "title": "Patients",
   "column": {
@@ -58,6 +76,34 @@
     "totalCost": "Treatment total",
     "totalPaid": "Paid",
     "treatments": "Treatments",
-    "treatmentWithTooth": "{{name}} · tooth {{tooth}}"
+    "treatmentWithTooth": "{{name}} · tooth {{tooth}}",
+    "newTreatment": "New treatment",
+    "writePrescription": "Write prescription",
+    "newAppointment": "New appointment",
+    "comingSoon": "This feature is coming soon.",
+    "toothChart": "Tooth chart",
+    "tabGeneral": "General info",
+    "tabTreatments": "Treatments",
+    "tabPrescriptions": "Prescriptions",
+    "tabGallery": "Gallery",
+    "noTreatments": "No treatments",
+    "noTreatmentsDescription": "Nothing has been recorded for this patient yet.",
+    "ageYears": "{{age}} years old",
+    "totalPaidOf": "Total paid: {{paid}} / {{total}}",
+    "visitCount_one": "{{count}} visit",
+    "visitCount_other": "{{count}} visits",
+    "history": {
+      "date": "Date",
+      "type": "Treatment",
+      "tooth": "Tooth",
+      "doctor": "Doctor",
+      "status": "Status",
+      "paid": "Paid"
+    },
+    "galleryEmpty": "No photos yet",
+    "galleryEmptyDescription": "Photos added for this patient will appear here.",
+    "galleryImage": "Photo",
+    "prescriptionsEmpty": "No prescriptions yet",
+    "prescriptionsEmptyDescription": "Prescriptions written for this patient will appear here."
   }
 }

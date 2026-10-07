@@ -36,7 +36,18 @@
     "editTitle": "Edit service",
     "saveFailed": "Could not save the changes. Please try again.",
     "empty": "No services yet",
-    "emptyDescription": "Add a service so treatments and prices can refer to it."
+    "emptyDescription": "Add a service so treatments and prices can refer to it.",
+    "doctorType": "Type",
+    "doctorTypePlaceholder": "Not assigned",
+    "filterLabel": "Filter by doctor type",
+    "filterAll": "All types",
+    "filterUnassigned": "Not assigned",
+    "filterEmpty": "No services of this type",
+    "deleteTitle": "Delete service",
+    "deleteDescription": "Delete “{{name}}”?",
+    "deleteWarning": "This cannot be undone. If any treatment or appointment history refers to this service, it is not confirmed whether that history is kept or deleted along with it.",
+    "deleteWait": "Delete ({{seconds}})",
+    "deleteFailed": "Could not delete the service. Please try again."
   },
   "clinic": {
     "name": "Clinic name",

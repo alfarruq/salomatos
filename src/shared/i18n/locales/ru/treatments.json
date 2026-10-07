@@ -1,0 +1,61 @@
+{
+  "table": {
+    "totalLabel": "Всего",
+    "inProgressLabel": "В процессе",
+    "completedLabel": "Завершено",
+    "columnTooth": "Зуб",
+    "columnType": "Лечение",
+    "columnDate": "Дата",
+    "columnStatus": "Статус",
+    "columnCost": "Стоимость",
+    "columnDebt": "Долг",
+    "columnActions": "Действия",
+    "toothCellHint": "Дважды щёлкните для подробностей",
+    "actionsMenuLabel": "Действия — {{type}}, {{date}}",
+    "actionDetail": "Подробнее",
+    "actionEdit": "Изменить",
+    "actionComplete": "Отметить завершённым",
+    "empty": "Лечения нет",
+    "emptyDescription": "Для этого пациента пока ничего не добавлено.",
+    "emptyAction": "Добавить первое лечение"
+  },
+  "detail": {
+    "title": "Сведения о лечении",
+    "toothLabel": "Зуб: {{tooth}}",
+    "dateLabel": "Дата",
+    "doctorLabel": "Врач",
+    "totalCostLabel": "Общая стоимость",
+    "totalPaidLabel": "Всего оплачено",
+    "remainingLabel": "Остаток",
+    "notesLabel": "Примечание",
+    "delete": "Удалить лечение",
+    "edit": "Изменить",
+    "takePayment": "Принять оплату",
+    "complete": "Отметить завершённым"
+  },
+  "composer": {
+    "title": "Новое лечение",
+    "editTitle": "Изменить лечение",
+    "doctorLabel": "Врач",
+    "doctorPlaceholder": "Выберите врача",
+    "statusLabel": "Статус",
+    "notesLabel": "Примечание",
+    "toothHint": "Нажмите на карту, чтобы выбрать зуб",
+    "treatmentTypePlaceholder": "Лечение",
+    "rowType": "Лечение",
+    "rowCost": "Стоимость",
+    "rowPaid": "Оплачено",
+    "totalsLabel": "Итого",
+    "save": "Сохранить",
+    "saveFailed": "Не удалось сохранить лечение. Попробуйте ещё раз.",
+    "toothType": {
+      "incisor": "резец",
+      "canine": "клык",
+      "premolar": "премоляр",
+      "molar": "моляр",
+      "upper": "Верхняя челюсть",
+      "lower": "Нижняя челюсть",
+      "tooth": "Зуб"
+    }
+  }
+}

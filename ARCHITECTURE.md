@@ -1610,6 +1610,11 @@ o'qimaydi — tenant `request.user` dan olinadi. Header'ni qoldirish "u nimadir 
 qilyapti" degan noto'g'ri taassurot berardi. Tenant izolyatsiyasi query key'larda qoladi
 (`§6.2`), va bu P0 talabining haqiqiy mazmuni.
 
+**Qayta ko'rib chiqildi (2026-09-30) — token endi Web Storage'da.** Yuqoridagi
+"P0 saqlanadi" bandi endi kuchda emas: `ADR-014` xodimlarning har F5'da tizimdan
+chiqib ketishini haqiqiy narx sifatida ko'rib, uni almashtirdi. To'liq qaror,
+sabab va qabul qilingan xavf — `ADR-014`da.
+
 ---
 
 ### ADR-004 — TanStack Query, Redux emas
@@ -1844,6 +1849,46 @@ bu ID turidan qat'i nazar majburiy. UUID migratsiyasi ikkinchi darajali va katta
 
 **Qachon qayta ko'riladi.** Backend UUID'ga o'tsa: sxemalarda tip almashtiriladi va
 `§5.4` tiklanadi. Frontend tomonda bu bir necha qatorlik o'zgarish.
+
+---
+
+### ADR-014 — Sessiya: access/refresh token Web Storage'da (`auth-session-storage`)
+**Status:** Qabul qilingan (2026-09-30) · ADR-003ni almashtiradi
+
+**Kontekst.** ADR-003 tokenni faqat RAM'da saqlashga majbur qildi — backend `httpOnly`
+cookie bermaydi, session authentication ham ishlatilmaydi. Narxi ochiq aytilgan edi:
+sahifa yangilanishi = tizimdan chiqish. Amalda bu xodimlar uchun nuqson sifatida
+sezildi: F5 bosilganda ish yo'qoladi, forma qaytadan to'ldiriladi.
+
+**Qaror.** `access_token` va `refresh_token` allowlist qilingan Web Storage orqali
+saqlanadi (`shared/lib/storage.ts`, faqat shu ikki kalit + `locale`). Ilova
+yuklanganda, router yaratilishidan **oldin**, `restoreSession()`
+(`shared/api/authSession.ts`) tokenni RAM'ga tiklaydi — agar mavjud bo'lsa va JWT
+`exp` hali o'tmagan bo'lsa; aks holda ikkala token o'chiriladi.
+
+**Qabul qilingan xavf.** XSS endi joriy sessiyadan tashqari, keyingi reload'gacha
+saqlangan tokenni ham o'qiy oladi — bu ADR-003/ADR-007 aynan shundan ogohlantirgan
+xavf. Endi qabul qilinadi, chunki:
+- Asosiy himoya XSS'ning o'ziga qaratilgan: `dangerouslySetInnerHTML` yo'q,
+  dependency'lar nazorat qilinadi, CSP kelajakda qo'shiladi — token qayerda
+  saqlanishidan qat'i nazar kerak bo'ladigan himoya.
+- Token storage'da **eng qisqa vaqt** turadi: muddati o'tgani ishlatilmaydi
+  (`restoreSession`), `401`da darhol o'chiriladi (`AppProviders.onUnauthorized`),
+  logout va klinika almashtirishda tozalanadi.
+- Bemor ma'lumoti (PHI) bu qarorga kirmaydi — query kesh hamon faqat RAM'da,
+  `persistQueryClient` ishlatilmaydi (`ADR-007` o'zgarmadi).
+
+**Oqibatlar.**
+- ➕ F5 endi sessiyani yo'qotmaydi; login sahifasi miltillab ham ko'rinmaydi.
+- ➕ Umumiy registratura kompyuterida xavf cheklangan: faqat qisqa umrli token,
+  bemor bazasi emas.
+- ➖ XSS'ning ta'sir doirasi kengaydi (yuqoridagi "qabul qilingan xavf"ga qarang).
+- ➖ `refresh_token` saqlanadi, lekin backend'da uni almashtiradigan endpoint hozircha
+  yo'q — bu faqat kelajak uchun tayyorgarlik, hech narsa uni ishlatmaydi.
+
+**Qachon qayta ko'riladi.** Backend token refresh endpoint yoki `httpOnly` cookie
+qo'shsa: token storage'dan butunlay olib tashlanadi, ADR-003ning asl (RAM'da yoki
+cookie'da) yo'nalishiga qaytiladi.
 
 ---
 

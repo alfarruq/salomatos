@@ -1,21 +1,22 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import * as v from 'valibot'
 import { fetchSession, type Session, sessionKeys, useSessionStore } from '@/entities/session'
+import { clearSession, saveSession } from '@/shared/api/authSession'
 import { httpClient } from '@/shared/api/httpClient'
-import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
 import type { LoginInput } from './schema'
 
 /**
  * `UserService.login` wraps its payload in the project's default response
  * serializer, so the tokens arrive one level down under `result`.
  *
- * ⛔ `refresh_token` is deliberately not read. The backend exposes no route to
- * exchange it, so keeping it would mean holding a credential that can do
- * nothing but leak.
+ * `refresh_token` is read and persisted (ADR `auth-session-storage`) even
+ * though the backend has no route to exchange it yet — it is there for when
+ * one exists, and `saveSession` is what puts it in storage.
  */
 const loginResponseSchema = v.object({
   result: v.object({
     access_token: v.pipe(v.string(), v.minLength(1)),
+    refresh_token: v.pipe(v.string(), v.minLength(1)),
   }),
 })
 
@@ -27,7 +28,7 @@ async function login(input: LoginInput): Promise<Session> {
   })
 
   const { result } = v.parse(loginResponseSchema, raw)
-  setAccessToken(result.access_token)
+  saveSession(result.access_token, result.refresh_token)
 
   try {
     /*
@@ -40,7 +41,7 @@ async function login(input: LoginInput): Promise<Session> {
     // Signed in as far as the server is concerned, but the app has no usable
     // session. Holding the token would leave the UI in a state where it looks
     // logged out yet sends authenticated requests.
-    clearAccessToken()
+    clearSession()
     throw error
   }
 }

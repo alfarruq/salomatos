@@ -24,7 +24,15 @@ export const LOCALE_LABELS: Record<Locale, string> = {
  * Namespaces load on demand (§12.1) — a receptionist working in the patient
  * list does not download the billing translations.
  */
-export const NAMESPACES = ['common', 'auth', 'validation', 'patients', 'admin'] as const
+export const NAMESPACES = [
+  'common',
+  'auth',
+  'validation',
+  'patients',
+  'admin',
+  'appointments',
+  'treatments',
+] as const
 
 export type Namespace = (typeof NAMESPACES)[number]
 

@@ -1,6 +1,8 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
+import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { doctorTypeQueries } from '@/entities/doctor-type'
 import {
   emptyTreatmentTypeForm,
   TreatmentTypeFormFields,
@@ -34,6 +36,12 @@ export function CreateTreatmentTypeDialog({
   })
 
   const { mutate, isPending } = useCreateTreatmentType(clinicId)
+
+  const doctorTypesQuery = useQuery(doctorTypeQueries.list(clinicId))
+  const doctorTypeOptions = (doctorTypesQuery.data ?? []).map((doctorType) => ({
+    value: String(doctorType.id),
+    label: doctorType.name,
+  }))
 
   const handleSubmit = form.handleSubmit((values) =>
     mutate(values, {
@@ -86,7 +94,11 @@ export function CreateTreatmentTypeDialog({
     >
       <form className="flex flex-col gap-4" id={FORM_ID} noValidate onSubmit={handleSubmit}>
         {rootError ? <Alert title={rootError} tone="danger" /> : null}
-        <TreatmentTypeFormFields form={form} isDisabled={isPending} />
+        <TreatmentTypeFormFields
+          doctorTypeOptions={doctorTypeOptions}
+          form={form}
+          isDisabled={isPending}
+        />
       </form>
     </Dialog>
   )

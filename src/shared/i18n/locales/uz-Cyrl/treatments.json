@@ -1,0 +1,61 @@
+{
+  "table": {
+    "totalLabel": "Жами",
+    "inProgressLabel": "Жараёнда",
+    "completedLabel": "Якунланган",
+    "columnTooth": "Тиш",
+    "columnType": "Даволаш тури",
+    "columnDate": "Сана",
+    "columnStatus": "Ҳолат",
+    "columnCost": "Даволаш қиймати",
+    "columnDebt": "Қарз",
+    "columnActions": "Амаллар",
+    "toothCellHint": "Батафсил кўриш учун икки марта босинг",
+    "actionsMenuLabel": "Амаллар — {{type}}, {{date}}",
+    "actionDetail": "Батафсил",
+    "actionEdit": "Таҳрирлаш",
+    "actionComplete": "Муолажани якунлаш",
+    "empty": "Муолажалар йўқ",
+    "emptyDescription": "Бу бемор учун ҳали ҳеч нарса қўшилмаган.",
+    "emptyAction": "Биринчи муолажани қўшинг"
+  },
+  "detail": {
+    "title": "Муолажа маълумотлари",
+    "toothLabel": "Тиш: {{tooth}}",
+    "dateLabel": "Сана",
+    "doctorLabel": "Шифокор",
+    "totalCostLabel": "Жами муолажа қиймати",
+    "totalPaidLabel": "Жами тўланган",
+    "remainingLabel": "Қолдиқ",
+    "notesLabel": "Изоҳ",
+    "delete": "Муолажани ўчириш",
+    "edit": "Таҳрирлаш",
+    "takePayment": "Тўлов олиш",
+    "complete": "Муолажани якунлаш"
+  },
+  "composer": {
+    "title": "Янги муолажа",
+    "editTitle": "Муолажани таҳрирлаш",
+    "doctorLabel": "Шифокор",
+    "doctorPlaceholder": "Шифокорни танланг",
+    "statusLabel": "Ҳолат",
+    "notesLabel": "Изоҳлар",
+    "toothHint": "Тиш танлаш учун харитага босинг",
+    "treatmentTypePlaceholder": "Даволаш тури",
+    "rowType": "Даволаш тури",
+    "rowCost": "Жами қиймат",
+    "rowPaid": "Жами тўланган",
+    "totalsLabel": "Жами",
+    "save": "Сақлаш",
+    "saveFailed": "Муолажани сақлаб бўлмади. Қайта уриниб кўринг.",
+    "toothType": {
+      "incisor": "кесувчи тиш",
+      "canine": "қозиқ тиш",
+      "premolar": "кичик озиқ тиш",
+      "molar": "катта озиқ тиш",
+      "upper": "Юқори жағ",
+      "lower": "Пастки жағ",
+      "tooth": "Тиш"
+    }
+  }
+}

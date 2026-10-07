@@ -1,6 +1,8 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
+import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { doctorQueries } from '@/entities/doctor'
 import {
   emptyPatientForm,
   PatientFormFields,
@@ -35,6 +37,12 @@ export function CreatePatientDialog({
   })
 
   const { mutate, isPending } = useCreatePatient(clinicId)
+
+  const doctorsQuery = useQuery(doctorQueries.list(clinicId))
+  const doctorOptions = (doctorsQuery.data ?? []).map((doctor) => ({
+    value: String(doctor.id),
+    label: doctor.fullName,
+  }))
 
   const handleSubmit = form.handleSubmit((values) =>
     mutate(values, {
@@ -89,7 +97,7 @@ export function CreatePatientDialog({
     >
       <form className="flex flex-col gap-4" id={FORM_ID} noValidate onSubmit={handleSubmit}>
         {rootError ? <Alert title={rootError} tone="danger" /> : null}
-        <PatientFormFields form={form} isDisabled={isPending} />
+        <PatientFormFields doctorOptions={doctorOptions} form={form} isDisabled={isPending} />
       </form>
     </Dialog>
   )

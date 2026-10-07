@@ -13,12 +13,6 @@ import type { Patient } from './types'
  * schema and the field markup in two places, or keeping the *definition of
  * what a patient is* with the entity and letting each feature own only its
  * mutation. The second keeps one source of truth for the contract.
- *
- * ⛔ `doctor` is absent, though the serializer accepts it. Assigning a doctor
- * needs a doctor picker, which needs `entities/doctor`, which does not exist
- * until phase 7.5. The field is nullable on the model, so omitting it creates a
- * patient with no doctor assigned — the same state the backend produces when a
- * receptionist has not chosen one yet.
  */
 
 /**
@@ -39,6 +33,12 @@ const UZ_PHONE = /^\+998\d{9}$/
 export const patientFormSchema = v.object({
   fullName: v.pipe(v.string(), v.trim(), v.minLength(2, 'validation.tooShort')),
   phoneNumber: v.pipe(v.string(), v.regex(UZ_PHONE, 'validation.phoneUz')),
+  /**
+   * An `entities/doctor` id as a string. Required — the confirmed POST
+   * contract has no way to send "no doctor" (`{"doctor": 0}` in the example),
+   * matching the same requirement already confirmed on `entities/appointment`.
+   */
+  doctorId: v.pipe(v.string(), v.minLength(1, 'validation.required')),
   birthDate: v.pipe(
     v.string(),
     // Optional, but not a licence to send nonsense: `parseCalendarDate`
@@ -54,16 +54,31 @@ export type PatientFormInput = v.InferOutput<typeof patientFormSchema>
 export const emptyPatientForm: PatientFormInput = {
   fullName: '',
   phoneNumber: '',
+  doctorId: '',
   birthDate: '',
   address: '',
   office: '',
 }
 
-/** Fills the form from an existing patient, for editing. */
-export function toPatientForm(patient: Patient): PatientFormInput {
+/**
+ * Fills the form from an existing patient, for editing.
+ *
+ * Typed against a `Pick`, not the full `Patient`: the table's row type
+ * (`PatientListItem`) carries every field this needs, and this way editing
+ * from the table does not require fetching the detail response first.
+ */
+export function toPatientForm(
+  patient: Pick<Patient, 'fullName' | 'phoneNumber' | 'birthDate' | 'address' | 'office'>,
+): PatientFormInput {
   return {
     fullName: patient.fullName,
     phoneNumber: patient.phoneNumber ?? '',
+    // Cannot be filled from `doctorName` with confidence — `PatientListItem`/
+    // `Patient` only ever carry the doctor's *name* (§ types.ts), the same gap
+    // already documented on `entities/appointment`. Left unresolved and
+    // guarded by `dirtyFields` in the edit mutation, so it is never sent
+    // unless the person actually picks a doctor this session.
+    doctorId: '',
     birthDate: patient.birthDate ?? '',
     address: patient.address ?? '',
     office: patient.office ?? '',
@@ -71,12 +86,13 @@ export function toPatientForm(patient: Patient): PatientFormInput {
 }
 
 /** Maps to the snake_case body the serializer reads. Empty means null, not "". */
-export function toPatientPayload(input: PatientFormInput): Record<string, string | null> {
+export function toPatientPayload(input: PatientFormInput): Record<string, string | number | null> {
   const orNull = (value: string): string | null => (value === '' ? null : value)
 
   return {
     full_name: input.fullName,
     phone_number: input.phoneNumber,
+    doctor: input.doctorId === '' ? null : Number(input.doctorId),
     birth_date: orNull(input.birthDate),
     address: orNull(input.address),
     office: orNull(input.office),
@@ -86,6 +102,7 @@ export function toPatientPayload(input: PatientFormInput): Record<string, string
 const SERVER_FIELD_NAMES: Record<string, keyof PatientFormInput> = {
   full_name: 'fullName',
   phone_number: 'phoneNumber',
+  doctor: 'doctorId',
   birth_date: 'birthDate',
   address: 'address',
   office: 'office',

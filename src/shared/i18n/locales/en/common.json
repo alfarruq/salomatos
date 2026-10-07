@@ -2,6 +2,9 @@
   "app": {
     "name": "SalomatOS"
   },
+  "currency": {
+    "som": "so'm"
+  },
   "action": {
     "save": "Save",
     "cancel": "Cancel",
@@ -20,6 +23,7 @@
     "breadcrumb": "Breadcrumb",
     "dashboard": "Dashboard",
     "patients": "Patients",
+    "appointments": "Appointments",
     "billing": "Billing",
     "admin": "Administration"
   },

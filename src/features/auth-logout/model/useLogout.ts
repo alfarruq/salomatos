@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSessionStore } from '@/entities/session'
-import { clearAccessToken } from '@/shared/api/tokenStore'
+import { clearSession } from '@/shared/api/authSession'
 
 /**
  * Signing out is entirely local, because there is nothing to tell the server.
@@ -26,7 +26,7 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: async () => {
-      clearAccessToken()
+      clearSession()
     },
 
     /*

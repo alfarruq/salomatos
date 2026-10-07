@@ -7,6 +7,8 @@
   "form": {
     "fullName": "F. I. Sh.",
     "phoneNumber": "Telefon raqami",
+    "doctor": "Shifokor",
+    "doctorPlaceholder": "Shifokorni tanlang",
     "birthDate": "Tug'ilgan sana",
     "birthDatePlaceholder": "Sanani tanlang",
     "previousMonth": "Oldingi oy",
@@ -16,7 +18,7 @@
   },
   "create": {
     "title": "Yangi bemor",
-    "description": "Ism va telefon raqami majburiy.",
+    "description": "Ism, telefon raqami va shifokor majburiy.",
     "submit": "Bemor qo'shish",
     "failed": "Bemorni qo'shib bo'lmadi. Qayta urinib ko'ring."
   },
@@ -25,10 +27,26 @@
     "description": "O'zgarishlar darhol saqlanadi.",
     "failed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring."
   },
+  "delete": {
+    "title": "Bemorni o'chirish",
+    "description": "\"{{name}}\" bemori butunlay o'chirilsinmi?",
+    "warning": "Bu amalni ortga qaytarib bo'lmaydi. Bemorning davolash, uchrashuv va to'lov tarixi bilan nima bo'lishi aniq emas — ular ham o'chishi yoki egasiz qolishi mumkin.",
+    "wait": "O'chirish ({{seconds}})",
+    "failed": "Bemorni o'chirib bo'lmadi. Qayta urinib ko'ring."
+  },
   "search": {
     "label": "Bemorlarni qidirish",
     "placeholder": "Ism",
     "clear": "Qidiruvni tozalash"
+  },
+  "filters": {
+    "treatmentTypeLabel": "Muolaja turi bo'yicha filtr",
+    "treatmentTypeAll": "Barcha muolaja turlari",
+    "statusLabel": "Holat bo'yicha filtr",
+    "statusAll": "Barcha holatlar",
+    "doctorLabel": "Shifokor bo'yicha filtr",
+    "doctorPlaceholder": "Shifokor",
+    "doctorAll": "Barcha shifokorlar"
   },
   "title": "Bemorlar",
   "column": {
@@ -58,6 +76,34 @@
     "totalCost": "Davolanish summasi",
     "totalPaid": "To'langan",
     "treatments": "Davolanish",
-    "treatmentWithTooth": "{{name}} · {{tooth}}-tish"
+    "treatmentWithTooth": "{{name}} · {{tooth}}-tish",
+    "newTreatment": "Yangi muolaja",
+    "writePrescription": "Retsept yozish",
+    "newAppointment": "Yangi uchrashuv",
+    "comingSoon": "Bu funksiya tez orada qo'shiladi.",
+    "toothChart": "Tish xaritasi",
+    "tabGeneral": "Umumiy ma'lumot",
+    "tabTreatments": "Muolajalar",
+    "tabPrescriptions": "Retseptlar",
+    "tabGallery": "Galereya",
+    "noTreatments": "Muolajalar yo'q",
+    "noTreatmentsDescription": "Bu bemor uchun hali muolaja qayd etilmagan.",
+    "ageYears": "{{age}} yosh",
+    "totalPaidOf": "Jami to'langan: {{paid}} / {{total}}",
+    "visitCount_one": "{{count}} tashrif",
+    "visitCount_other": "{{count}} tashrif",
+    "history": {
+      "date": "Sana",
+      "type": "Muolaja",
+      "tooth": "Tish",
+      "doctor": "Shifokor",
+      "status": "Holat",
+      "paid": "To'langan"
+    },
+    "galleryEmpty": "Hozircha rasm yo'q",
+    "galleryEmptyDescription": "Bu bemor uchun qo'shilgan rasmlar shu yerda ko'rinadi.",
+    "galleryImage": "Rasm",
+    "prescriptionsEmpty": "Hozircha retsept yo'q",
+    "prescriptionsEmptyDescription": "Bu bemorga yozilgan retseptlar shu yerda ko'rinadi."
   }
 }

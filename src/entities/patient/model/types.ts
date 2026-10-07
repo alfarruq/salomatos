@@ -83,6 +83,7 @@ export interface Patient {
   /** From the patient's most recent *appointment* — not the same source as the list's. */
   status: PatientStatus | null
   treatments: readonly PatientTreatment[]
+  gallery: readonly PatientGalleryImage[]
   totalTreatmentCost: number
   totalPaid: number
   remaining: number
@@ -95,6 +96,15 @@ export interface PatientTreatment {
   name: string
   /** FDI tooth number. One tooth per treatment row on this backend. */
   toothNumber: number | null
+}
+
+/** A photo from the patient's gallery tab — `GalleryList`. */
+export interface PatientGalleryImage {
+  id: number
+  /** Relative media path (`/media/...`), same-origin — see `PatientAvatar`. */
+  imageUrl: string | null
+  /** UTC ISO-8601 instant; format at display time (§12.4). */
+  createdAt: string | null
 }
 
 /**

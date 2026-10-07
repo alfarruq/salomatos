@@ -7,7 +7,7 @@ export {
   treatmentTypeFormFieldOf,
   treatmentTypeFormSchema,
 } from './model/formSchema'
-export { toTreatmentType, treatmentTypeListSchema, treatmentTypeSchema } from './model/schema'
+export { toTreatmentType, treatmentTypePageSchema, treatmentTypeSchema } from './model/schema'
 export type { TreatmentType, TreatmentTypeId } from './model/types'
 export {
   TreatmentTypeFormFields,

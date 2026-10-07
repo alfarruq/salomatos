@@ -1,0 +1,284 @@
+import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { Doctor } from '@/entities/doctor'
+import { doctorQueries } from '@/entities/doctor'
+import type { Treatment, TreatmentStatus } from '@/entities/treatment'
+import type { TreatmentType } from '@/entities/treatment-type'
+import { treatmentTypeQueries } from '@/entities/treatment-type'
+import { ApiError } from '@/shared/api/errors'
+import { todayCalendarDate } from '@/shared/lib/calendarDate'
+import { Alert, Button, Dialog, ErrorState, Field, Select, Skeleton, Textarea } from '@/shared/ui'
+import type { ComposerFields, TreatmentRow } from '../model/types'
+import { useSaveTreatments } from '../model/useSaveTreatments'
+import { ToothPicker } from './ToothPicker'
+import { TreatmentRowsTable } from './TreatmentRowsTable'
+
+export interface TreatmentComposerProps {
+  clinicId: number
+  patientId: number
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  /** Present only when editing an existing treatment. Absent means "create". */
+  initialTreatment?: Treatment
+}
+
+let rowIdCounter = 0
+function nextRowId(): string {
+  rowIdCounter += 1
+  return `row-${rowIdCounter}`
+}
+
+/**
+ * The create/edit dialog for a patient's treatments — one definition shared
+ * by both, per §6: a tooth map and a rows table are not worth building twice.
+ *
+ * Reads its own reference data (doctors, treatment types) rather than taking
+ * them as props, so every call site — the history table's "new" button, its
+ * row menu's "edit" — only has to pass the ids.
+ */
+export function TreatmentComposer({
+  clinicId,
+  patientId,
+  open,
+  onOpenChange,
+  initialTreatment,
+}: TreatmentComposerProps) {
+  const { t } = useTranslation(['treatments', 'common'])
+
+  const doctorsQuery = useQuery(doctorQueries.list(clinicId))
+  const treatmentTypesQuery = useQuery(treatmentTypeQueries.list(clinicId))
+
+  if (doctorsQuery.isPending || treatmentTypesQuery.isPending) {
+    return (
+      <Dialog
+        onOpenChange={onOpenChange}
+        open={open}
+        title={
+          initialTreatment === undefined
+            ? t('treatments:composer.title')
+            : t('treatments:composer.editTitle')
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      </Dialog>
+    )
+  }
+
+  if (doctorsQuery.isError || treatmentTypesQuery.isError) {
+    return (
+      <Dialog onOpenChange={onOpenChange} open={open} title={t('treatments:composer.title')}>
+        <ErrorState description={t('common:error.pageBody')} title={t('common:error.pageTitle')} />
+      </Dialog>
+    )
+  }
+
+  return (
+    <TreatmentComposerForm
+      clinicId={clinicId}
+      doctors={doctorsQuery.data}
+      initialTreatment={initialTreatment}
+      onOpenChange={onOpenChange}
+      open={open}
+      patientId={patientId}
+      treatmentTypes={treatmentTypesQuery.data}
+    />
+  )
+}
+
+function buildInitialRows(
+  initialTreatment: Treatment | undefined,
+  treatmentTypes: TreatmentType[],
+): TreatmentRow[] {
+  if (initialTreatment === undefined || initialTreatment.toothNumber === null) return []
+
+  // Best effort only: the read response gives a name, not the id this needs
+  // to prefill the select. If nothing matches, the select opens unset and
+  // the row's save omits `treatment_type` unless the user picks one anyway
+  // (`TreatmentRowsTable`'s `onExistingRowTypeChanged`).
+  const matchedType = treatmentTypes.find(
+    (type) => type.name === initialTreatment.treatmentTypeName,
+  )
+
+  return [
+    {
+      rowId: nextRowId(),
+      toothNumber: initialTreatment.toothNumber,
+      treatmentTypeId: matchedType?.id ?? null,
+      treatmentTypeName: initialTreatment.treatmentTypeName ?? '',
+      totalCost:
+        initialTreatment.totalTreatmentCost === null
+          ? ''
+          : String(initialTreatment.totalTreatmentCost),
+      totalPaid: initialTreatment.totalPaid === null ? '' : String(initialTreatment.totalPaid),
+      existingTreatmentId: initialTreatment.id,
+    },
+  ]
+}
+
+function TreatmentComposerForm({
+  clinicId,
+  patientId,
+  open,
+  onOpenChange,
+  initialTreatment,
+  doctors,
+  treatmentTypes,
+}: {
+  clinicId: number
+  patientId: number
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  initialTreatment: Treatment | undefined
+  doctors: Doctor[]
+  treatmentTypes: TreatmentType[]
+}) {
+  const { t } = useTranslation(['treatments', 'patients', 'common'])
+  const { mutate, isPending, error } = useSaveTreatments(clinicId)
+
+  const [rows, setRows] = useState<TreatmentRow[]>(() =>
+    buildInitialRows(initialTreatment, treatmentTypes),
+  )
+  const [doctorId, setDoctorId] = useState(() => {
+    if (initialTreatment === undefined) return ''
+    return String(
+      doctors.find((doctor) => doctor.fullName === initialTreatment.doctorName)?.id ?? '',
+    )
+  })
+  const [status, setStatus] = useState<TreatmentStatus>(initialTreatment?.status ?? 'in_progress')
+  const [notes, setNotes] = useState(initialTreatment?.notes ?? '')
+  const [doctorTouched, setDoctorTouched] = useState(false)
+  const [existingRowTypeTouched, setExistingRowTypeTouched] = useState(false)
+
+  const isEditing = initialTreatment !== undefined
+  const hasNewRows = rows.some((row) => row.existingTreatmentId === null)
+  // A new record always needs a real doctor; an edit that only changes an
+  // existing row's own fields can leave it alone (see `formSchema.ts`).
+  const doctorRequired = !isEditing || hasNewRows
+  const canSave = rows.length > 0 && (!doctorRequired || doctorId !== '')
+
+  const doctorOptions = doctors.map((doctor) => ({
+    value: String(doctor.id),
+    label: doctor.fullName,
+  }))
+  const statusOptions: { value: TreatmentStatus; label: string }[] = [
+    { value: 'in_progress', label: t('patients:status.in_progress') },
+    { value: 'completed', label: t('patients:status.completed') },
+  ]
+
+  function handleAddTooth(toothNumber: number, type: TreatmentType) {
+    setRows((current) => [
+      ...current,
+      {
+        rowId: nextRowId(),
+        toothNumber,
+        treatmentTypeId: type.id,
+        treatmentTypeName: type.name,
+        totalCost: type.price === null ? '' : String(type.price),
+        totalPaid: '',
+        existingTreatmentId: null,
+      },
+    ])
+  }
+
+  function handleRemoveTooth(toothNumber: number) {
+    setRows((current) => current.filter((row) => row.toothNumber !== toothNumber))
+  }
+
+  function handleRowChange(rowId: string, changes: Partial<TreatmentRow>) {
+    setRows((current) => current.map((row) => (row.rowId === rowId ? { ...row, ...changes } : row)))
+  }
+
+  function handleRemoveRow(rowId: string) {
+    setRows((current) => current.filter((row) => row.rowId !== rowId))
+  }
+
+  const errorMessage =
+    error === null || error === undefined
+      ? null
+      : error instanceof ApiError && error.kind === 'network'
+        ? t('common:error.network')
+        : t('treatments:composer.saveFailed')
+
+  function handleSave() {
+    mutate(
+      {
+        patientId,
+        rows,
+        fields: { doctorId, status, notes } satisfies ComposerFields,
+        startDate: initialTreatment?.startDate ?? todayCalendarDate(),
+        touched: { doctor: doctorTouched, treatmentType: existingRowTypeTouched },
+      },
+      { onSuccess: () => onOpenChange(false) },
+    )
+  }
+
+  return (
+    <Dialog
+      className="sm:max-w-4xl"
+      footer={
+        <>
+          <Button disabled={isPending} onClick={() => onOpenChange(false)} variant="secondary">
+            {t('common:action.cancel')}
+          </Button>
+          <Button disabled={!canSave} isLoading={isPending} onClick={handleSave} variant="primary">
+            {t('treatments:composer.save')}
+          </Button>
+        </>
+      }
+      onOpenChange={onOpenChange}
+      open={open}
+      title={isEditing ? t('treatments:composer.editTitle') : t('treatments:composer.title')}
+    >
+      <div className="flex flex-col gap-6">
+        {errorMessage === null ? null : <Alert title={errorMessage} tone="danger" />}
+
+        <div className="grid gap-6 sm:grid-cols-2">
+          <ToothPicker
+            onAddTooth={handleAddTooth}
+            onRemoveTooth={handleRemoveTooth}
+            rows={rows}
+            treatmentTypes={treatmentTypes}
+          />
+
+          <div className="flex flex-col gap-4">
+            <Field isRequired={doctorRequired} label={t('treatments:composer.doctorLabel')}>
+              <Select
+                onValueChange={(value) => {
+                  setDoctorId(value)
+                  setDoctorTouched(true)
+                }}
+                options={doctorOptions}
+                placeholder={t('treatments:composer.doctorPlaceholder')}
+                {...(doctorId === '' ? {} : { value: doctorId })}
+              />
+            </Field>
+
+            <Field label={t('treatments:composer.statusLabel')}>
+              <Select
+                onValueChange={(value) => setStatus(value as TreatmentStatus)}
+                options={statusOptions}
+                value={status}
+              />
+            </Field>
+
+            <Field label={t('treatments:composer.notesLabel')}>
+              <Textarea onChange={(event) => setNotes(event.target.value)} rows={4} value={notes} />
+            </Field>
+          </div>
+        </div>
+
+        <TreatmentRowsTable
+          onExistingRowTypeChanged={() => setExistingRowTypeTouched(true)}
+          onRemoveRow={handleRemoveRow}
+          onRowChange={handleRowChange}
+          rows={rows}
+          treatmentTypes={treatmentTypes}
+        />
+      </div>
+    </Dialog>
+  )
+}

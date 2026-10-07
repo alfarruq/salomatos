@@ -1,7 +1,15 @@
 import i18next, { type i18n as I18n } from 'i18next'
 import resourcesToBackend from 'i18next-resources-to-backend'
 import { initReactI18next } from 'react-i18next'
-import { DEFAULT_LOCALE, LOCALES, type Locale, type Namespace, resolveLocale } from './locales'
+import { storage } from '@/shared/lib/storage'
+import {
+  DEFAULT_LOCALE,
+  isLocale,
+  LOCALES,
+  type Locale,
+  type Namespace,
+  resolveLocale,
+} from './locales'
 
 /**
  * i18next setup.
@@ -19,11 +27,13 @@ import { DEFAULT_LOCALE, LOCALES, type Locale, type Namespace, resolveLocale } f
  * the platform already provides is not a trade worth making. Reverting is a
  * config change plus a JSON syntax change, not a rewrite.
  *
- * ⛔ The language detector plugin is not used either: it persists the choice to
- * browser storage, which §3 forbids outright. The language is read from the
- * browser's own preferences and can be changed in-session; remembering a staff
- * member's choice belongs on their user record — a backend field we do not have
- * yet, and the right place for it anyway.
+ * The `i18next-browser-languagedetector` plugin is still not used — it also
+ * sniffs `<html lang>`, cookies and query strings, more surface than this app
+ * needs for one job. That job — remembering the choice across a reload — is
+ * done through `shared/lib/storage`'s `locale` key instead (§3's allowlist),
+ * validated on the way back in rather than trusted: a corrupted or foreign
+ * value falls back to the browser's own preference, same as before this
+ * existed.
  */
 
 /**
@@ -36,10 +46,20 @@ const backend = resourcesToBackend(
 )
 
 export function createI18n(initialLocale?: Locale): I18n {
+  const stored = storage.get('locale')
   const locale =
-    initialLocale ?? resolveLocale(typeof navigator === 'undefined' ? [] : [...navigator.languages])
+    initialLocale ??
+    (stored !== null && isLocale(stored) ? stored : null) ??
+    resolveLocale(typeof navigator === 'undefined' ? [] : [...navigator.languages])
 
   const instance = i18next.createInstance()
+
+  // Every future change — from the switcher or anywhere else — persists the
+  // same way, so this is the only place that needs to know storage exists.
+  instance.on('languageChanged', (next) => {
+    if (isLocale(next)) storage.set('locale', next)
+    if (typeof document !== 'undefined') document.documentElement.lang = next
+  })
 
   void instance
     .use(backend)

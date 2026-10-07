@@ -2,10 +2,14 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { PatientFilters, PatientId, PatientListItem } from '@/entities/patient'
+import { doctorQueries } from '@/entities/doctor'
+import type { PatientFilters, PatientId, PatientListItem, PatientStatus } from '@/entities/patient'
 import { patientQueries } from '@/entities/patient'
 import { Can } from '@/entities/session'
+import { treatmentTypeQueries } from '@/entities/treatment-type'
 import { CreatePatientDialog } from '@/features/patient-create'
+import { DeletePatientDialog } from '@/features/patient-delete'
+import { EditPatientDialog } from '@/features/patient-edit'
 import { PatientSearchInput, usePatientSearch } from '@/features/patient-search'
 import { PAGE_SIZE } from '@/shared/api/pagination'
 import {
@@ -14,6 +18,7 @@ import {
   ErrorState,
   Pagination,
   QueryBoundary,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -23,6 +28,14 @@ import {
   TableSkeleton,
 } from '@/shared/ui'
 import { usePatientColumns } from '../model/usePatientColumns'
+
+/*
+ * Radix's `Select` hardcodes `""` to mean "nothing selected, show the
+ * placeholder" — not available as a real, displayable option value (see
+ * `TreatmentTypeTable`, which hit this first). "All" needs its own sentinel,
+ * distinct from any real status or treatment-type id.
+ */
+const FILTER_ALL = 'all'
 
 export interface PatientTableProps {
   clinicId: number
@@ -51,11 +64,15 @@ export function PatientTable({
   const { t } = useTranslation(['patients', 'common'])
   const queryClient = useQueryClient()
   const [isCreateOpen, setCreateOpen] = useState(false)
+  const [editing, setEditing] = useState<PatientListItem | null>(null)
+  const [deleting, setDeleting] = useState<PatientListItem | null>(null)
 
   const search = usePatientSearch()
   const query = useQuery(
     patientQueries.list(clinicId, { ...filters, search: search.debouncedTerm }),
   )
+  const treatmentTypesQuery = useQuery(treatmentTypeQueries.list(clinicId))
+  const doctorsQuery = useQuery(doctorQueries.list(clinicId))
 
   const handleSearchChange = (value: string) => {
     search.setTerm(value)
@@ -63,6 +80,56 @@ export function PatientTable({
     // one-page result shows an empty table that looks like "no patients".
     if (filters.page !== 1) onFiltersChange({ ...filters, page: 1 })
   }
+
+  const handleStatusChange = (value: string) => {
+    onFiltersChange({
+      ...filters,
+      status: value === FILTER_ALL ? null : (value as PatientStatus),
+      page: 1,
+    })
+  }
+
+  const handleTreatmentTypeChange = (value: string) => {
+    onFiltersChange({
+      ...filters,
+      treatmentTypeId: value === FILTER_ALL ? null : Number(value),
+      page: 1,
+    })
+  }
+
+  /*
+   * A staff name, not patient data (§3) — unlike `search`, this is allowed in
+   * the URL and the route already puts it there.
+   *
+   * The list endpoint's `?doctor=` filter matches on name (confirmed shape),
+   * not an id, so the select's value is the doctor's full name, not `doctor.id`
+   * — same string the URL already carries.
+   */
+  const handleDoctorChange = (value: string) => {
+    onFiltersChange({ ...filters, doctor: value === FILTER_ALL ? '' : value, page: 1 })
+  }
+
+  const statusOptions = [
+    { value: FILTER_ALL, label: t('patients:filters.statusAll') },
+    { value: 'in_progress', label: t('patients:status.in_progress') },
+    { value: 'completed', label: t('patients:status.completed') },
+  ]
+
+  const treatmentTypeOptions = [
+    { value: FILTER_ALL, label: t('patients:filters.treatmentTypeAll') },
+    ...(treatmentTypesQuery.data ?? []).map((treatmentType) => ({
+      value: String(treatmentType.id),
+      label: treatmentType.name,
+    })),
+  ]
+
+  const doctorOptions = [
+    { value: FILTER_ALL, label: t('patients:filters.doctorAll') },
+    ...(doctorsQuery.data ?? []).map((doctor) => ({
+      value: doctor.fullName,
+      label: doctor.fullName,
+    })),
+  ]
 
   /**
    * Warms the card before the click lands. The row is already on screen, so
@@ -73,16 +140,58 @@ export function PatientTable({
     void queryClient.prefetchQuery(patientQueries.detail(clinicId, patientId))
   }
 
-  const columns = usePatientColumns()
+  const columns = usePatientColumns({ onDelete: setDeleting, onEdit: setEditing })
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <PatientSearchInput
-          onChange={handleSearchChange}
-          onClear={() => handleSearchChange('')}
-          value={search.term}
-        />
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <PatientSearchInput
+              onChange={handleSearchChange}
+              onClear={() => handleSearchChange('')}
+              value={search.term}
+            />
+          </div>
+
+          <label className="sr-only" htmlFor="patient-status-filter">
+            {t('patients:filters.statusLabel')}
+          </label>
+          <Select
+            className="w-auto shrink-0"
+            id="patient-status-filter"
+            onValueChange={handleStatusChange}
+            options={statusOptions}
+            size="sm"
+            value={filters.status ?? FILTER_ALL}
+          />
+
+          {/* Not shown — the select's own visible options already say what it
+              filters. Kept for assistive tech, which still needs a name for it. */}
+          <label className="sr-only" htmlFor="patient-treatment-type-filter">
+            {t('patients:filters.treatmentTypeLabel')}
+          </label>
+          <Select
+            className="w-auto shrink-0"
+            id="patient-treatment-type-filter"
+            onValueChange={handleTreatmentTypeChange}
+            options={treatmentTypeOptions}
+            size="sm"
+            value={filters.treatmentTypeId === null ? FILTER_ALL : String(filters.treatmentTypeId)}
+          />
+
+          <label className="sr-only" htmlFor="patient-doctor-filter">
+            {t('patients:filters.doctorLabel')}
+          </label>
+          <Select
+            className="w-auto shrink-0"
+            id="patient-doctor-filter"
+            onValueChange={handleDoctorChange}
+            options={doctorOptions}
+            size="sm"
+            value={filters.doctor === '' ? FILTER_ALL : filters.doctor}
+          />
+        </div>
 
         {/* UX only — Django decides what may actually be created (§9.1). */}
         <Can permission="patient:write">
@@ -181,6 +290,29 @@ export function PatientTable({
       </QueryBoundary>
 
       <CreatePatientDialog clinicId={clinicId} onOpenChange={setCreateOpen} open={isCreateOpen} />
+
+      {editing === null ? null : (
+        <EditPatientDialog
+          clinicId={clinicId}
+          onOpenChange={(open) => {
+            if (!open) setEditing(null)
+          }}
+          open
+          patient={editing}
+        />
+      )}
+
+      {deleting === null ? null : (
+        <DeletePatientDialog
+          clinicId={clinicId}
+          onDeleted={() => setDeleting(null)}
+          onOpenChange={(open) => {
+            if (!open) setDeleting(null)
+          }}
+          open
+          patient={deleting}
+        />
+      )}
     </div>
   )
 }

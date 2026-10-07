@@ -28,14 +28,25 @@ import { httpClient } from '@/shared/api/httpClient'
 async function updatePatient({
   patientId,
   input,
+  includeDoctorId,
 }: {
   patientId: PatientId
   input: PatientFormInput
+  /**
+   * `false` unless the dialog reports the field itself was changed this
+   * session (`formState.dirtyFields`) — same guard as `useUpdateAppointment`,
+   * since `toPatientForm` cannot resolve `doctorId` from the list/detail
+   * response's `doctorName` (§ formSchema.ts).
+   */
+  includeDoctorId: boolean
 }): Promise<PatientListItem> {
+  const payload = toPatientPayload(input)
+  if (!includeDoctorId) delete payload['doctor']
+
   const raw = await httpClient<unknown>(`v1/clinic/patients/${patientId}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(toPatientPayload(input)),
+    body: JSON.stringify(payload),
   })
 
   // As with create, the response is the *list* serializer.

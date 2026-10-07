@@ -4,12 +4,15 @@ import { readJwtPayload } from '@/shared/lib/jwt'
 import {
   accessTokenFor,
   errorEnvelope,
+  MOCK_APPOINTMENTS,
   MOCK_DOCTOR_TYPES,
   MOCK_DOCTORS,
   MOCK_PASSWORD,
   MOCK_PATIENT_DETAILS,
   MOCK_PATIENTS,
+  MOCK_RECIPES,
   MOCK_TREATMENT_TYPES,
+  MOCK_TREATMENTS,
   MOCK_USERS,
   type MockUserKey,
 } from './fixtures'
@@ -61,6 +64,31 @@ function doctorTypeNameFor(rawId: unknown): string | null {
   const id = Number(rawId)
   if (rawId === null || rawId === undefined || Number.isNaN(id)) return null
   return MOCK_DOCTOR_TYPES.find((doctorType) => doctorType.id === id)?.name ?? null
+}
+
+/** Same id-in, name-out pair confirmed for `doctor`/`doctor_id` on `/calendars/appointments/`. */
+function doctorNameFor(rawId: unknown): string | null {
+  const id = Number(rawId)
+  if (rawId === null || rawId === undefined || Number.isNaN(id)) return null
+  return MOCK_DOCTORS.find((doctor) => doctor.id === id)?.full_name ?? null
+}
+
+/** Same pair as `doctorNameFor`, for `patient`/`patient_id`. */
+function patientNameFor(rawId: unknown): string | null {
+  const id = Number(rawId)
+  if (rawId === null || rawId === undefined || Number.isNaN(id)) return null
+  return MOCK_PATIENTS.find((patient) => patient.id === id)?.full_name ?? null
+}
+
+function idOf(rawId: unknown): number | null {
+  const id = Number(rawId)
+  return rawId === null || rawId === undefined || Number.isNaN(id) ? null : id
+}
+
+/** DRF's `TimeField` always answers with seconds, even when the client sent none. */
+function withSeconds(rawTime: unknown): string {
+  const time = typeof rawTime === 'string' ? rawTime : ''
+  return time.length === 5 ? `${time}:00` : time
 }
 
 export const handlers = [
@@ -175,7 +203,9 @@ export const handlers = [
       appointment_date: null,
       treatment_type: null,
       status: null,
-      doctor: null,
+      // Written as an id (`doctor`), read back as a name — same list-serializer
+      // shape confirmed on `/clinic/doctors/` and `/clinic/treatment-types/`.
+      doctor: doctorNameFor(body['doctor']),
       remaining: null,
       total_remaining: 0,
       birth_date: body['birth_date'] ?? null,
@@ -200,7 +230,20 @@ export const handlers = [
     if (existing === undefined) return new HttpResponse(null, { status: 404 })
 
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
-    return HttpResponse.json({ ...existing, ...body })
+    const updated: Record<string, unknown> = { ...existing, ...body }
+    if ('doctor' in body) updated['doctor'] = doctorNameFor(body['doctor'])
+
+    return HttpResponse.json(updated)
+  }),
+
+  http.delete('/api/v1/clinic/patients/:patientId/', ({ request, params }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const id = Number(params['patientId'])
+    const existing = MOCK_PATIENTS.find((patient) => patient.id === id)
+    if (existing === undefined) return new HttpResponse(null, { status: 404 })
+
+    return new HttpResponse(null, { status: 204 })
   }),
 
   /** `DoctorService.get_doctor_types` — a plain array, not a page. */
@@ -237,20 +280,29 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 })
   }),
 
-  /** `TreatmentTypeService.get_treatment_types` — a plain array, not a page. */
+  /** `TreatmentTypeService.get_treatment_types` — paginated, like patients. */
   http.get('/api/v1/clinic/treatment-types/', ({ request }) => {
     if (authenticate(request) === null) return unauthorized()
-    return HttpResponse.json(MOCK_TREATMENT_TYPES)
+    return HttpResponse.json({
+      count: MOCK_TREATMENT_TYPES.length,
+      next: null,
+      previous: null,
+      results: MOCK_TREATMENT_TYPES,
+    })
   }),
 
   http.post('/api/v1/clinic/treatment-types/', async ({ request }) => {
     if (authenticate(request) === null) return unauthorized()
 
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
+    // The id the client sent, translated to a name — create/update answer with
+    // the list serializer, same as `doctor_type` on `/clinic/doctors/`.
+    const doctorType = MOCK_DOCTOR_TYPES.find((type) => type.id === body['doctor_type'])
     return HttpResponse.json({
       id: 800,
       name: body['name'] ?? '',
       price: body['price'] ?? null,
+      doctor_type: doctorType?.name ?? null,
     })
   }),
 
@@ -262,7 +314,22 @@ export const handlers = [
     if (existing === undefined) return new HttpResponse(null, { status: 404 })
 
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
-    return HttpResponse.json({ ...existing, ...body })
+    const patch: Record<string, unknown> = { ...body }
+    if ('doctor_type' in patch) {
+      const doctorType = MOCK_DOCTOR_TYPES.find((type) => type.id === patch['doctor_type'])
+      patch['doctor_type'] = doctorType?.name ?? null
+    }
+    return HttpResponse.json({ ...existing, ...patch })
+  }),
+
+  http.delete('/api/v1/clinic/treatment-types/:id/', ({ request, params }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const id = Number(params['id'])
+    const existing = MOCK_TREATMENT_TYPES.find((service) => service.id === id)
+    if (existing === undefined) return new HttpResponse(null, { status: 404 })
+
+    return new HttpResponse(null, { status: 204 })
   }),
 
   /** `UserService.update` — the clinic's own record. */
@@ -363,5 +430,111 @@ export const handlers = [
     }
 
     return HttpResponse.json(detail)
+  }),
+
+  /** `TreatmentList` — a plain array, filtered by the `patient_id` query param. */
+  http.get('/api/v1/clinic/treatments/', ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const patientId = Number(new URL(request.url).searchParams.get('patient_id'))
+    return HttpResponse.json(MOCK_TREATMENTS[patientId] ?? [])
+  }),
+
+  /** `RecipeList` — a plain array, filtered by the `patient_id` query param. */
+  http.get('/api/v1/core/recipes/', ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const patientId = Number(new URL(request.url).searchParams.get('patient_id'))
+    return HttpResponse.json(MOCK_RECIPES[patientId] ?? [])
+  }),
+
+  /**
+   * `CalendarService.get_appointments` — confirmed shape, see
+   * `entities/appointment/model/schema.ts`. Mocked as a plain array: the
+   * endpoint answers for one day or one week at a time, which is a bounded
+   * slice rather than the kind of catalog `/clinic/treatment-types/` turned
+   * out to paginate (still unconfirmed either way).
+   */
+  http.get('/api/v1/calendars/appointments/', ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const date = new URL(request.url).searchParams.get('date')
+    const matched =
+      date === 'week' || date === null
+        ? MOCK_APPOINTMENTS
+        : MOCK_APPOINTMENTS.filter((appointment) => appointment.date === date)
+
+    return HttpResponse.json(matched)
+  }),
+
+  http.post('/api/v1/calendars/appointments/', async ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
+
+    // Confirmed against a real 400: unlike `patient`, `doctor` is required.
+    if (body['doctor'] === null || body['doctor'] === undefined) {
+      return HttpResponse.json(
+        errorEnvelope({
+          message: 'Invalid input.',
+          messageKey: 'invalid',
+          errors: { doctor: 'null' },
+          exceptionClass: 'ValidationError',
+        }),
+        { status: 400 },
+      )
+    }
+
+    const patientId = idOf(body['patient'])
+    return HttpResponse.json({
+      id: 900,
+      patient_id: patientId,
+      // No `full_name` on read: a linked patient's own name wins, and an
+      // unlinked walk-in falls back to what was typed — confirmed shape.
+      patient: patientNameFor(patientId) ?? body['full_name'] ?? null,
+      phone_number: body['phone_number'] ?? null,
+      doctor_id: idOf(body['doctor']),
+      doctor: doctorNameFor(body['doctor']),
+      // Confirmed against a real response: sent back even though the form
+      // never submits it.
+      treatment_type: null,
+      date: body['date'] ?? '',
+      time: withSeconds(body['time']),
+      notes: body['notes'] ?? null,
+      status: body['status'] ?? 'in_progress',
+    })
+  }),
+
+  http.patch('/api/v1/calendars/appointments/:id/', async ({ request, params }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const id = Number(params['id'])
+    const existing = MOCK_APPOINTMENTS.find((appointment) => appointment.id === id)
+    if (existing === undefined) return new HttpResponse(null, { status: 404 })
+
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
+    const updated: Record<string, unknown> = { ...existing, ...body }
+    if ('patient' in body) {
+      const patientId = idOf(body['patient'])
+      updated['patient_id'] = patientId
+      updated['patient'] = patientNameFor(patientId) ?? body['full_name'] ?? existing.patient
+    }
+    if ('doctor' in body) {
+      updated['doctor_id'] = idOf(body['doctor'])
+      updated['doctor'] = doctorNameFor(body['doctor'])
+    }
+    if ('time' in body) updated['time'] = withSeconds(body['time'])
+
+    return HttpResponse.json(updated)
+  }),
+
+  http.delete('/api/v1/calendars/appointments/:id/', ({ request, params }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const id = Number(params['id'])
+    const existing = MOCK_APPOINTMENTS.find((appointment) => appointment.id === id)
+    if (existing === undefined) return new HttpResponse(null, { status: 404 })
+
+    return new HttpResponse(null, { status: 204 })
   }),
 ]

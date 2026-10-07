@@ -36,7 +36,18 @@
     "editTitle": "Xizmatni tahrirlash",
     "saveFailed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring.",
     "empty": "Hozircha xizmat yo'q",
-    "emptyDescription": "Davolanish va narxlar unga murojaat qila olishi uchun xizmat qo'shing."
+    "emptyDescription": "Davolanish va narxlar unga murojaat qila olishi uchun xizmat qo'shing.",
+    "doctorType": "Turi",
+    "doctorTypePlaceholder": "Tayinlanmagan",
+    "filterLabel": "Shifokor turi bo'yicha filtr",
+    "filterAll": "Barchasi",
+    "filterUnassigned": "Tayinlanmagan",
+    "filterEmpty": "Bu turdagi xizmat topilmadi",
+    "deleteTitle": "Xizmatni o'chirish",
+    "deleteDescription": "\"{{name}}\" o'chirilsinmi?",
+    "deleteWarning": "Bu amalni ortga qaytarib bo'lmaydi. Agar bu xizmatga bog'liq davolash yoki qabul tarixi bo'lsa, o'chirilganda ular saqlanib qolishi yoki yo'qolishi aniq emas.",
+    "deleteWait": "O'chirish ({{seconds}})",
+    "deleteFailed": "Xizmatni o'chirib bo'lmadi. Qayta urinib ko'ring."
   },
   "clinic": {
     "name": "Klinika nomi",

@@ -2,6 +2,9 @@
   "app": {
     "name": "SalomatOS"
   },
+  "currency": {
+    "som": "сўм"
+  },
   "action": {
     "save": "Сақлаш",
     "cancel": "Бекор қилиш",
@@ -20,6 +23,7 @@
     "breadcrumb": "Саҳифалар занжири",
     "dashboard": "Бошқарув панели",
     "patients": "Беморлар",
+    "appointments": "Учрашувлар",
     "billing": "Тўловлар",
     "admin": "Бошқарув"
   },

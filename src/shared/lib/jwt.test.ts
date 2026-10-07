@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { readJwtPayload } from './jwt'
+import { isJwtExpired, readJwtPayload } from './jwt'
 
 function token(payload: unknown): string {
   const encode = (value: unknown): string => {
@@ -55,5 +55,25 @@ describe('readJwtPayload', () => {
     // `Number('')` is 0, and an empty claim is not user zero.
     expect(readJwtPayload(token({ user_id: '' }))).toBeNull()
     expect(readJwtPayload(token({ user_id: '  ' }))).toBeNull()
+  })
+})
+
+describe('isJwtExpired', () => {
+  it('is false for a token whose exp is in the future', () => {
+    expect(isJwtExpired(token({ user_id: 1, exp: Date.now() / 1000 + 3600 }))).toBe(false)
+  })
+
+  it('is true for a token whose exp is in the past', () => {
+    expect(isJwtExpired(token({ user_id: 1, exp: Date.now() / 1000 - 3600 }))).toBe(true)
+  })
+
+  it('treats a token expiring within the skew window as expired', () => {
+    expect(isJwtExpired(token({ user_id: 1, exp: Date.now() / 1000 + 10 }), 30)).toBe(true)
+  })
+
+  it('is true for anything unreadable, same as readJwtPayload returning null', () => {
+    expect(isJwtExpired('')).toBe(true)
+    expect(isJwtExpired('not-a-token')).toBe(true)
+    expect(isJwtExpired(token({ user_id: 1 }))).toBe(true)
   })
 })

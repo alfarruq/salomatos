@@ -62,6 +62,8 @@ describe('CreatePatientDialog', () => {
 
     await userEvent.type(await screen.findByLabelText('F. I. Sh.'), 'Yangi Bemor')
     await userEvent.type(screen.getByLabelText('Telefon raqami'), '935550022')
+    await userEvent.click(await screen.findByRole('combobox', { name: 'Shifokor' }))
+    await userEvent.click(await screen.findByRole('option', { name: 'Sardor Usmonov' }))
     await userEvent.click(screen.getByRole('button', { name: "Bemor qo'shish" }))
 
     await vi.waitFor(() => expect(onCreated).toHaveBeenCalledOnce())
@@ -74,6 +76,8 @@ describe('CreatePatientDialog', () => {
     await userEvent.type(await screen.findByLabelText('F. I. Sh.'), 'Vali Aliyev')
     // Already registered at this clinic — `unique_phone_per_clinic`.
     await userEvent.type(screen.getByLabelText('Telefon raqami'), '901234567')
+    await userEvent.click(await screen.findByRole('combobox', { name: 'Shifokor' }))
+    await userEvent.click(await screen.findByRole('option', { name: 'Sardor Usmonov' }))
     await userEvent.click(screen.getByRole('button', { name: "Bemor qo'shish" }))
 
     /*

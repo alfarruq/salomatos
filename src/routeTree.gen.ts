@@ -19,6 +19,7 @@ import { Route as AuthAdminClinicRouteImport } from './pages/_auth/admin/clinic'
 import { Route as AuthAdminDoctorTypesRouteImport } from './pages/_auth/admin/doctor-types'
 import { Route as AuthAdminDoctorsRouteImport } from './pages/_auth/admin/doctors'
 import { Route as AuthAdminServicesRouteImport } from './pages/_auth/admin/services'
+import { Route as AuthAppointmentsIndexRouteImport } from './pages/_auth/appointments/index'
 import { Route as AuthPatientsIndexRouteImport } from './pages/_auth/patients/index'
 import { Route as AuthPatientsPatientIdRouteImport } from './pages/_auth/patients/$patientId'
 
@@ -71,6 +72,11 @@ const AuthAdminServicesRoute = AuthAdminServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => AuthAdminRoute,
 } as any)
+const AuthAppointmentsIndexRoute = AuthAppointmentsIndexRouteImport.update({
+  id: '/appointments/',
+  path: '/appointments/',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthPatientsIndexRoute = AuthPatientsIndexRouteImport.update({
   id: '/patients/',
   path: '/patients/',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/admin/services': typeof AuthAdminServicesRoute
   '/patients/$patientId': typeof AuthPatientsPatientIdRoute
   '/admin/': typeof AuthAdminIndexRoute
+  '/appointments/': typeof AuthAppointmentsIndexRoute
   '/patients/': typeof AuthPatientsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/admin/services': typeof AuthAdminServicesRoute
   '/patients/$patientId': typeof AuthPatientsPatientIdRoute
   '/admin': typeof AuthAdminIndexRoute
+  '/appointments': typeof AuthAppointmentsIndexRoute
   '/patients': typeof AuthPatientsIndexRoute
 }
 export interface FileRoutesById {
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/_auth/admin/services': typeof AuthAdminServicesRoute
   '/_auth/patients/$patientId': typeof AuthPatientsPatientIdRoute
   '/_auth/admin/': typeof AuthAdminIndexRoute
+  '/_auth/appointments/': typeof AuthAppointmentsIndexRoute
   '/_auth/patients/': typeof AuthPatientsIndexRoute
 }
 export interface FileRouteTypes {
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/patients/$patientId'
     | '/admin/'
+    | '/appointments/'
     | '/patients/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/patients/$patientId'
     | '/admin'
+    | '/appointments'
     | '/patients'
   id:
     | '__root__'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/_auth/admin/services'
     | '/_auth/patients/$patientId'
     | '/_auth/admin/'
+    | '/_auth/appointments/'
     | '/_auth/patients/'
   fileRoutesById: FileRoutesById
 }
@@ -242,6 +254,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAdminServicesRouteImport
       parentRoute: typeof AuthAdminRoute
     }
+    '/_auth/appointments/': {
+      id: '/_auth/appointments/'
+      path: '/appointments'
+      fullPath: '/appointments/'
+      preLoaderRoute: typeof AuthAppointmentsIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/patients/': {
       id: '/_auth/patients/'
       path: '/patients'
@@ -283,6 +302,7 @@ interface AuthRouteChildren {
   AuthAdminRoute: typeof AuthAdminRouteWithChildren
   AuthDashboardRoute: typeof AuthDashboardRoute
   AuthPatientsPatientIdRoute: typeof AuthPatientsPatientIdRoute
+  AuthAppointmentsIndexRoute: typeof AuthAppointmentsIndexRoute
   AuthPatientsIndexRoute: typeof AuthPatientsIndexRoute
 }
 
@@ -290,6 +310,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthAdminRoute: AuthAdminRouteWithChildren,
   AuthDashboardRoute: AuthDashboardRoute,
   AuthPatientsPatientIdRoute: AuthPatientsPatientIdRoute,
+  AuthAppointmentsIndexRoute: AuthAppointmentsIndexRoute,
   AuthPatientsIndexRoute: AuthPatientsIndexRoute,
 }
 

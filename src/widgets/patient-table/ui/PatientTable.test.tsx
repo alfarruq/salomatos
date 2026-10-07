@@ -43,7 +43,7 @@ function signIn() {
   })
 }
 
-function renderTable() {
+function renderTable(filterOverrides: Partial<Omit<PatientFilters, 'search'>> = {}) {
   const onOpenPatient = vi.fn()
   const onFiltersChange = vi.fn()
 
@@ -57,7 +57,7 @@ function renderTable() {
         <Suspense fallback={null}>
           <PatientTable
             clinicId={CLINIC_ID}
-            filters={filters}
+            filters={{ ...filters, ...filterOverrides }}
             onFiltersChange={onFiltersChange}
             onOpenPatient={onOpenPatient}
           />
@@ -83,7 +83,7 @@ describe('PatientTable', () => {
     renderTable()
 
     // Same grouping wherever staff meet a number.
-    expect(await screen.findByText('+998 90 123 45 67')).toBeInTheDocument()
+    expect(await screen.findByText('+998-90-123-45-67')).toBeInTheDocument()
   })
 
   it('shows a dash rather than a blank cell for a patient with nothing on record', async () => {
@@ -142,6 +142,87 @@ describe('PatientTable', () => {
     expect(await screen.findByText('Hech narsa topilmadi')).toBeInTheDocument()
     // Not "add a patient" — that is not what this person was trying to do.
     expect(screen.getByRole('button', { name: "Barcha bemorlarni ko'rsatish" })).toBeInTheDocument()
+  })
+
+  it('opens the row menu without navigating to the patient', async () => {
+    const { onOpenPatient } = renderTable()
+
+    await screen.findByText('Vali Aliyev')
+    await userEvent.click(screen.getByRole('button', { name: 'Tahrirlash — Vali Aliyev' }))
+
+    expect(screen.getByRole('menuitem', { name: 'Tahrirlash' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: "O'chirish" })).toBeInTheDocument()
+    expect(onOpenPatient).not.toHaveBeenCalled()
+  })
+
+  it('opens the edit dialog from the row menu', async () => {
+    renderTable()
+
+    await screen.findByText('Vali Aliyev')
+    await userEvent.click(screen.getByRole('button', { name: 'Tahrirlash — Vali Aliyev' }))
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Tahrirlash' }))
+
+    expect(await screen.findByRole('heading', { name: 'Bemorni tahrirlash' })).toBeInTheDocument()
+  })
+
+  it('filters by treatment type through the select, not free text', async () => {
+    const { onFiltersChange } = renderTable()
+    await screen.findByText('Vali Aliyev')
+
+    const select = screen.getByRole('combobox', { name: "Muolaja turi bo'yicha filtr" })
+    await userEvent.click(select)
+    await userEvent.click(screen.getByRole('option', { name: 'Tozalash' }))
+
+    expect(onFiltersChange).toHaveBeenCalledWith({ ...filters, treatmentTypeId: 8, page: 1 })
+  })
+
+  it('sends null, not the sentinel, when "all" is chosen again', async () => {
+    // Radix's `Select` treats `""` as "nothing selected" no matter what — the
+    // filter's "all" option has to use a different sentinel value, or this
+    // never renders anything to pick in the first place. Starting from a
+    // non-null filter, since the select's value is controlled by `filters`
+    // and this widget never re-renders itself with the result of its own
+    // `onFiltersChange` call — that is the route's job (see `PatientsPage`).
+    const { onFiltersChange } = renderTable({ treatmentTypeId: 8 })
+    await screen.findByText('Vali Aliyev')
+
+    const select = screen.getByRole('combobox', { name: "Muolaja turi bo'yicha filtr" })
+    expect(select).toHaveTextContent('Tozalash')
+
+    await userEvent.click(select)
+    await userEvent.click(screen.getByRole('option', { name: 'Barcha muolaja turlari' }))
+
+    expect(onFiltersChange).toHaveBeenCalledWith({
+      ...filters,
+      treatmentTypeId: null,
+      page: 1,
+    })
+  })
+
+  it('filters by status through the select', async () => {
+    const { onFiltersChange } = renderTable()
+    await screen.findByText('Vali Aliyev')
+
+    const select = screen.getByRole('combobox', { name: "Holat bo'yicha filtr" })
+    await userEvent.click(select)
+    await userEvent.click(screen.getByRole('option', { name: 'Yakunlangan' }))
+
+    expect(onFiltersChange).toHaveBeenCalledWith({ ...filters, status: 'completed', page: 1 })
+  })
+
+  it('sends the doctor filter to the URL, unlike the PHI search box', async () => {
+    const { onFiltersChange } = renderTable()
+    await screen.findByText('Vali Aliyev')
+
+    const select = screen.getByRole('combobox', { name: "Shifokor bo'yicha filtr" })
+    await userEvent.click(select)
+    await userEvent.click(await screen.findByRole('option', { name: 'Sardor Usmonov' }))
+
+    expect(onFiltersChange).toHaveBeenCalledWith({
+      ...filters,
+      doctor: 'Sardor Usmonov',
+      page: 1,
+    })
   })
 
   it('hides the create button from a user without permission', async () => {

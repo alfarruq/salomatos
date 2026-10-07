@@ -8,10 +8,11 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { useSessionStore } from '@/entities/session'
 import { useLockStore } from '@/features/session-lock'
 import { routeTree } from '@/routeTree.gen'
+import { clearSession } from '@/shared/api/authSession'
 import { configureApi, resetApiContext } from '@/shared/api/httpContext'
 import { accessTokenFor, MOCK_USERS } from '@/shared/api/mocks/fixtures'
 import { server } from '@/shared/api/mocks/server'
-import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
+import { setAccessToken } from '@/shared/api/tokenStore'
 import { createI18n } from '@/shared/i18n'
 import { IDLE_TIMEOUT_MS, IDLE_WARNING_MS } from '@/shared/lib/useIdleTimer'
 import { Toaster } from '@/shared/ui'
@@ -32,7 +33,7 @@ function renderApp(initialPath = '/') {
   // would cancel the request that reported the 401.
   configureApi({
     onUnauthorized: () => {
-      clearAccessToken()
+      clearSession()
       useSessionStore.getState().clear()
     },
   })
@@ -80,7 +81,7 @@ beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 afterEach(() => {
   server.resetHandlers()
   resetApiContext()
-  clearAccessToken()
+  clearSession()
   useSessionStore.getState().clear()
   useLockStore.getState().unlock()
 })

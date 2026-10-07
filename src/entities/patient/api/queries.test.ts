@@ -101,6 +101,16 @@ describe('fetchPatient', () => {
     expect(patient.treatments).toEqual([])
     expect(patient.age).toBeNull()
     expect(patient.remaining).toBe(0)
+    expect(patient.gallery).toEqual([])
+  })
+
+  it('maps the gallery array embedded in the detail response', async () => {
+    const patient = await fetchPatient(101)
+
+    expect(patient.gallery).toEqual([
+      { id: 1, imageUrl: '/media/gallery/before.jpg', createdAt: '2026-08-20T09:15:00Z' },
+      { id: 2, imageUrl: '/media/gallery/after.jpg', createdAt: '2026-08-24T14:40:00Z' },
+    ])
   })
 
   it('reports a missing patient as notFound, not as a crash', async () => {

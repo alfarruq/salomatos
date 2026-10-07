@@ -1,14 +1,22 @@
 import * as v from 'valibot'
 import { pageSchema } from '@/shared/api/pagination'
 import { parseCalendarDate } from '@/shared/lib/calendarDate'
-import type { AppointmentSlot, Patient, PatientListItem, PatientTreatment } from './types'
+import type {
+  AppointmentSlot,
+  Patient,
+  PatientGalleryImage,
+  PatientListItem,
+  PatientTreatment,
+} from './types'
 
 /**
  * The wire contract for `/api/patients/`, validated at runtime (ADR-006).
  *
- * Only the fields the interface uses are declared; Valibot ignores the rest, so
- * the detail response's `gallery` and `recipe` arrays pass through untouched
- * until phase 7.2 needs them.
+ * Only the fields the interface uses are declared; Valibot ignores the rest.
+ * The detail response's `recipe` array still passes through untouched — the
+ * prescriptions tab reads its own endpoint (`entities/recipe`) instead, since
+ * `/api/v1/core/recipes/` is the confirmed contract and this embedded one is
+ * not.
  */
 
 /** Absent or null both mean "nothing here" — see `sessionSchema` for why. */
@@ -77,6 +85,18 @@ const treatmentSchema = v.object({
   tooth_number: optionalNumber,
 })
 
+/**
+ * `GalleryList` (drf-yasg). `image` is `readOnly` and typed `uri`, but every
+ * other media field on this backend (`patient.image`, `doctor.image`) turns
+ * out to be a relative `/media/...` path rather than an absolute URL — so it
+ * is read the same defensive way, not trusted to be a real URI.
+ */
+const galleryImageSchema = v.object({
+  id: v.pipe(v.number(), v.integer()),
+  image: optionalString,
+  created_at: optionalString,
+})
+
 export const patientDetailSchema = v.object({
   id: v.pipe(v.number(), v.integer()),
   full_name: v.string(),
@@ -96,6 +116,7 @@ export const patientDetailSchema = v.object({
    * case where it is right and this is wrong.
    */
   treatment_type: v.optional(v.fallback(v.array(treatmentSchema), []), []),
+  gallery: v.optional(v.fallback(v.array(galleryImageSchema), []), []),
 
   // Money, and the counters beside it. Zero is the server's own default when
   // a patient has no treatment on record.
@@ -168,6 +189,10 @@ function toTreatment(response: v.InferOutput<typeof treatmentSchema>): PatientTr
   return { id: response.id, name: response.name, toothNumber: response.tooth_number }
 }
 
+function toGalleryImage(response: v.InferOutput<typeof galleryImageSchema>): PatientGalleryImage {
+  return { id: response.id, imageUrl: response.image, createdAt: response.created_at }
+}
+
 export function toPatient(response: PatientDetailResponse): Patient {
   return {
     id: response.id,
@@ -181,6 +206,7 @@ export function toPatient(response: PatientDetailResponse): Patient {
     age: response.age,
     status: response.status,
     treatments: response.treatment_type.map(toTreatment),
+    gallery: response.gallery.map(toGalleryImage),
     // Zero, not null: these are counters and the server's own default is 0
     // when a patient has no treatment on record.
     totalTreatmentCost: response.total_treatment_cost ?? 0,

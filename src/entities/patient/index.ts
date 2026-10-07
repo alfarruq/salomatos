@@ -20,6 +20,7 @@ export {
   defaultPatientFilters,
   type Patient,
   type PatientFilters,
+  type PatientGalleryImage,
   type PatientId,
   type PatientListItem,
   type PatientStatus,
@@ -27,4 +28,6 @@ export {
 } from './model/types'
 export { PatientAvatar, type PatientAvatarProps } from './ui/PatientAvatar'
 export { PatientFormFields, type PatientFormFieldsProps } from './ui/PatientFormFields'
+export { PatientGallery, type PatientGalleryProps } from './ui/PatientGallery'
 export { PatientStatusBadge, type PatientStatusBadgeProps } from './ui/PatientStatusBadge'
+export { ToothChart, type ToothChartProps } from './ui/ToothChart'

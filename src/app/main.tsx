@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { restoreSession } from '@/shared/api/authSession'
 import { App } from './App'
 import { AppProviders } from './providers/AppProviders'
 import './styles/theme.css'
@@ -11,6 +12,13 @@ const container = document.getElementById('root')
 if (!container) {
   throw new Error('Root container #root not found in index.html')
 }
+
+/*
+ * Synchronous, and before the first render: the router (created inside
+ * `App`) reads the token through `tokenStore` on its very first `beforeLoad`,
+ * so this has to land before that render happens at all, not in an effect.
+ */
+restoreSession()
 
 /*
  * ⛔ There is no mock backend here any more, and there must not be one again.

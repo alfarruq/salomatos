@@ -1,0 +1,72 @@
+{
+  "title": "Uchrashuvlar",
+  "status": {
+    "in_progress": "Jarayonda",
+    "completed": "Yakunlangan"
+  },
+  "form": {
+    "patient": "Bemor",
+    "patientSearchPlaceholder": "Ism bo'yicha qidirish",
+    "unlinkPatient": "Bemorni bog'lashni bekor qilish",
+    "fullName": "F. I. Sh.",
+    "fullNameLinkedHint": "Bemor biriktirilgan — ism doim uning o'z kartasidan olinadi.",
+    "phoneNumber": "Telefon raqami",
+    "doctor": "Shifokor",
+    "doctorPlaceholder": "Tayinlanmagan",
+    "date": "Sana",
+    "datePlaceholder": "Sanani tanlang",
+    "previousMonth": "Oldingi oy",
+    "nextMonth": "Keyingi oy",
+    "time": "Vaqt",
+    "status": "Holati",
+    "notes": "Izoh"
+  },
+  "create": {
+    "title": "Yangi uchrashuv",
+    "description": "Mavjud bemorni tanlang yoki yangi kishining ismi va telefonini kiriting.",
+    "submit": "Uchrashuv qo'shish",
+    "failed": "Uchrashuvni qo'shib bo'lmadi. Qayta urinib ko'ring."
+  },
+  "edit": {
+    "title": "Uchrashuvni tahrirlash",
+    "failed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring."
+  },
+  "delete": {
+    "title": "Uchrashuvni o'chirish",
+    "description": "\"{{name}}\" uchrashuvi o'chirilsinmi?",
+    "failed": "Uchrashuvni o'chirib bo'lmadi. Qayta urinib ko'ring."
+  },
+  "view": {
+    "label": "Ko'rinish",
+    "day": "Kunlik",
+    "week": "Haftalik",
+    "all": "Hammasi",
+    "previousDay": "Oldingi kun",
+    "nextDay": "Keyingi kun",
+    "currentWeek": "Joriy hafta"
+  },
+  "column": {
+    "date": "Sana",
+    "time": "Vaqt",
+    "patient": "Bemor",
+    "doctor": "Shifokor",
+    "status": "Holati"
+  },
+  "empty": {
+    "title": "Hozircha uchrashuv yo'q",
+    "description": "Uchrashuv qo'shsangiz shu yerda ko'rinadi."
+  },
+  "search": {
+    "placeholder": "Ism yoki telefon bo'yicha qidirish",
+    "empty": "Hech narsa topilmadi."
+  },
+  "weekday": {
+    "mon": "Du",
+    "tue": "Se",
+    "wed": "Cho",
+    "thu": "Pa",
+    "fri": "Ju",
+    "sat": "Sha",
+    "sun": "Ya"
+  }
+}

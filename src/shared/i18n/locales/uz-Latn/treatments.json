@@ -1,0 +1,61 @@
+{
+  "table": {
+    "totalLabel": "Jami",
+    "inProgressLabel": "Jarayonda",
+    "completedLabel": "Tugallangan",
+    "columnTooth": "Tish",
+    "columnType": "Davolash turi",
+    "columnDate": "Sana",
+    "columnStatus": "Holat",
+    "columnCost": "Davolash qiymati",
+    "columnDebt": "Qarz",
+    "columnActions": "Amallar",
+    "toothCellHint": "Batafsil ko'rish uchun ikki marta bosing",
+    "actionsMenuLabel": "Amallar — {{type}}, {{date}}",
+    "actionDetail": "Batafsil",
+    "actionEdit": "Tahrirlash",
+    "actionComplete": "Muolajani yakunlash",
+    "empty": "Muolajalar yo'q",
+    "emptyDescription": "Bu bemor uchun hali hech narsa qo'shilmagan.",
+    "emptyAction": "Birinchi muolajani qo'shing"
+  },
+  "detail": {
+    "title": "Muolaja ma'lumotlari",
+    "toothLabel": "Tish: {{tooth}}",
+    "dateLabel": "Sana",
+    "doctorLabel": "Shifokor",
+    "totalCostLabel": "Jami muolaja qiymati",
+    "totalPaidLabel": "Jami to'langan",
+    "remainingLabel": "Qoldiq",
+    "notesLabel": "Izoh",
+    "delete": "Muolajani o'chirish",
+    "edit": "Tahrirlash",
+    "takePayment": "To'lov olish",
+    "complete": "Muolajani yakunlash"
+  },
+  "composer": {
+    "title": "Yangi muolaja",
+    "editTitle": "Muolajani tahrirlash",
+    "doctorLabel": "Shifokor",
+    "doctorPlaceholder": "Shifokorni tanlang",
+    "statusLabel": "Holat",
+    "notesLabel": "Izohlar",
+    "toothHint": "Tish tanlash uchun xaritaga bosing",
+    "treatmentTypePlaceholder": "Davolash turi",
+    "rowType": "Davolash turi",
+    "rowCost": "Jami qiymat",
+    "rowPaid": "Jami to'langan",
+    "totalsLabel": "Jami",
+    "save": "Saqlash",
+    "saveFailed": "Muolajani saqlab bo'lmadi. Qayta urinib ko'ring.",
+    "toothType": {
+      "incisor": "kesuvchi tish",
+      "canine": "qoziq tish",
+      "premolar": "kichik oziq tish",
+      "molar": "katta oziq tish",
+      "upper": "Yuqori jag'",
+      "lower": "Pastki jag'",
+      "tooth": "Tish"
+    }
+  }
+}

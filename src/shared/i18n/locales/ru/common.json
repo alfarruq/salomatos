@@ -2,6 +2,9 @@
   "app": {
     "name": "SalomatOS"
   },
+  "currency": {
+    "som": "сум"
+  },
   "action": {
     "save": "Сохранить",
     "cancel": "Отмена",
@@ -20,6 +23,7 @@
     "breadcrumb": "Хлебные крошки",
     "dashboard": "Панель управления",
     "patients": "Пациенты",
+    "appointments": "Записи на приём",
     "billing": "Платежи",
     "admin": "Администрирование"
   },

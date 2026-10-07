@@ -1,17 +1,24 @@
-import type { UseFormReturn } from 'react-hook-form'
+import { Controller, type UseFormReturn } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { Field, Input } from '@/shared/ui'
+import { Field, Input, MoneyInput, Select, type SelectOption } from '@/shared/ui'
 import type { TreatmentTypeFormInput } from '../model/formSchema'
 
 export interface TreatmentTypeFormFieldsProps {
   form: UseFormReturn<TreatmentTypeFormInput>
   isDisabled?: boolean
+  /**
+   * Doctor-type choices, as plain `{value, label}` pairs rather than the
+   * `entities/doctor-type` shape — an entity may not import another entity
+   * (§4), so the feature that fetches the list converts it before it gets here.
+   */
+  doctorTypeOptions: SelectOption[]
 }
 
 /** A service's writable fields. Passive — the feature owns the mutation (§3.2). */
 export function TreatmentTypeFormFields({
   form,
   isDisabled = false,
+  doctorTypeOptions,
 }: TreatmentTypeFormFieldsProps) {
   const { t } = useTranslation(['admin', 'validation'])
 
@@ -33,15 +40,35 @@ export function TreatmentTypeFormFields({
         error={message(errors.price?.message)}
         label={t('admin:service.price')}
       >
-        <Input
-          autoComplete="off"
-          disabled={isDisabled}
-          // Numeric keypad on the tablet at reception, but still a text field:
-          // `type="number"` brings spinners, scroll-wheel edits and a value
-          // that silently becomes empty on a stray character.
-          inputMode="numeric"
-          placeholder="1200000"
-          {...form.register('price')}
+        <Controller
+          control={form.control}
+          name="price"
+          render={({ field }) => (
+            <MoneyInput
+              disabled={isDisabled}
+              name={field.name}
+              onChange={field.onChange}
+              placeholder="1,200,000"
+              value={field.value}
+            />
+          )}
+        />
+      </Field>
+
+      <Field label={t('admin:service.doctorType')}>
+        <Controller
+          control={form.control}
+          name="doctorTypeId"
+          render={({ field }) => (
+            <Select
+              disabled={isDisabled}
+              name={field.name}
+              onValueChange={field.onChange}
+              options={doctorTypeOptions}
+              placeholder={t('admin:service.doctorTypePlaceholder')}
+              value={field.value}
+            />
+          )}
         />
       </Field>
     </div>

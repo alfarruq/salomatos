@@ -7,9 +7,9 @@ import { Button, DropdownMenu, DropdownMenuItem, DropdownMenuLabel } from '@/sha
  * Each language is written in itself — someone looking for Русский is not
  * helped by seeing "Rus tili" in a language they cannot read.
  *
- * The choice lasts for the session only. Remembering it belongs on the user's
- * record: §3 rules out browser storage, and a shared reception desk is exactly
- * where a per-machine preference would be wrong anyway.
+ * The choice survives a reload — `shared/i18n/config.ts` persists it through
+ * `shared/lib/storage`'s allowlisted `locale` key (§3) the moment
+ * `changeLanguage` fires, so nothing here needs to know that happens.
  */
 export function LanguageSwitcher() {
   const { t, i18n } = useTranslation('common')
