@@ -23,6 +23,8 @@ export interface TreatmentRowsTableProps {
   onRemoveRow: (rowId: string) => void
   /** Only meaningful for the one row with an `existingTreatmentId` — see the composer. */
   onExistingRowTypeChanged: () => void
+  /** Off for a non-dental doctor, whose rows have no tooth to show. */
+  showToothColumn: boolean
 }
 
 function debtOf(row: TreatmentRow): number {
@@ -42,6 +44,7 @@ export function TreatmentRowsTable({
   onRowChange,
   onRemoveRow,
   onExistingRowTypeChanged,
+  showToothColumn,
 }: TreatmentRowsTableProps) {
   const { t, i18n } = useTranslation(['treatments', 'common'])
   const currencyLabel = t('common:currency.som')
@@ -60,7 +63,7 @@ export function TreatmentRowsTable({
     <Table density="compact">
       <TableHeader>
         <TableRow>
-          <TableHead>{t('treatments:table.columnTooth')}</TableHead>
+          {showToothColumn ? <TableHead>{t('treatments:table.columnTooth')}</TableHead> : null}
           <TableHead>{t('treatments:composer.rowType')}</TableHead>
           <TableHead align="right">{t('treatments:composer.rowCost')}</TableHead>
           <TableHead align="right">{t('treatments:composer.rowPaid')}</TableHead>
@@ -72,11 +75,17 @@ export function TreatmentRowsTable({
       <TableBody>
         {rows.map((row) => (
           <TableRow key={row.rowId}>
-            <TableCell>
-              <span className="flex size-8 items-center justify-center rounded-lg bg-accent-soft text-callout font-medium text-accent-text">
-                {row.toothNumber}
-              </span>
-            </TableCell>
+            {showToothColumn ? (
+              <TableCell>
+                {row.toothNumber === null ? (
+                  <span className="text-text-tertiary">—</span>
+                ) : (
+                  <span className="flex size-8 items-center justify-center rounded-lg bg-accent-soft text-callout font-medium text-accent-text">
+                    {row.toothNumber}
+                  </span>
+                )}
+              </TableCell>
+            ) : null}
             <TableCell>
               <Select
                 onValueChange={(value) => {
@@ -112,7 +121,11 @@ export function TreatmentRowsTable({
             </TableCell>
             <TableCell align="right">
               <Button
-                aria-label={`${t('common:action.delete')} — ${t('treatments:table.columnTooth')} ${row.toothNumber}`}
+                aria-label={`${t('common:action.delete')} — ${
+                  row.toothNumber === null
+                    ? row.treatmentTypeName
+                    : `${t('treatments:table.columnTooth')} ${row.toothNumber}`
+                }`}
                 onClick={() => onRemoveRow(row.rowId)}
                 size="sm"
                 variant="ghost"
@@ -127,7 +140,7 @@ export function TreatmentRowsTable({
       {rows.length === 0 ? null : (
         <tfoot>
           <TableRow className="font-medium">
-            <TableCell className="text-text-secondary" colSpan={2}>
+            <TableCell className="text-text-secondary" colSpan={showToothColumn ? 2 : 1}>
               {t('treatments:composer.totalsLabel')}
             </TableCell>
             <TableCell align="right" isNumeric>

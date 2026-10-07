@@ -1,6 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 import * as v from 'valibot'
 import { httpClient } from '@/shared/api/httpClient'
+import { pathFromNext } from '@/shared/api/pagination'
 import { cachePolicy } from '@/shared/config/cache'
 import {
   type TreatmentTypeResponse,
@@ -13,12 +14,6 @@ import type { TreatmentType } from '../model/types'
 export const treatmentTypeKeys = {
   scope: (clinicId: number) => ['clinics', clinicId, 'treatment-types'] as const,
   list: (clinicId: number) => [...treatmentTypeKeys.scope(clinicId), 'list'] as const,
-}
-
-/** `next`'s own origin and `/api` prefix, which `httpClient` adds back itself. */
-function pathFromNext(next: string): string {
-  const url = new URL(next, globalThis.location.origin)
-  return `${url.pathname.replace(/^\/api\//, '')}${url.search}`
 }
 
 /**

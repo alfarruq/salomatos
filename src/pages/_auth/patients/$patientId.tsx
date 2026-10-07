@@ -23,13 +23,15 @@ import {
   patientQueries,
   ToothChart,
 } from '@/entities/patient'
-import { PrescriptionList } from '@/entities/recipe'
 import { Can } from '@/entities/session'
 import type { Treatment } from '@/entities/treatment'
 import { CreateAppointmentDialog } from '@/features/appointment-create'
 import { DeletePatientDialog } from '@/features/patient-delete'
 import { EditPatientDialog } from '@/features/patient-edit'
+import { GalleryDropzone } from '@/features/patient-gallery-upload'
+import { RecipeEditor } from '@/features/recipe-editor'
 import { TreatmentComposer } from '@/features/treatment-composer'
+import { DeleteTreatmentDialog } from '@/features/treatment-delete'
 import { formatCalendarDate, todayCalendarDate } from '@/shared/lib/calendarDate'
 import { formatSom } from '@/shared/lib/money'
 import {
@@ -44,6 +46,7 @@ import {
   Tabs,
   toast,
 } from '@/shared/ui'
+import { PrescriptionCards } from '@/widgets/patient-prescriptions'
 import { TreatmentHistoryTable } from '@/widgets/patient-treatments'
 
 export const Route = createFileRoute('/_auth/patients/$patientId')({
@@ -58,6 +61,27 @@ function PatientDetailPage() {
   const [isEditOpen, setEditOpen] = useState(false)
   const [isDeleteOpen, setDeleteOpen] = useState(false)
   const [isAppointmentOpen, setAppointmentOpen] = useState(false)
+  // Here rather than in the tabs: the header's button and the table both open it.
+  const [isComposerOpen, setComposerOpen] = useState(false)
+  const [editingTreatment, setEditingTreatment] = useState<Treatment | null>(null)
+  // A fresh key per opening: the form seeds its state once, on mount, so
+  // without this the next opening would inherit the last one's doctor and rows.
+  const [composerSession, setComposerSession] = useState(0)
+
+  // Same reasoning as the composer: a fresh form on every opening.
+  const [isRecipeEditorOpen, setRecipeEditorOpen] = useState(false)
+  const [recipeEditorSession, setRecipeEditorSession] = useState(0)
+
+  const openRecipeEditor = () => {
+    setRecipeEditorSession((session) => session + 1)
+    setRecipeEditorOpen(true)
+  }
+
+  const openComposer = (treatment: Treatment | null) => {
+    setEditingTreatment(treatment)
+    setComposerSession((session) => session + 1)
+    setComposerOpen(true)
+  }
 
   /*
    * ADR-013: ids are integers here. A non-numeric path segment is a typed or
@@ -102,15 +126,9 @@ function PatientDetailPage() {
             </Link>
 
             <div className="flex flex-wrap gap-2">
-              {/*
-               * Not wired to anything real yet — there is no treatment or
-               * prescription API to call. Showing the button but announcing
-               * the gap beats hiding a control the reference design asked
-               * for outright.
-               */}
               <Button
                 iconLeft={<Stethoscope aria-hidden="true" className="size-4" />}
-                onClick={() => toast.info(t('patients:detail.comingSoon'))}
+                onClick={() => openComposer(null)}
                 size="sm"
                 variant="primary"
               >
@@ -118,7 +136,7 @@ function PatientDetailPage() {
               </Button>
               <Button
                 iconLeft={<Pill aria-hidden="true" className="size-4" />}
-                onClick={() => toast.info(t('patients:detail.comingSoon'))}
+                onClick={openRecipeEditor}
                 size="sm"
                 variant="secondary"
               >
@@ -156,8 +174,31 @@ function PatientDetailPage() {
 
           <div className="grid items-start gap-6 lg:grid-cols-[320px_1fr]">
             <PatientSidebar patient={patient} />
-            <PatientTabs patient={patient} />
+            <PatientTabs
+              onOpenComposer={openComposer}
+              onOpenRecipeEditor={openRecipeEditor}
+              patient={patient}
+            />
           </div>
+
+          <TreatmentComposer
+            clinicId={clinicId}
+            key={composerSession}
+            nextVisitNumber={patient.visitNumber + 1}
+            onOpenChange={setComposerOpen}
+            open={isComposerOpen}
+            patientId={patient.id}
+            {...(editingTreatment === null ? {} : { initialTreatment: editingTreatment })}
+          />
+
+          <RecipeEditor
+            clinicId={clinicId}
+            key={`recipe-${recipeEditorSession}`}
+            onOpenChange={setRecipeEditorOpen}
+            open={isRecipeEditorOpen}
+            patientId={patient.id}
+            patientName={patient.fullName}
+          />
 
           <CreateAppointmentDialog
             clinicId={clinicId}
@@ -290,11 +331,18 @@ function PatientSidebar({ patient }: { patient: Patient }) {
   )
 }
 
-function PatientTabs({ patient }: { patient: Patient }) {
+function PatientTabs({
+  patient,
+  onOpenComposer,
+  onOpenRecipeEditor,
+}: {
+  patient: Patient
+  onOpenComposer: (treatment: Treatment | null) => void
+  onOpenRecipeEditor: () => void
+}) {
   const { t } = useTranslation(['patients', 'common'])
   const { clinicId } = Route.useRouteContext()
-  const [isComposerOpen, setComposerOpen] = useState(false)
-  const [editingTreatment, setEditingTreatment] = useState<Treatment | null>(null)
+  const [deletingTreatment, setDeletingTreatment] = useState<Treatment | null>(null)
 
   return (
     <>
@@ -317,15 +365,9 @@ function PatientTabs({ patient }: { patient: Patient }) {
               <TreatmentHistoryTable
                 clinicId={clinicId}
                 onComplete={() => toast.info(t('patients:detail.comingSoon'))}
-                onCreate={() => {
-                  setEditingTreatment(null)
-                  setComposerOpen(true)
-                }}
-                onDelete={() => toast.info(t('patients:detail.comingSoon'))}
-                onEdit={(treatment) => {
-                  setEditingTreatment(treatment)
-                  setComposerOpen(true)
-                }}
+                onCreate={() => onOpenComposer(null)}
+                onDelete={setDeletingTreatment}
+                onEdit={onOpenComposer}
                 onTakePayment={() => toast.info(t('patients:detail.comingSoon'))}
                 patientId={patient.id}
               />
@@ -336,7 +378,14 @@ function PatientTabs({ patient }: { patient: Patient }) {
             label: t('patients:detail.tabPrescriptions'),
             content: (
               <Card className="p-6">
-                <PrescriptionList clinicId={clinicId} patientId={patient.id} />
+                <PrescriptionCards
+                  clinicId={clinicId}
+                  onCreate={onOpenRecipeEditor}
+                  onDelete={() => toast.info(t('patients:detail.comingSoon'))}
+                  onEdit={() => toast.info(t('patients:detail.comingSoon'))}
+                  onPrint={() => toast.info(t('patients:detail.comingSoon'))}
+                  patientId={patient.id}
+                />
               </Card>
             ),
           },
@@ -345,20 +394,29 @@ function PatientTabs({ patient }: { patient: Patient }) {
             label: t('patients:detail.tabGallery'),
             content: (
               <Card className="p-6">
-                <PatientGallery images={patient.gallery} />
+                <div className="flex flex-col gap-4">
+                  <GalleryDropzone clinicId={clinicId} patientId={patient.id} />
+                  {patient.gallery.length === 0 ? null : (
+                    <PatientGallery images={patient.gallery} />
+                  )}
+                </div>
               </Card>
             ),
           },
         ]}
       />
 
-      <TreatmentComposer
-        clinicId={clinicId}
-        onOpenChange={setComposerOpen}
-        open={isComposerOpen}
-        patientId={patient.id}
-        {...(editingTreatment === null ? {} : { initialTreatment: editingTreatment })}
-      />
+      {deletingTreatment === null ? null : (
+        <DeleteTreatmentDialog
+          clinicId={clinicId}
+          onDeleted={() => setDeletingTreatment(null)}
+          onOpenChange={(open) => {
+            if (!open) setDeletingTreatment(null)
+          }}
+          open
+          treatment={deletingTreatment}
+        />
+      )}
     </>
   )
 }

@@ -1,0 +1,101 @@
+{
+  "list": {
+    "medicineCount_one": "{{count}} та дори",
+    "medicineCount_other": "{{count}} та дори",
+    "print": "Чоп этиш"
+  },
+  "doseForm": {
+    "tablet_one": "{{count}} таблетка",
+    "tablet_other": "{{count}} таблетка",
+    "capsule_one": "{{count}} капсула",
+    "capsule_other": "{{count}} капсула",
+    "sachet_one": "{{count}} пакет",
+    "sachet_other": "{{count}} пакет",
+    "gel_one": "{{count}} марта суртиш",
+    "gel_other": "{{count}} марта суртиш",
+    "spray_one": "{{count}} пуркаш",
+    "spray_other": "{{count}} пуркаш",
+    "drops_one": "{{count}} томчи",
+    "drops_other": "{{count}} томчи",
+    "injection_one": "{{count}} ампула",
+    "injection_other": "{{count}} ампула",
+    "cream_one": "{{count}} марта суртиш",
+    "cream_other": "{{count}} марта суртиш",
+    "rinse_one": "{{count}} марта чайқаш",
+    "rinse_other": "{{count}} марта чайқаш"
+  },
+  "frequency": {
+    "od": "1 маҳал/кун",
+    "bid": "2 маҳал/кун",
+    "tid": "3 маҳал/кун",
+    "qid": "4 маҳал/кун",
+    "q6h": "Ҳар 6 соатда",
+    "q8h": "Ҳар 8 соатда",
+    "q12h": "Ҳар 12 соатда",
+    "prn": "Керак бўлганда"
+  },
+  "meal": {
+    "before": "Овқатдан олдин",
+    "after": "Овқатдан кейин",
+    "with": "Овқат билан",
+    "none": "Овқатга боғлиқ эмас",
+    "beforeMinutes": "Овқатдан {{minutes}} дақ олдин",
+    "afterMinutes": "Овқатдан {{minutes}} дақ кейин"
+  },
+  "duration": {
+    "days_one": "{{count}} кун",
+    "days_other": "{{count}} кун",
+    "weeks_one": "{{count}} ҳафта",
+    "weeks_other": "{{count}} ҳафта"
+  },
+  "doseFormName": {
+    "tablet": "Таблетка",
+    "capsule": "Капсула",
+    "sachet": "Пакет",
+    "gel": "Гел",
+    "spray": "Спрей",
+    "drops": "Томчи",
+    "injection": "Ампула",
+    "cream": "Крем",
+    "rinse": "Чайқаш"
+  },
+  "durationUnit": {
+    "days": "Кун",
+    "weeks": "Ҳафта"
+  },
+  "category": {
+    "antibiotic": "Антибиотиклар",
+    "analgesic": "Оғриқ қолдирувчи",
+    "topical": "Маҳаллий / чайқаш",
+    "other": "Қўшимча"
+  },
+  "editor": {
+    "title": "Рецепт ёзиш",
+    "doctorLabel": "Шифокор",
+    "doctorPlaceholder": "Шифокорни танланг",
+    "medicinesTitle": "Дори-дармонлар",
+    "addMedicine": "Дори қўшиш",
+    "noMedicines": "Ҳали дори қўшилмаган. \"Дори қўшиш\" тугмасини босинг.",
+    "nameLabel": "Дори номи",
+    "namePlaceholder": "Дорини танланг ёки ёзинг",
+    "searchPlaceholder": "Дори номини қидиринг…",
+    "notInCatalog": "Каталогда топилмади",
+    "addCustom": "\"{{name}}\" ни қўшиш",
+    "doseLabel": "Доза",
+    "formLabel": "Шакли",
+    "frequencyLabel": "Қабул",
+    "mealLabel": "Овқат",
+    "minutesLabel": "Дақиқа",
+    "durationLabel": "Муддат",
+    "unitLabel": "Бирлик",
+    "removeMedicine": "Дорини олиб ташлаш",
+    "removeNamedMedicine": "{{name}} ни олиб ташлаш",
+    "incomplete": "Ҳар бир дорида доза ва муддат бутун сон бўлиши керак.",
+    "notesLabel": "Изоҳ",
+    "save": "Рецептни сақлаш",
+    "saved": "Рецепт сақланди",
+    "saveFailed": "Рецептни сақлаб бўлмади. Қайтадан уриниб кўринг.",
+    "patientLabel": "Бемор",
+    "notesPlaceholder": "Бемор учун қўшимча изоҳлар…"
+  }
+}

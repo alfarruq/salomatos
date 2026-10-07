@@ -1,12 +1,13 @@
 import * as v from 'valibot'
+import { pageSchema } from '@/shared/api/pagination'
 import { parseCalendarDate } from '@/shared/lib/calendarDate'
 import type { Treatment } from './types'
 
 /**
- * The wire contract for `/api/v1/clinic/treatments/?patient_id=` (ADR-006),
- * from `TreatmentList` (drf-yasg). Confirmed as a plain array, not the
- * paginated envelope `/clinic/treatment-types/` turned out to need — see that
- * entity's schema for the shape this project has been burned by twice.
+ * The wire contract for `/api/v1/clinic/treatments/` (ADR-006), from
+ * `TreatmentList` (drf-yasg). The list `GET` was first confirmed as a plain
+ * array, then observed (2026-10-07, live) as DRF's page envelope — so the read
+ * accepts both. The bulk `POST` answers with a plain array of created rows.
  *
  * Every field but `id` is read defensively. `TreatmentList` marks most of them
  * required, but `PatientListSerializer`'s `doctor` and `treatment_type` made
@@ -56,6 +57,11 @@ export const treatmentSchema = v.object({
 })
 
 export const treatmentListSchema = v.array(treatmentSchema)
+
+export const treatmentListResponseSchema = v.union([
+  treatmentListSchema,
+  pageSchema(treatmentSchema),
+])
 
 export type TreatmentResponse = v.InferOutput<typeof treatmentSchema>
 

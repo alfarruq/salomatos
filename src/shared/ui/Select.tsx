@@ -23,6 +23,8 @@ export interface SelectProps {
   disabled?: boolean
   name?: string
   id?: string
+  /** Names the trigger where no visible `Field` label fits, e.g. a table cell. */
+  'aria-label'?: string
   className?: string
 }
 
@@ -63,6 +65,7 @@ export function Select({
   disabled,
   name,
   id,
+  'aria-label': ariaLabel,
   className,
 }: SelectProps) {
   const field = useFieldControl()
@@ -92,6 +95,7 @@ export function Select({
     >
       <SelectPrimitive.Trigger
         id={id ?? field?.controlId}
+        aria-label={ariaLabel}
         aria-describedby={field?.describedBy}
         aria-invalid={field?.isInvalid ?? undefined}
         className={cn(

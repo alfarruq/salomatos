@@ -26,26 +26,52 @@ describe('fetchRecipes', () => {
   it('reads the array the fixture has for the requested patient, with its medicines', async () => {
     const recipes = await fetchRecipes(101)
 
-    expect(recipes).toHaveLength(1)
-    expect(recipes[0]).toEqual({
+    expect(recipes).toHaveLength(2)
+    expect(recipes.find((recipe) => recipe.id === 1)).toEqual({
       id: 1,
       doctorName: 'Sardor Usmonov',
-      notes: 'Ovqatdan keyin ichish tavsiya etiladi.',
+      notes: "Issiq ovqat iste'mol qilmang.",
       clinicName: 'Dilnoza Rahimova',
-      createdAt: '2026-08-20T09:30:00Z',
+      createdAt: '2026-09-02T10:00:00Z',
       medicines: [
         {
           id: 1,
-          name: 'Amoksitsillin',
-          dose: '500 mg',
-          type: 'Tablet',
-          frequency: 'Kuniga 2 marta',
-          duration: '7 kun',
-          meal: 'Ovqatdan keyin',
+          name: 'Amoksiklav 625 mg',
+          dose: 1,
+          type: 'tablet',
+          frequency: 'bid',
+          duration: 5,
+          meal: 'after',
           minutes: 30,
+        },
+        {
+          id: 2,
+          name: 'Xolisal gel',
+          dose: 1,
+          type: 'gel',
+          frequency: 'tid',
+          duration: 7,
+          meal: 'none',
+          minutes: 0,
         },
       ],
     })
+  })
+
+  it('reads `dose` and `duration` as the integers the server sends', async () => {
+    // The first schema typed them as strings; one live create proved otherwise,
+    // and that mismatch would have failed the whole tab on the first prescription.
+    server.use(
+      http.get('/api/v1/core/recipes/', () =>
+        HttpResponse.json([
+          { id: 9, medicines: [{ id: 1, dose: 2, duration: '14', minutes: 15 }] },
+        ]),
+      ),
+    )
+
+    const [medicine] = (await fetchRecipes(101))[0]?.medicines ?? []
+    expect(medicine?.dose).toBe(2)
+    expect(medicine?.duration).toBe(14)
   })
 
   it('sends the patient filter', async () => {

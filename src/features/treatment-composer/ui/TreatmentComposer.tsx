@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Doctor } from '@/entities/doctor'
 import { doctorQueries } from '@/entities/doctor'
+import { isDentalDoctorType } from '@/entities/doctor-type'
 import type { Treatment, TreatmentStatus } from '@/entities/treatment'
 import type { TreatmentType } from '@/entities/treatment-type'
 import { treatmentTypeQueries } from '@/entities/treatment-type'
@@ -13,10 +14,13 @@ import type { ComposerFields, TreatmentRow } from '../model/types'
 import { useSaveTreatments } from '../model/useSaveTreatments'
 import { ToothPicker } from './ToothPicker'
 import { TreatmentRowsTable } from './TreatmentRowsTable'
+import { TreatmentTypeAdder } from './TreatmentTypeAdder'
 
 export interface TreatmentComposerProps {
   clinicId: number
   patientId: number
+  /** Sent as `visit_number` on every new row — the patient's visit count plus one. */
+  nextVisitNumber: number
   open: boolean
   onOpenChange: (open: boolean) => void
   /** Present only when editing an existing treatment. Absent means "create". */
@@ -40,6 +44,7 @@ function nextRowId(): string {
 export function TreatmentComposer({
   clinicId,
   patientId,
+  nextVisitNumber,
   open,
   onOpenChange,
   initialTreatment,
@@ -81,6 +86,7 @@ export function TreatmentComposer({
       clinicId={clinicId}
       doctors={doctorsQuery.data}
       initialTreatment={initialTreatment}
+      nextVisitNumber={nextVisitNumber}
       onOpenChange={onOpenChange}
       open={open}
       patientId={patientId}
@@ -89,11 +95,20 @@ export function TreatmentComposer({
   )
 }
 
+/** Stands in for the chart / type list until there is a doctor to decide which. */
+function ComposerHint({ children }: { children: string }) {
+  return (
+    <div className="flex min-h-48 items-center justify-center rounded-card border border-dashed border-border p-6 text-center text-callout text-text-secondary">
+      {children}
+    </div>
+  )
+}
+
 function buildInitialRows(
   initialTreatment: Treatment | undefined,
   treatmentTypes: TreatmentType[],
 ): TreatmentRow[] {
-  if (initialTreatment === undefined || initialTreatment.toothNumber === null) return []
+  if (initialTreatment === undefined) return []
 
   // Best effort only: the read response gives a name, not the id this needs
   // to prefill the select. If nothing matches, the select opens unset and
@@ -122,6 +137,7 @@ function buildInitialRows(
 function TreatmentComposerForm({
   clinicId,
   patientId,
+  nextVisitNumber,
   open,
   onOpenChange,
   initialTreatment,
@@ -130,6 +146,7 @@ function TreatmentComposerForm({
 }: {
   clinicId: number
   patientId: number
+  nextVisitNumber: number
   open: boolean
   onOpenChange: (open: boolean) => void
   initialTreatment: Treatment | undefined
@@ -153,6 +170,18 @@ function TreatmentComposerForm({
   const [doctorTouched, setDoctorTouched] = useState(false)
   const [existingRowTypeTouched, setExistingRowTypeTouched] = useState(false)
 
+  /*
+   * The doctor decides everything below them: a dental doctor gets the tooth
+   * chart, any other specialty a plain list, and either way only the
+   * treatment types filed under that doctor's own type. Matched by name —
+   * both list serializers send the doctor type's `__str__`, never its id.
+   */
+  const selectedDoctor = doctors.find((doctor) => String(doctor.id) === doctorId) ?? null
+  const specialty = selectedDoctor?.doctorTypeName ?? null
+  const isDental = isDentalDoctorType(specialty)
+  const specialtyTypes =
+    specialty === null ? [] : treatmentTypes.filter((type) => type.doctorTypeName === specialty)
+
   const isEditing = initialTreatment !== undefined
   const hasNewRows = rows.some((row) => row.existingTreatmentId === null)
   // A new record always needs a real doctor; an edit that only changes an
@@ -169,7 +198,19 @@ function TreatmentComposerForm({
     { value: 'completed', label: t('patients:status.completed') },
   ]
 
-  function handleAddTooth(toothNumber: number, type: TreatmentType) {
+  function handleDoctorChange(value: string) {
+    const nextSpecialty =
+      doctors.find((doctor) => String(doctor.id) === value)?.doctorTypeName ?? null
+    // Unsaved rows were picked from the old specialty's types, which the new
+    // doctor cannot perform. The row being edited is a saved record — kept.
+    if (nextSpecialty !== specialty) {
+      setRows((current) => current.filter((row) => row.existingTreatmentId !== null))
+    }
+    setDoctorId(value)
+    setDoctorTouched(true)
+  }
+
+  function handleAddRow(toothNumber: number | null, type: TreatmentType) {
     setRows((current) => [
       ...current,
       {
@@ -210,6 +251,7 @@ function TreatmentComposerForm({
         rows,
         fields: { doctorId, status, notes } satisfies ComposerFields,
         startDate: initialTreatment?.startDate ?? todayCalendarDate(),
+        visitNumber: nextVisitNumber,
         touched: { doctor: doctorTouched, treatmentType: existingRowTypeTouched },
       },
       { onSuccess: () => onOpenChange(false) },
@@ -236,21 +278,12 @@ function TreatmentComposerForm({
       <div className="flex flex-col gap-6">
         {errorMessage === null ? null : <Alert title={errorMessage} tone="danger" />}
 
+        {/* Fields first: the doctor has to be chosen before the right half means anything. */}
         <div className="grid gap-6 sm:grid-cols-2">
-          <ToothPicker
-            onAddTooth={handleAddTooth}
-            onRemoveTooth={handleRemoveTooth}
-            rows={rows}
-            treatmentTypes={treatmentTypes}
-          />
-
           <div className="flex flex-col gap-4">
             <Field isRequired={doctorRequired} label={t('treatments:composer.doctorLabel')}>
               <Select
-                onValueChange={(value) => {
-                  setDoctorId(value)
-                  setDoctorTouched(true)
-                }}
+                onValueChange={handleDoctorChange}
                 options={doctorOptions}
                 placeholder={t('treatments:composer.doctorPlaceholder')}
                 {...(doctorId === '' ? {} : { value: doctorId })}
@@ -269,6 +302,28 @@ function TreatmentComposerForm({
               <Textarea onChange={(event) => setNotes(event.target.value)} rows={4} value={notes} />
             </Field>
           </div>
+
+          {selectedDoctor === null ? (
+            <ComposerHint>{t('treatments:composer.chooseDoctorFirst')}</ComposerHint>
+          ) : specialty === null ? (
+            <ComposerHint>{t('treatments:composer.doctorHasNoType')}</ComposerHint>
+          ) : specialtyTypes.length === 0 ? (
+            <ComposerHint>
+              {t('treatments:composer.noTypesForSpecialty', { specialty })}
+            </ComposerHint>
+          ) : isDental ? (
+            <ToothPicker
+              onAddTooth={handleAddRow}
+              onRemoveTooth={handleRemoveTooth}
+              rows={rows}
+              treatmentTypes={specialtyTypes}
+            />
+          ) : (
+            <TreatmentTypeAdder
+              onAdd={(type) => handleAddRow(null, type)}
+              treatmentTypes={specialtyTypes}
+            />
+          )}
         </div>
 
         <TreatmentRowsTable
@@ -276,7 +331,8 @@ function TreatmentComposerForm({
           onRemoveRow={handleRemoveRow}
           onRowChange={handleRowChange}
           rows={rows}
-          treatmentTypes={treatmentTypes}
+          showToothColumn={isDental || rows.some((row) => row.toothNumber !== null)}
+          treatmentTypes={specialtyTypes}
         />
       </div>
     </Dialog>

@@ -189,7 +189,7 @@ export const MOCK_PATIENT_DETAILS: Record<number, unknown> = {
 
 /**
  * `TreatmentList`, keyed by `patient_id` the way `/clinic/treatments/` filters
- * them. A plain array on the wire, confirmed against a real response.
+ * them. The handler wraps these in the page envelope the live endpoint sends.
  */
 export const MOCK_TREATMENTS: Record<number, unknown[]> = {
   101: [
@@ -229,27 +229,59 @@ export const MOCK_TREATMENTS: Record<number, unknown[]> = {
 
 /**
  * `RecipeList`, keyed by `patient_id` the way `/core/recipes/` filters them.
- * A plain array on the wire, confirmed against a real response.
+ * A plain array on the wire, confirmed by a live create on 2026-10-07:
+ * `dose`, `duration` and `minutes` are integers. Recipe 2 holds free text in
+ * `type`/`frequency`/`meal`, the way a row written by another client could.
  */
 export const MOCK_RECIPES: Record<number, unknown[]> = {
   101: [
     {
-      id: 1,
+      id: 2,
       patient: 'Vali Aliyev',
       doctor: 'Sardor Usmonov',
-      notes: 'Ovqatdan keyin ichish tavsiya etiladi.',
+      notes: '',
       clinic: 'Dilnoza Rahimova',
       created_at: '2026-08-20T09:30:00Z',
       medicines: [
         {
-          id: 1,
+          id: 3,
           name: 'Amoksitsillin',
-          dose: '500 mg',
-          type: 'Tablet',
+          dose: 1,
+          type: 'Tabletka',
           frequency: 'Kuniga 2 marta',
-          duration: '7 kun',
+          duration: 7,
           meal: 'Ovqatdan keyin',
+          minutes: 0,
+        },
+      ],
+    },
+    {
+      id: 1,
+      patient: 'Vali Aliyev',
+      doctor: 'Sardor Usmonov',
+      notes: "Issiq ovqat iste'mol qilmang.",
+      clinic: 'Dilnoza Rahimova',
+      created_at: '2026-09-02T10:00:00Z',
+      medicines: [
+        {
+          id: 1,
+          name: 'Amoksiklav 625 mg',
+          dose: 1,
+          type: 'tablet',
+          frequency: 'bid',
+          duration: 5,
+          meal: 'after',
           minutes: 30,
+        },
+        {
+          id: 2,
+          name: 'Xolisal gel',
+          dose: 1,
+          type: 'gel',
+          frequency: 'tid',
+          duration: 7,
+          meal: 'none',
+          minutes: 0,
         },
       ],
     },

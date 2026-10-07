@@ -8,7 +8,8 @@ import type { TreatmentStatus } from '@/entities/treatment'
 export interface TreatmentRow {
   /** Stable React key. Also how the save step tells rows apart. */
   rowId: string
-  toothNumber: number
+  /** Only a dental doctor's rows have one — other specialties do not work on a tooth. */
+  toothNumber: number | null
   treatmentTypeId: number | null
   /** For display before `treatmentTypeId` resolves, and for the existing row if it never does. */
   treatmentTypeName: string

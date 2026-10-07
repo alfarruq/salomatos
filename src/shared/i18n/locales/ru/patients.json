@@ -105,6 +105,10 @@
     "galleryEmpty": "Пока нет фото",
     "galleryEmptyDescription": "Фотографии, добавленные для этого пациента, появятся здесь.",
     "galleryImage": "Фото",
+    "galleryDropHere": "Перетащите фото сюда",
+    "galleryOrBrowse": "или нажмите, чтобы выбрать",
+    "galleryUploading": "Загрузка...",
+    "galleryUploadFailed": "Не удалось загрузить фото. Попробуйте ещё раз.",
     "prescriptionsEmpty": "Пока нет рецептов",
     "prescriptionsEmptyDescription": "Рецепты, выписанные этому пациенту, появятся здесь."
   }

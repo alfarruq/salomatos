@@ -33,6 +33,13 @@
     "takePayment": "To'lov olish",
     "complete": "Muolajani yakunlash"
   },
+  "delete": {
+    "title": "Muolajani o'chirish",
+    "description": "{{type}} ({{tooth}}-tish) muolajasi butunlay o'chirilsinmi?",
+    "warning": "Muolajaning qiymati va to'lovlari ham u bilan birga o'chadi. Bu amalni ortga qaytarib bo'lmaydi.",
+    "wait": "O'chirish ({{seconds}})",
+    "failed": "Muolajani o'chirib bo'lmadi. Qayta urinib ko'ring."
+  },
   "composer": {
     "title": "Yangi muolaja",
     "editTitle": "Muolajani tahrirlash",
@@ -42,6 +49,10 @@
     "notesLabel": "Izohlar",
     "toothHint": "Tish tanlash uchun xaritaga bosing",
     "treatmentTypePlaceholder": "Davolash turi",
+    "chooseDoctorFirst": "Avval shifokorni tanlang — davolash turlari uning mutaxassisligiga qarab chiqadi.",
+    "doctorHasNoType": "Bu shifokorga mutaxassislik (shifokor turi) biriktirilmagan. Davolash turlarini ko'rish uchun avval unga tur belgilang.",
+    "noTypesForSpecialty": "\"{{specialty}}\" mutaxassisligi uchun hali davolash turi qo'shilmagan.",
+    "addTreatmentLabel": "Davolash turini qo'shish",
     "rowType": "Davolash turi",
     "rowCost": "Jami qiymat",
     "rowPaid": "Jami to'langan",

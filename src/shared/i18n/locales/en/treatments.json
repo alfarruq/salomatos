@@ -33,6 +33,13 @@
     "takePayment": "Take payment",
     "complete": "Mark as completed"
   },
+  "delete": {
+    "title": "Delete treatment",
+    "description": "Delete “{{type}}” (tooth {{tooth}}) entirely?",
+    "warning": "Its cost and payments are deleted with it. This cannot be undone.",
+    "wait": "Delete ({{seconds}})",
+    "failed": "Could not delete the treatment. Please try again."
+  },
   "composer": {
     "title": "New treatment",
     "editTitle": "Edit treatment",
@@ -42,6 +49,10 @@
     "notesLabel": "Notes",
     "toothHint": "Click the chart to pick a tooth",
     "treatmentTypePlaceholder": "Treatment",
+    "chooseDoctorFirst": "Choose a doctor first — the treatments offered depend on their specialty.",
+    "doctorHasNoType": "This doctor has no specialty (doctor type) set. Assign one to see treatments.",
+    "noTypesForSpecialty": "No treatments have been added for “{{specialty}}” yet.",
+    "addTreatmentLabel": "Add a treatment",
     "rowType": "Treatment",
     "rowCost": "Total cost",
     "rowPaid": "Total paid",

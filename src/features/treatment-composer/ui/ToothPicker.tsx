@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TreatmentType } from '@/entities/treatment-type'
 import { cn } from '@/shared/lib/cn'
-import { DentalChart, type DentalChartLabels, Select } from '@/shared/ui'
+import { DentalChart, type DentalChartLabels, Field, Select } from '@/shared/ui'
 import type { TreatmentRow } from '../model/types'
 
 export interface ToothPickerProps {
@@ -39,7 +39,11 @@ export function ToothPicker({ rows, treatmentTypes, onAddTooth, onRemoveTooth }:
     tooth: t('composer.toothType.tooth'),
   }
 
-  const values = Object.fromEntries(rows.map((row) => [String(row.toothNumber), 'selected']))
+  const values = Object.fromEntries(
+    rows.flatMap((row) =>
+      row.toothNumber === null ? [] : [[String(row.toothNumber), 'selected']],
+    ),
+  )
 
   const typeOptions = treatmentTypes.map((type) => ({ value: String(type.id), label: type.name }))
 
@@ -92,17 +96,19 @@ export function ToothPicker({ rows, treatmentTypes, onAddTooth, onRemoveTooth }:
               collisionPadding={16}
               sideOffset={8}
             >
-              <Select
-                onValueChange={(value) => {
-                  const type = treatmentTypes.find((candidate) => String(candidate.id) === value)
-                  if (type === undefined) return
-                  onAddTooth(pending.toothNumber, type)
-                  setPending(null)
-                }}
-                options={typeOptions}
-                placeholder={t('composer.treatmentTypePlaceholder')}
-                size="sm"
-              />
+              <Field label={t('composer.rowType')}>
+                <Select
+                  onValueChange={(value) => {
+                    const type = treatmentTypes.find((candidate) => String(candidate.id) === value)
+                    if (type === undefined) return
+                    onAddTooth(pending.toothNumber, type)
+                    setPending(null)
+                  }}
+                  options={typeOptions}
+                  placeholder={t('composer.treatmentTypePlaceholder')}
+                  size="sm"
+                />
+              </Field>
             </PopoverPrimitive.Content>
           </PopoverPrimitive.Portal>
         </PopoverPrimitive.Root>

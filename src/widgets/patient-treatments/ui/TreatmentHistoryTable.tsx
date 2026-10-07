@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Treatment } from '@/entities/treatment'
 import { TreatmentStatusBadge, treatmentQueries } from '@/entities/treatment'
-import type { CalendarDate } from '@/shared/lib/calendarDate'
+import { formatFixedDate } from '@/shared/lib/calendarDate'
 import { formatSom } from '@/shared/lib/money'
 import {
   Badge,
@@ -36,12 +36,6 @@ export interface TreatmentHistoryTableProps {
 
 /** Shown when the server had nothing to send for a cell. */
 const EMPTY = '—'
-
-/** Fixed, not locale-dependent — a dense table reads it the same way in every language. */
-function toFixedDate(value: CalendarDate): string {
-  const [year, month, day] = value.split('-')
-  return `${day}.${month}.${year}`
-}
 
 /**
  * The patient's full treatment history, with the actions that manage it.
@@ -145,7 +139,9 @@ export function TreatmentHistoryTable({
                       </TableCell>
                       <TableCell>{treatment.treatmentTypeName ?? EMPTY}</TableCell>
                       <TableCell>
-                        {treatment.startDate === null ? EMPTY : toFixedDate(treatment.startDate)}
+                        {treatment.startDate === null
+                          ? EMPTY
+                          : formatFixedDate(treatment.startDate)}
                       </TableCell>
                       <TableCell>
                         <TreatmentStatusBadge status={treatment.status} />
@@ -173,7 +169,7 @@ export function TreatmentHistoryTable({
                                 date:
                                   treatment.startDate === null
                                     ? EMPTY
-                                    : toFixedDate(treatment.startDate),
+                                    : formatFixedDate(treatment.startDate),
                               })}
                               size="sm"
                               variant="ghost"
@@ -193,6 +189,9 @@ export function TreatmentHistoryTable({
                               {t('treatments:table.actionComplete')}
                             </DropdownMenuItem>
                           )}
+                          <DropdownMenuItem isDestructive onSelect={() => onDelete(treatment)}>
+                            {t('common:action.delete')}
+                          </DropdownMenuItem>
                         </DropdownMenu>
                       </TableCell>
                     </TableRow>

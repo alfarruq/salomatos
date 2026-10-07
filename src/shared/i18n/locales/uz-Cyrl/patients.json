@@ -103,6 +103,10 @@
     "galleryEmpty": "Ҳозирча расм йўқ",
     "galleryEmptyDescription": "Бу бемор учун қўшилган расмлар шу ерда кўринади.",
     "galleryImage": "Расм",
+    "galleryDropHere": "Расмларни шу ерга ташланг",
+    "galleryOrBrowse": "ёки танлаш учун босинг",
+    "galleryUploading": "Юкланмоқда...",
+    "galleryUploadFailed": "Расмни юклаб бўлмади. Қайта уриниб кўринг.",
     "prescriptionsEmpty": "Ҳозирча рецепт йўқ",
     "prescriptionsEmptyDescription": "Бу беморга ёзилган рецептлар шу ерда кўринади."
   }

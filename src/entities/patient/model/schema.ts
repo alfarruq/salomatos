@@ -91,7 +91,7 @@ const treatmentSchema = v.object({
  * out to be a relative `/media/...` path rather than an absolute URL — so it
  * is read the same defensive way, not trusted to be a real URI.
  */
-const galleryImageSchema = v.object({
+export const galleryImageSchema = v.object({
   id: v.pipe(v.number(), v.integer()),
   image: optionalString,
   created_at: optionalString,
@@ -189,7 +189,9 @@ function toTreatment(response: v.InferOutput<typeof treatmentSchema>): PatientTr
   return { id: response.id, name: response.name, toothNumber: response.tooth_number }
 }
 
-function toGalleryImage(response: v.InferOutput<typeof galleryImageSchema>): PatientGalleryImage {
+export function toGalleryImage(
+  response: v.InferOutput<typeof galleryImageSchema>,
+): PatientGalleryImage {
   return { id: response.id, imageUrl: response.image, createdAt: response.created_at }
 }
 

@@ -8,10 +8,9 @@ import type { ComposerFields, TreatmentRow } from './types'
  * expects on write; the read side of the same names carries a display string
  * instead (`entities/treatment`'s schema comment explains why).
  *
- * `visit_number` is a required column on the model (`TreatmentList`) with no
- * field in this UI to set it — there was nowhere safe to guess a value, so
- * it is left off the payload rather than invented. If the server rejects
- * that, it needs either a default on its side or a real field here.
+ * `visit_number` is required — confirmed live: the same payload without it is
+ * a 400, with it a 200. The product decision is the patient's current visit
+ * count plus one, not shown in the form; every row in one save is one visit.
  */
 export interface NewTreatmentPayload {
   patient: number
@@ -19,7 +18,13 @@ export interface NewTreatmentPayload {
   treatment_type: number
   total_treatment_cost: number
   total_paid: number
-  tooth_number: number
+  visit_number: number
+  /**
+   * ⚠️ `null` for a non-dental treatment. The live endpoint currently answers
+   * 400 to that (omitted and `null` alike) — it needs `tooth_number` made
+   * optional server-side; there is no honest tooth to send instead.
+   */
+  tooth_number: number | null
   start_date: string
   notes: string
   status: ComposerFields['status']
@@ -28,7 +33,7 @@ export interface NewTreatmentPayload {
 export function toNewTreatmentPayload(
   row: TreatmentRow,
   fields: ComposerFields,
-  context: { patientId: number; startDate: string },
+  context: { patientId: number; startDate: string; visitNumber: number },
 ): NewTreatmentPayload | null {
   if (row.treatmentTypeId === null) return null
   // `Number('')` is 0, and an unselected doctor is not doctor zero.
@@ -42,6 +47,7 @@ export function toNewTreatmentPayload(
     treatment_type: row.treatmentTypeId,
     total_treatment_cost: Number(digitsOf(row.totalCost) || '0'),
     total_paid: Number(digitsOf(row.totalPaid) || '0'),
+    visit_number: context.visitNumber,
     tooth_number: row.toothNumber,
     start_date: context.startDate,
     notes: fields.notes,

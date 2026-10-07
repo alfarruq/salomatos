@@ -103,6 +103,10 @@
     "galleryEmpty": "Hozircha rasm yo'q",
     "galleryEmptyDescription": "Bu bemor uchun qo'shilgan rasmlar shu yerda ko'rinadi.",
     "galleryImage": "Rasm",
+    "galleryDropHere": "Rasmlarni shu yerga tashlang",
+    "galleryOrBrowse": "yoki tanlash uchun bosing",
+    "galleryUploading": "Yuklanmoqda...",
+    "galleryUploadFailed": "Rasmni yuklab bo'lmadi. Qayta urinib ko'ring.",
     "prescriptionsEmpty": "Hozircha retsept yo'q",
     "prescriptionsEmptyDescription": "Bu bemorga yozilgan retseptlar shu yerda ko'rinadi."
   }

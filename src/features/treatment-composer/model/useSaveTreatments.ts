@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import * as v from 'valibot'
+import { patientKeys } from '@/entities/patient'
 import { treatmentKeys, treatmentListSchema, treatmentSchema } from '@/entities/treatment'
 import { httpClient } from '@/shared/api/httpClient'
 import { toExistingTreatmentPayload, toNewTreatmentPayload } from './formSchema'
@@ -10,6 +11,7 @@ export interface SaveTreatmentsInput {
   rows: TreatmentRow[]
   fields: ComposerFields
   startDate: string
+  visitNumber: number
   touched: { doctor: boolean; treatmentType: boolean }
 }
 
@@ -35,6 +37,7 @@ async function saveTreatments(input: SaveTreatmentsInput): Promise<void> {
       toNewTreatmentPayload(row, input.fields, {
         patientId: input.patientId,
         startDate: input.startDate,
+        visitNumber: input.visitNumber,
       }),
     )
     .filter((payload) => payload !== null)
@@ -64,6 +67,8 @@ export function useSaveTreatments(clinicId: number) {
     mutationFn: saveTreatments,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: treatmentKeys.scope(clinicId) })
+      // The card's totals and tooth chart are derived from these rows server-side.
+      void queryClient.invalidateQueries({ queryKey: patientKeys.scope(clinicId) })
     },
   })
 }

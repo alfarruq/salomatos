@@ -103,6 +103,10 @@
     "galleryEmpty": "No photos yet",
     "galleryEmptyDescription": "Photos added for this patient will appear here.",
     "galleryImage": "Photo",
+    "galleryDropHere": "Drop photos here",
+    "galleryOrBrowse": "or click to browse",
+    "galleryUploading": "Uploading...",
+    "galleryUploadFailed": "Could not upload the photo. Please try again.",
     "prescriptionsEmpty": "No prescriptions yet",
     "prescriptionsEmptyDescription": "Prescriptions written for this patient will appear here."
   }

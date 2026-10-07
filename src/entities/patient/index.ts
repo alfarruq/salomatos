@@ -8,10 +8,12 @@ export {
   toPatientPayload,
 } from './model/formSchema'
 export {
+  galleryImageSchema,
   parseFormattedAppointment,
   patientDetailSchema,
   patientListItemSchema,
   patientPageSchema,
+  toGalleryImage,
   toPatient,
   toPatientListItem,
 } from './model/schema'

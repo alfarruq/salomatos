@@ -24,7 +24,7 @@ describe('treatmentKeys', () => {
 describe('fetchTreatments', () => {
   beforeEach(() => setAccessToken(accessTokenFor('clinic')))
 
-  it('reads the array the fixture has for the requested patient', async () => {
+  it('reads the page the fixture has for the requested patient', async () => {
     const treatments = await fetchTreatments(101)
 
     expect(treatments).toHaveLength(2)
@@ -52,6 +52,32 @@ describe('fetchTreatments', () => {
     await fetchTreatments(101)
 
     expect(requested).toContain('patient_id=101')
+  })
+
+  it('follows `next` so a long history is not cut off at the page size', async () => {
+    server.use(
+      http.get('/api/v1/clinic/treatments/', ({ request }) => {
+        const page = new URL(request.url).searchParams.get('page')
+        return HttpResponse.json(
+          page === '2'
+            ? { count: 2, next: null, previous: null, results: [{ id: 2 }] }
+            : {
+                count: 2,
+                next: 'http://localhost:3000/api/v1/clinic/treatments/?patient_id=101&page=2',
+                previous: null,
+                results: [{ id: 1 }],
+              },
+        )
+      }),
+    )
+
+    expect((await fetchTreatments(101)).map((treatment) => treatment.id)).toEqual([1, 2])
+  })
+
+  it('still reads a plain array, the shape this endpoint was first confirmed as', async () => {
+    server.use(http.get('/api/v1/clinic/treatments/', () => HttpResponse.json([{ id: 7 }])))
+
+    expect((await fetchTreatments(101)).map((treatment) => treatment.id)).toEqual([7])
   })
 
   it('is empty for a patient with no treatments on record', async () => {

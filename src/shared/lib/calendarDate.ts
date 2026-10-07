@@ -66,3 +66,13 @@ export function formatCalendarDate(value: CalendarDate, locale: string): string 
 
   return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(parsed)
 }
+
+/**
+ * `dd.MM.yyyy`, the same in every language — for the dense lists and printed
+ * forms that ask for one fixed shape rather than `formatCalendarDate`'s
+ * locale-aware one.
+ */
+export function formatFixedDate(value: CalendarDate): string {
+  const [year, month, day] = value.split('-')
+  return `${day}.${month}.${year}`
+}

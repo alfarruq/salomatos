@@ -36,6 +36,12 @@ export function pageSchema<TSchema extends v.GenericSchema>(item: TSchema) {
   })
 }
 
+/** `next`'s own origin and `/api` prefix, which `httpClient` adds back itself. */
+export function pathFromNext(next: string): string {
+  const url = new URL(next, globalThis.location.origin)
+  return `${url.pathname.replace(/^\/api\//, '')}${url.search}`
+}
+
 /** Page size is the server's; this mirrors `PAGE_SIZE` so callers can do arithmetic. */
 export const PAGE_SIZE = 10
 

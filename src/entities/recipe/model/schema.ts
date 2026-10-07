@@ -3,8 +3,10 @@ import type { Medicine, Recipe } from './types'
 
 /**
  * The wire contract for `/api/v1/core/recipes/?patient_id=` (ADR-006), from
- * `RecipeList` (drf-yasg). Confirmed as a plain array, not the paginated
- * envelope `/clinic/treatment-types/` turned out to need.
+ * `RecipeList` (drf-yasg), confirmed against a live create on 2026-10-07: a
+ * plain array; `dose`, `duration` and `minutes` are integers; `type`,
+ * `frequency` and `meal` are free text, which this client writes as the
+ * codes in `medication.ts` but must still read as whatever older rows hold.
  *
  * Only `id` is trusted as required. `RecipeList` marks the rest required too,
  * but that promise has been wrong before on this backend, and a prescription
@@ -26,10 +28,10 @@ const optionalNumber = v.pipe(
 const medicineSchema = v.object({
   id: v.pipe(v.number(), v.integer()),
   name: optionalString,
-  dose: optionalString,
+  dose: optionalNumber,
   type: optionalString,
   frequency: optionalString,
-  duration: optionalString,
+  duration: optionalNumber,
   meal: optionalString,
   minutes: optionalNumber,
 })

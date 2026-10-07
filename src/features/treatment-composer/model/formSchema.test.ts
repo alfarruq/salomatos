@@ -17,13 +17,19 @@ const newRow: TreatmentRow = {
 describe('toNewTreatmentPayload', () => {
   it('builds the full array-entry shape confirmed against the real contract', () => {
     expect(
-      toNewTreatmentPayload(newRow, fields, { patientId: 101, startDate: '2026-10-05' }),
+      toNewTreatmentPayload(newRow, fields, {
+        patientId: 101,
+        startDate: '2026-10-05',
+        visitNumber: 4,
+      }),
     ).toEqual({
       patient: 101,
       doctor: 7,
       treatment_type: 9,
       total_treatment_cost: 1_200_000,
       total_paid: 500_000,
+      // Required: the live endpoint answers 400 without it.
+      visit_number: 4,
       tooth_number: 16,
       start_date: '2026-10-05',
       notes: 'Izoh',
@@ -34,7 +40,11 @@ describe('toNewTreatmentPayload', () => {
   it('refuses a row with no treatment type — nothing to send', () => {
     const row = { ...newRow, treatmentTypeId: null }
     expect(
-      toNewTreatmentPayload(row, fields, { patientId: 101, startDate: '2026-10-05' }),
+      toNewTreatmentPayload(row, fields, {
+        patientId: 101,
+        startDate: '2026-10-05',
+        visitNumber: 4,
+      }),
     ).toBeNull()
   })
 
@@ -46,6 +56,7 @@ describe('toNewTreatmentPayload', () => {
         {
           patientId: 101,
           startDate: '2026-10-05',
+          visitNumber: 4,
         },
       ),
     ).toBeNull()
@@ -53,7 +64,11 @@ describe('toNewTreatmentPayload', () => {
 
   it('treats an unset money field as zero, not NaN', () => {
     const row = { ...newRow, totalCost: '', totalPaid: '' }
-    const payload = toNewTreatmentPayload(row, fields, { patientId: 101, startDate: '2026-10-05' })
+    const payload = toNewTreatmentPayload(row, fields, {
+      patientId: 101,
+      startDate: '2026-10-05',
+      visitNumber: 4,
+    })
     expect(payload?.total_treatment_cost).toBe(0)
     expect(payload?.total_paid).toBe(0)
   })
@@ -96,7 +111,7 @@ describe('toExistingTreatmentPayload', () => {
     expect(payload).not.toHaveProperty('doctor')
   })
 
-  it('never sends patient, tooth_number or start_date — nothing here can change them', () => {
+  it('never sends patient, tooth_number, start_date or visit_number — nothing here can change them', () => {
     const payload = toExistingTreatmentPayload(existingRow, fields, {
       doctor: true,
       treatmentType: true,
@@ -105,5 +120,6 @@ describe('toExistingTreatmentPayload', () => {
     expect(payload).not.toHaveProperty('patient')
     expect(payload).not.toHaveProperty('tooth_number')
     expect(payload).not.toHaveProperty('start_date')
+    expect(payload).not.toHaveProperty('visit_number')
   })
 })

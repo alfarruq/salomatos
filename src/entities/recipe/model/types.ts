@@ -2,12 +2,17 @@
 export interface Medicine {
   id: number
   name: string | null
-  dose: string | null
+  /** Integer on the server: how many of `type` per intake. */
+  dose: number | null
+  /** Dose form — a `DoseForm` code when this client wrote it, free text otherwise. */
   type: string | null
+  /** A `Frequency` code, or free text from older rows. */
   frequency: string | null
-  duration: string | null
+  /** Integer on the server, in days — it has no unit field. */
+  duration: number | null
+  /** A `MealRelation` code, or free text from older rows. */
   meal: string | null
-  /** Minutes relative to `meal` — the field the server does not otherwise explain. */
+  /** Minutes before/after `meal`; 0 when the timing does not apply. */
   minutes: number | null
 }
 

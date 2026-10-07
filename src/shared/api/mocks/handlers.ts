@@ -432,12 +432,66 @@ export const handlers = [
     return HttpResponse.json(detail)
   }),
 
-  /** `TreatmentList` — a plain array, filtered by the `patient_id` query param. */
+  /**
+   * `GalleryCreateUpdate` — confirmed against the real backend (see
+   * `features/patient-gallery-upload`): `user` is the patient's own id
+   * despite the name, and the file itself is the only other field. The one
+   * handler in this file reading `request.formData()` instead of
+   * `request.json()`, since the real endpoint only parses multipart.
+   *
+   * Stateless like every other create handler here (`/clinic/patients/`,
+   * `/clinic/doctors/`): it does not push onto `MOCK_PATIENT_DETAILS`, whose
+   * entries are shared across every test in the run.
+   */
+  http.post('/api/v1/clinic/galleries/', async ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const form = await request.formData()
+    const userId = Number(form.get('user'))
+
+    if (!Number.isInteger(userId) || MOCK_PATIENT_DETAILS[userId] === undefined) {
+      return HttpResponse.json(
+        errorEnvelope({
+          message: 'Invalid input.',
+          messageKey: 'invalid',
+          exceptionClass: 'ValidationError',
+          errors: { user: 'does_not_exist' },
+        }),
+        { status: 400 },
+      )
+    }
+
+    const file = form.get('image')
+    return HttpResponse.json({
+      id: 999,
+      image: file instanceof File ? `/media/gallery/${file.name}` : null,
+      created_at: new Date().toISOString(),
+    })
+  }),
+
+  /**
+   * `TreatmentList`, filtered by `patient_id` — in DRF's page envelope, as the
+   * live endpoint answered on 2026-10-07. One page: no fixture has ten rows.
+   */
   http.get('/api/v1/clinic/treatments/', ({ request }) => {
     if (authenticate(request) === null) return unauthorized()
 
     const patientId = Number(new URL(request.url).searchParams.get('patient_id'))
-    return HttpResponse.json(MOCK_TREATMENTS[patientId] ?? [])
+    const results = MOCK_TREATMENTS[patientId] ?? []
+    return HttpResponse.json({ count: results.length, next: null, previous: null, results })
+  }),
+
+  /** 204 with no body, confirmed live. Stateless, like every other write here. */
+  http.delete('/api/v1/clinic/treatments/:treatmentId/', ({ request, params }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const id = Number(params['treatmentId'])
+    const exists = Object.values(MOCK_TREATMENTS).some((rows) =>
+      rows.some((row) => (row as { id: number }).id === id),
+    )
+    return exists
+      ? new HttpResponse(null, { status: 204 })
+      : new HttpResponse(null, { status: 404 })
   }),
 
   /** `RecipeList` — a plain array, filtered by the `patient_id` query param. */
@@ -446,6 +500,35 @@ export const handlers = [
 
     const patientId = Number(new URL(request.url).searchParams.get('patient_id'))
     return HttpResponse.json(MOCK_RECIPES[patientId] ?? [])
+  }),
+
+  /**
+   * One object in, one object out — confirmed live on 2026-10-07, names in
+   * place of the `patient`/`doctor` ids. Stateless, like every other write here.
+   */
+  http.post('/api/v1/core/recipes/', async ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
+    const medicines = Array.isArray(body['medicines']) ? (body['medicines'] as unknown[]) : []
+    if (medicines.length === 0) {
+      return HttpResponse.json(
+        { message: 'Validation error', errors: { medicines: ['This field is required.'] } },
+        { status: 400 },
+      )
+    }
+    return HttpResponse.json({
+      id: 900,
+      patient: patientNameFor(body['patient']),
+      doctor: doctorNameFor(body['doctor']),
+      notes: body['notes'] ?? '',
+      clinic: null,
+      created_at: '2026-10-07T09:00:00Z',
+      medicines: medicines.map((medicine, index) => ({
+        id: 900 + index,
+        ...(medicine as Record<string, unknown>),
+      })),
+    })
   }),
 
   /**
