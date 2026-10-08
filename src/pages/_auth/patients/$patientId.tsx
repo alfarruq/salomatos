@@ -21,7 +21,6 @@ import {
   PatientGallery,
   PatientStatusBadge,
   patientQueries,
-  ToothChart,
 } from '@/entities/patient'
 import { Can } from '@/entities/session'
 import type { Treatment } from '@/entities/treatment'
@@ -47,7 +46,7 @@ import {
   toast,
 } from '@/shared/ui'
 import { PrescriptionCards } from '@/widgets/patient-prescriptions'
-import { TreatmentHistoryTable } from '@/widgets/patient-treatments'
+import { TreatmentHistoryTable, TreatmentToothChart } from '@/widgets/patient-treatments'
 
 export const Route = createFileRoute('/_auth/patients/$patientId')({
   component: PatientDetailPage,
@@ -353,8 +352,14 @@ function PatientTabs({
             label: t('patients:detail.tabGeneral'),
             content: (
               <Card className="p-6">
-                <h2 className="mb-4 text-title2 text-text">{t('patients:detail.toothChart')}</h2>
-                <ToothChart status={patient.status} treatments={patient.treatments} />
+                <TreatmentToothChart
+                  clinicId={clinicId}
+                  onComplete={() => toast.info(t('patients:detail.comingSoon'))}
+                  onDelete={setDeletingTreatment}
+                  onEdit={onOpenComposer}
+                  onTakePayment={() => toast.info(t('patients:detail.comingSoon'))}
+                  patientId={patient.id}
+                />
               </Card>
             ),
           },

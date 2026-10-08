@@ -68,5 +68,9 @@
       "lower": "Lower jaw",
       "tooth": "Tooth"
     }
+  },
+  "chart": {
+    "completed": "Completed",
+    "inProgress": "In progress"
   }
 }

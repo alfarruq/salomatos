@@ -68,5 +68,9 @@
       "lower": "Pastki jag'",
       "tooth": "Tish"
     }
+  },
+  "chart": {
+    "completed": "Tugallangan",
+    "inProgress": "Jarayonda"
   }
 }
