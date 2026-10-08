@@ -29,7 +29,7 @@ Backend: Django 5 + DRF, alohida repo, same-origin `/api/*`.
 | **P2** | Kod sifati (tiplar, testlar) | ⚠️ Faqat aniq sabab bilan, kommentda qayd etiladi |
 | **P3** | UX va dizayn tizimi | ✅ Foydalanuvchi qarori ustun |
 
-**P0 override so'ralganda** ("tez bo'lsin, tokenni localStorage'ga tashla"):
+**P0 override so'ralganda** ("tez bo'lsin, bemor ismini URL'ga qo'y" yoki "bemor ro'yxatini localStorage'da keshla"):
 1. Bajarma.
 2. Qaysi P0 qoidasi va nima uchun buzilishini bir jumlada ayt.
 3. Xavfsiz muqobilni taklif qil.
@@ -46,7 +46,25 @@ Har doim, har faylda, har vazifada amal qiladi.
 → PHI bo'lmagan filtrlar (sana, status, sahifa, sort) URL'da **qoladi** — ulashiladigan link muhim.
 → ID sifatida faqat UUID: `?patient=550e8400-...` ✅ · `?patient=Aliyev+Vali` ⛔
 
-**Brauzer xotirasi sirlar uchun ishlatilmaydi.** `localStorage`, `sessionStorage`, `IndexedDB` — token, foydalanuvchi ma'lumoti yoki PHI uchun **qat'iy taqiqlangan**. Faqat RAM. `persistQueryClient` ishlatilmaydi. Sabab: umumiy kompyuter (registratura stoli) va XSS.
+**Brauzer xotirasi — faqat allowlist.** `localStorage` ga **faqat** quyidagi kalitlar yoziladi. Boshqa hech narsa:
+
+| Kalit | Qiymat | Nega ruxsat |
+|---|---|---|
+| `salomat:locale` | qo'llab-quvvatlanadigan til kodi | Sir emas, PHI emas. Refreshdan keyin til saqlanishi kerak. |
+| `salomat:access_token` | JWT access token | Refreshdan keyin sessiya saqlanishi uchun. Backend'da refresh endpoint yo'q (ADR: `auth-session-storage`, ADR-003 ni almashtiradi). |
+| `salomat:refresh_token` | JWT refresh token | Backend refresh endpoint qo'shganda ishlatiladi. Hozircha faqat saqlanadi. |
+
+→ Web Storage'ga to'g'ridan-to'g'ri murojaat **taqiqlangan** — faqat `shared/lib/storage` orqali (§10). Yangi kalit qo'shish = allowlist'ni kengaytirish = **to'xta va so'ra** (§9).
+→ Qat'iy taqiqlangan: foydalanuvchi profili, PHI, query kesh (`persistQueryClient` ishlatilmaydi), `sessionStorage`/`IndexedDB` da har qanday sir.
+→ Qabul qilingan xavf: XSS storage'dagi tokenni o'qiy oladi. Shuning uchun token storage'da **eng qisqa vaqt** turadi: muddati o'tgani ishlatilmaydi, `401` da darhol o'chiriladi, logout'da tozalanadi. XSS'ga qarshi asosiy himoya — `dangerouslySetInnerHTML` yo'q, CSP, dependency'lar nazorati.
+
+**Sessiya (token) hayot sikli.** Kanonik kod §10 da.
+- Login: `access_token` → `storage.set('accessToken', ...)` **va** RAM'dagi auth store. `refresh_token` → `storage.set('refreshToken', ...)`.
+- Ilova yuklanishi (route guard'dan oldin): storage'da `access_token` bor va JWT `exp` hali o'tmagan bo'lsa → RAM'ga yuklanadi, foydalanuvchi o'z sahifasida qoladi. Yo'q yoki muddati o'tgan bo'lsa → ikkala token o'chiriladi → login sahifasi.
+- `401` javob: ikkala token storage'dan o'chiriladi + `queryClient.clear()` → login sahifasi. (Refresh endpoint qo'shilganda bu yerga single-flight refresh keladi — o'shanda backend kontraktini so'ra.)
+- Logout va klinika almashtirish: `storage.remove('accessToken')` + `storage.remove('refreshToken')` + `queryClient.clear()` + RAM'dagi auth holati tozalanadi.
+- Token hech qachon URL'ga, logga, Sentry'ga, xato xabariga tushmaydi.
+- `exp` faqat UX uchun o'qiladi (imzo frontendda tekshirilmaydi) — haqiqiy tekshiruv backend'da.
 
 **Tenant izolyatsiyasi.** Har bir query key ichida `clinicId`, `entityKeys` factory orqali. `clinicId`siz key = eski klinika ma'lumotining ko'rinishi = **ma'lumot sizib chiqishi**, bug emas.
 
@@ -98,6 +116,8 @@ Vazifa hajmiga qarab. Kichik vazifaga katta seremoniya qo'llama.
 
 **Izchillik yangilikdan muhimroq.** Yangi kod yozishdan oldin eng yaqin mavjud namunani o'qi va strukturasini takrorla.
 
+**Debug / bisection.** Kutilmagan xato sababini topish uchun bir nechta (2+) vaqtinchalik repro faylini ketma-ket sinab ko'rish kerak bo'lsa — buni asosiy suhbatda emas, `Agent` tool (`general-purpose` yoki `Explore`) orqali qil. Har bir oraliq urinish o'zining alohida kontekstida qoladi, asosiy suhbatga faqat sabab va tuzatish taklifi qaytadi. Bitta aniq, tez repro (1 fayl, 1 urinish) uchun bu shart emas.
+
 ---
 
 ## 6. Minimal diff qoidasi
@@ -113,7 +133,7 @@ Vazifa hajmiga qarab. Kichik vazifaga katta seremoniya qo'llama.
 ## 7. Tekshiruv
 
 ```bash
-pnpm verify           # tsc --noEmit && biome ci . && lint:boundaries && vitest run   ← MAJBURIY
+pnpm verify           # tsc && biome ci && lint:boundaries && check:contrast && i18n:check && vitest   ← MAJBURIY
 pnpm lint:boundaries  # qatlam grafigi (§3.3) — eslint-plugin-boundaries
 pnpm api:generate     # OpenAPI → TS tiplar (backend schema o'zgarganda)
 pnpm i18n:check       # barcha tillarda kalitlar to'liqmi
@@ -153,6 +173,7 @@ Aniq triggerlar (mavhum "ishonchim past" emas):
 - Yangi permission kerak
 - `ARCHITECTURE.md` qoidasini buzish kerak (ADR talab qilinadi)
 - PHI bilan ishlashda shubha
+- Storage allowlist'iga (§3) yangi kalit kerak
 - Vazifa 5+ faylga tegadi va reja tasdiqlanmagan
 
 Bitta aniq savol ber, taxminlar ro'yxatini emas.
@@ -181,6 +202,95 @@ export const patientQueries = {
 }
 ```
 
+**Storage — Web Storage'ga yagona kirish nuqtasi** (`shared/lib/storage.ts`)
+```ts
+// Allowlist is the security boundary: anything not listed here cannot be persisted.
+const KEYS = {
+  locale: 'salomat:locale',
+  accessToken: 'salomat:access_token',
+  refreshToken: 'salomat:refresh_token',
+} as const
+
+type StorageKey = keyof typeof KEYS
+
+export const storage = {
+  get(key: StorageKey): string | null {
+    try {
+      return localStorage.getItem(KEYS[key])
+    } catch {
+      // Storage can be unavailable (private mode, blocked site data) — fall back to RAM-only.
+      return null
+    }
+  },
+  set(key: StorageKey, value: string): void {
+    try {
+      localStorage.setItem(KEYS[key], value)
+    } catch {
+      // See get(): losing persistence must not break the app.
+    }
+  },
+  remove(key: StorageKey): void {
+    try {
+      localStorage.removeItem(KEYS[key])
+    } catch {
+      // See get().
+    }
+  },
+}
+```
+
+**Til — refreshdan keyin saqlanadi**
+```ts
+// Stored value is untrusted input: validate before handing it to i18n.
+const stored = storage.get('locale')
+const initial = isSupportedLocale(stored) ? stored : DEFAULT_LOCALE
+
+i18n.init({ lng: initial /* ... */ })
+i18n.on('languageChanged', (lng) => {
+  storage.set('locale', lng)
+  document.documentElement.lang = lng
+})
+```
+
+**Sessiya — saqlash, tiklash, tozalash** (`shared/api/` yoki `shared/lib/`)
+```ts
+// Called once on app start, before the router's beforeLoad runs.
+export function restoreSession(): boolean {
+  const token = storage.get('accessToken')
+  if (!token || isJwtExpired(token)) {
+    clearSession()
+    return false
+  }
+  tokenStore.set(token)
+  return true
+}
+
+export function saveSession(access: string, refresh: string): void {
+  tokenStore.set(access)
+  storage.set('accessToken', access)
+  storage.set('refreshToken', refresh)
+}
+
+export function clearSession(): void {
+  tokenStore.clear()
+  storage.remove('accessToken')
+  storage.remove('refreshToken')
+}
+
+// UX-only expiry check: the signature is NOT verified here, the backend does that.
+function isJwtExpired(token: string, skewSec = 30): boolean {
+  try {
+    const payload: unknown = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')))
+    if (typeof payload !== 'object' || payload === null || !('exp' in payload)) return true
+    const { exp } = payload
+    return typeof exp !== 'number' || exp * 1000 <= Date.now() + skewSec * 1000
+  } catch {
+    return true
+  }
+}
+```
+`restoreSession()` sinxron, shuning uchun router yaratilishidan oldin chaqiriladi va login sahifasi "miltillab" o'tmaydi. `401` va logout'da `clearSession()` + `queryClient.clear()`.
+
 **Mutation + optimistic** — faqat qaytariladigan amallarda. To'lov, retsept, tibbiy yozuvni yakunlashda ishlatilmaydi.
 ```ts
 useMutation({
@@ -208,7 +318,7 @@ mutate(values, {
   },
 })
 ```
-Zod xabarlari — tarjima kalitlari: `.min(2, 'validation.tooShort')`.
+Validatsiya xabarlari — tarjima kalitlari: `v.minLength(2, 'validation.tooShort')` (Valibot, `ADR-011`).
 
 **4 holat — har bir ma'lumot ekranida majburiy**
 ```tsx
@@ -234,6 +344,7 @@ Ruxsatlar `/api/me/` dan. Rol → ruxsat xaritasini frontendda hardcode qilma.
 **Kod**
 - `any`, `@ts-ignore`, asossiz `!` — taqiqlangan. `unknown` + narrowing.
 - API tiplari qo'lda yozilmaydi — `src/shared/api/generated` dan import. Bu papka tahrirlanmaydi.
+- `*.gen.ts` (masalan `src/routeTree.gen.ts`) — avtogenerat, qo'lda o'qilmaydi/tahrirlanmaydi. Route haqida ma'lumot kerak bo'lsa route faylining o'zidan (`_auth/...`) qara.
 - Foydalanuvchiga ko'rinadigan matn — faqat `t()`.
 - Rang/spacing/radius — faqat `@theme` tokenlari. Hardcode `#hex` yo'q.
 - `useEffect` + `fetch` yo'q → `useQuery` yoki route `loader`.
@@ -255,7 +366,7 @@ Ruxsatlar `/api/me/` dan. Rol → ruxsat xaritasini frontendda hardcode qilma.
 - [ ] `pnpm verify` **bajarildi** va yashil
 - [ ] Query key ichida `clinicId`
 - [ ] URL'ga PHI tushmadi, qidiruv `useState`da
-- [ ] `localStorage` / `sessionStorage` ishlatilmadi
+- [ ] Web Storage faqat `shared/lib/storage` orqali, faqat allowlist kalitlari; PHI va profil storage'da yo'q; token 401/logout'da o'chiriladi
 - [ ] `console.log` qolmadi
 - [ ] 4 holat (loading / empty / error / success) bor
 - [ ] Matn `t()` orqali, 4 tilda kalit qo'shildi
@@ -291,6 +402,8 @@ To'liq token jadvali: `ARCHITECTURE.md` §11 + `src/app/styles/theme.css`.
 
 **DRF xatolari** 4 xil shaklda keladi → `normalizeDrfError()`.
 
+**Login javobi o'ralgan.** Tokenlar `response.result.access_token` / `response.result.refresh_token` ichida keladi, root'da emas. Generatsiya qilingan tipdan foydalan.
+
 **Pagination** — `CursorPagination` + `useInfiniteQuery` yoki `keepPreviousData`.
 
 **100+ qatorli ro'yxat** → `@tanstack/react-virtual`.
@@ -305,6 +418,7 @@ To'liq token jadvali: `ARCHITECTURE.md` §11 + `src/app/styles/theme.css`.
 |---|---|
 | To'liq arxitektura, ADR | `ARCHITECTURE.md` |
 | Qatlamlar §3 · API §5 · Kesh §6 · Xavfsizlik §13 · Anti-patternlar §20 | `ARCHITECTURE.md` |
+| Sessiya va storage qarori | `ARCHITECTURE.md` → ADR `auth-session-storage` |
 | Dizayn tokenlari | `ARCHITECTURE.md` §11 + `theme.css` |
 | Komponent etaloni | `/dev/ui` route |
 | Majburlash qoidalari | `.claude/settings.json` |

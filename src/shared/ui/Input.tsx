@@ -1,10 +1,10 @@
-import type { ComponentPropsWithoutRef } from 'react'
+import type { ComponentPropsWithRef } from 'react'
 import { cn } from '@/shared/lib/cn'
 import { useFieldControl } from './Field'
 
 export type InputSize = 'sm' | 'md'
 
-export interface InputProps extends Omit<ComponentPropsWithoutRef<'input'>, 'size' | 'className'> {
+export interface InputProps extends Omit<ComponentPropsWithRef<'input'>, 'size' | 'className'> {
   /** `sm` is the dense variant for tables and toolbars (§13 data density). */
   size?: InputSize
   className?: string
@@ -23,6 +23,7 @@ export function Input({ size = 'md', id, className, ...props }: InputProps) {
       id={id ?? field?.controlId}
       aria-describedby={props['aria-describedby'] ?? field?.describedBy}
       aria-invalid={props['aria-invalid'] ?? field?.isInvalid ?? undefined}
+      aria-required={field?.isRequired === true ? true : undefined}
       className={cn(
         'w-full rounded-control bg-sunken text-text',
         // The border is the structure; §11.1 prefers it over a shadow.

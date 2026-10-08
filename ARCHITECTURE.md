@@ -120,9 +120,9 @@ Versiyalar 2026-yil iyul holatiga. **Major versiyani o'zgartirish — ADR talab 
 | `@tanstack/react-router` | `^1` | Routing (tip-xavfsiz) |
 | `@tanstack/react-query` | `^5.101` | Server state |
 | `zustand` | `^5` | Client state |
-| `zod` | `^4` | Runtime validatsiya |
+| `valibot` | `^1` | Runtime validatsiya (`ADR-011` — Zod o'rniga) |
 | `react-hook-form` | `^7.80` | Formalar |
-| `@hookform/resolvers` | `^5` | RHF ↔ Zod ko'prigi |
+| `@hookform/resolvers` | `^5` | RHF ↔ Valibot ko'prigi |
 
 > **Eslatma:** React uchun TanStack Query hamon **v5**. Internetdagi "v6" — Svelte adapteri, ichida baribir v5 core ishlaydi. Adashmang.
 
@@ -213,7 +213,7 @@ src/
 ├── entities/                     # Biznes OBYEKTLARI (ot)
 │   ├── patient/
 │   │   ├── api/                  # queryOptions, mutations, query keys
-│   │   ├── model/                # tiplar, Zod schema, mapper'lar
+│   │   ├── model/                # tiplar, validatsiya schema'si, mapper'lar
 │   │   └── ui/                   # PatientAvatar, PatientStatusBadge
 │   ├── appointment/
 │   ├── clinic/
@@ -318,7 +318,7 @@ Bu refaktoring erkinligini beradi: ichki strukturani xohlagancha o'zgartirasiz, 
 | Hook fayli | `camelCase.ts` | `usePatientFilters.ts` |
 | Boshqa `.ts` fayllar | `camelCase.ts` | `queryKeys.ts`, `formatPhone.ts` |
 | Tip / Interface | `PascalCase` | `Patient`, `AppointmentStatus` |
-| Zod schema | `camelCase` + `Schema` | `createPatientSchema` |
+| Validatsiya schema'si | `camelCase` + `Schema` | `createPatientSchema` |
 | Konstanta | `SCREAMING_SNAKE` | `IDLE_TIMEOUT_MS` |
 | Boolean o'zgaruvchi | `is/has/can` prefiksi | `isLoading`, `canEditPatient` |
 | Event handler | `handle` prefiksi | `handleSubmit` |
@@ -764,7 +764,7 @@ Filtrlar `useState`da emas, URL'da yashaydi:
 ```tsx
 // pages/_auth/patients/index.tsx
 export const Route = createFileRoute('/_auth/patients/')({
-  validateSearch: zodValidator(patientFiltersSchema),   // tip-xavfsiz search params
+  validateSearch: (search) => v.parse(patientFiltersSchema, search),   // tip-xavfsiz
   loaderDeps: ({ search }) => search,
   loader: ({ context, deps }) =>
     context.queryClient.ensureInfiniteQueryData(
@@ -898,16 +898,18 @@ export function Can({ permission, fallback = null, children }: CanProps) {
 
 ```tsx
 // features/patient-create/model/schema.ts
-export const createPatientSchema = z.object({
-  firstName: z.string().trim().min(2, 'validation.tooShort').max(60),
-  lastName: z.string().trim().min(2, 'validation.tooShort').max(60),
-  phone: z.string().regex(/^\+998\d{9}$/, 'validation.phoneUz'),
-  birthDate: z.string().date().refine(notInFuture, 'validation.birthDateFuture'),
-  gender: z.enum(['male', 'female']),
-  notes: z.string().max(1000).optional(),
+import * as v from 'valibot'   // ADR-011
+
+export const createPatientSchema = v.object({
+  firstName: v.pipe(v.string(), v.trim(), v.minLength(2, 'validation.tooShort'), v.maxLength(60)),
+  lastName:  v.pipe(v.string(), v.trim(), v.minLength(2, 'validation.tooShort'), v.maxLength(60)),
+  phone:     v.pipe(v.string(), v.regex(/^\+998\d{9}$/, 'validation.phoneUz')),
+  birthDate: v.pipe(v.string(), v.check(notInFuture, 'validation.birthDateFuture')),
+  gender:    v.picklist(['male', 'female']),
+  notes:     v.optional(v.pipe(v.string(), v.maxLength(1000))),
 })
 
-export type CreatePatientInput = z.infer<typeof createPatientSchema>
+export type CreatePatientInput = v.InferOutput<typeof createPatientSchema>
 ```
 
 Xato xabarlari — **tarjima kalitlari**, tayyor matn emas. 4 ta til bor.
@@ -917,7 +919,7 @@ Xato xabarlari — **tarjima kalitlari**, tayyor matn emas. 4 ta til bor.
 export function CreatePatientForm({ onSuccess }: Props) {
   const { t } = useTranslation('patients')
   const form = useForm<CreatePatientInput>({
-    resolver: zodResolver(createPatientSchema),
+    resolver: valibotResolver(createPatientSchema),
     mode: 'onBlur',                          // onChange emas — har harfda validatsiya bezovta qiladi
   })
   const { mutate, isPending } = useCreatePatient()
@@ -1426,7 +1428,7 @@ Tibbiy tizimda qisman ishlaydigan ilova — butunlay o'lgan ilovadan ancha yaxsh
 
 | Daraja | Vosita | Qamrov | Nima testlanadi |
 |---|---|---|---|
-| Unit | Vitest | Mantiq 100% | Formatlash, hisob-kitob, Zod schema, mapper |
+| Unit | Vitest | Mantiq 100% | Formatlash, hisob-kitob, validatsiya schema'si, mapper |
 | Komponent | Vitest + RTL + MSW | Asosiy oqimlar | Formalar, jadvallar, `Can` gate |
 | E2E | Playwright | 8–12 kritik yo'l | Quyida |
 
@@ -1575,6 +1577,44 @@ veb SPA'ga emas. Amaliy oqibati: `httpClient` da (`§5.2`) refresh oqimi **yo'q*
 401 kelganda `refreshSession()` chaqirilmaydi, to'g'ridan-to'g'ri `hardLogout()` bajariladi va
 `/login` ga yo'naltiriladi. Sessiya muddatini Django uzaytiradi, frontend emas.
 
+**Qayta ko'rib chiqildi (2026-08-25) — `Bearer` token, xotirada.**
+> ⚠️ Bu qaror **hujjat tanlovi bilan emas, mavjud backend bilan** almashtirildi. Backend
+> tahlili ko'rsatdiki, Django `simplejwt` ni ishlatadi: `DEFAULT_AUTHENTICATION_CLASSES` —
+> `CustomJwtAuthentication`, `POST /api/login/` esa tokenlarni **javob tanasida** qaytaradi
+> (`{message, result: {access_token, refresh_token}}`). `httpOnly` cookie yo'q, sessiya
+> autentifikatsiyasi API uchun ishlatilmaydi.
+
+**Yangi qaror.** `Authorization: Bearer <access_token>`, token **faqat RAM'da**
+(`shared/api/tokenStore.ts`).
+
+**P0 saqlanadi.** ADR-007 va `§13.2` o'z kuchida: token brauzer xotirasiga **yozilmaydi**.
+Bu yerda tanlov yo'q edi — `localStorage` variantini foydalanuvchi so'rasa ham bajarilmaydi.
+
+**Narxi, ochiq aytilgan.** Sahifa yangilanishi = tizimdan chiqish. Token xotirada, backend esa
+cookie o'rnatmaydi, ya'ni tiklanadigan manba yo'q. Umumiy registratura kompyuterida bu
+xatti-harakat **to'g'ri**, lekin xodimlar uni nuqson deb hisoblaydi. Yagona to'g'ri yechim —
+backend tokenni `httpOnly` cookie'da bersa; bu backend o'zgarishi va ataylab qilinmadi.
+
+**Refresh oqimi baribir yo'q.** Sabab endi boshqa: backend'da refresh route'i **umuman
+mavjud emas** (`login/`, `me/`, `update/<pk>/` — boshqa hech narsa), shuning uchun
+`refresh_token` yuboriladigan joy yo'q va u o'qilmaydi ham. 401 — terminal holat.
+
+**Chiqish ham lokal.** Logout endpoint'i yo'q, va token bekor qilinmaydi:
+`BLACKLIST_AFTER_ROTATION: True` yozilgan, lekin `token_blacklist` `INSTALLED_APPS` da
+yo'q — `simplejwt` bu chaqiruvni jimgina yutadi. Ya'ni `useLogout` **ekranni** himoya qiladi,
+**hisob ma'lumotini** emas. Berilgan token muddati tugaguncha (sukut bo'yicha **1 kun**)
+amal qiladi. Buni yopish server tomonda.
+
+**`X-Clinic-Id` header'i olib tashlandi** (`§5.2` dan chetlanish). Backend uni hech qayerda
+o'qimaydi — tenant `request.user` dan olinadi. Header'ni qoldirish "u nimadir himoya
+qilyapti" degan noto'g'ri taassurot berardi. Tenant izolyatsiyasi query key'larda qoladi
+(`§6.2`), va bu P0 talabining haqiqiy mazmuni.
+
+**Qayta ko'rib chiqildi (2026-09-30) — token endi Web Storage'da.** Yuqoridagi
+"P0 saqlanadi" bandi endi kuchda emas: `ADR-014` xodimlarning har F5'da tizimdan
+chiqib ketishini haqiqiy narx sifatida ko'rib, uni almashtirdi. To'liq qaror,
+sabab va qabul qilingan xavf — `ADR-014`da.
+
 ---
 
 ### ADR-004 — TanStack Query, Redux emas
@@ -1609,6 +1649,27 @@ veb SPA'ga emas. Amaliy oqibati: `httpClient` da (`§5.2`) refresh oqimi **yo'q*
 **Qaror.** `drf-spectacular` → OpenAPI → Orval. `api:check` CI qadamlaridan biri.
 
 **Oqibat.** Backend kontrakti o'zgarsa — **build yiqiladi**, production emas. Evaziga: backend jamoasi schema sifatiga mas'ul bo'ladi (`§5.4`).
+
+**Qayta ko'rib chiqildi (2026-08-25) — generatsiya yo'q, qo'lda yozilgan sxemalar.**
+> Backend `drf-yasg` ni ishlatadi (`drf-spectacular` emas). U **Swagger 2.0** chiqaradi,
+> Orval esa OpenAPI 3 kutadi. Bundan ham muhimi: schema route'i `config/urls.py` da
+> **`if settings.DEBUG:`** ichida ro'yxatdan o'tadi, ya'ni to'g'ri sozlangan production'da
+> u umuman mavjud bo'lmaydi. Generatsiyani CI qadami sifatida bog'lab bo'lmaydi.
+
+**Yangi qaror.** Tiplar **qo'lda**, Valibot sxemalari sifatida (`ADR-011`), va ular
+kompilyatsiya vaqtidagi tip emas — **ishga tushirish paytidagi tekshiruv**. `parse` qoladi.
+
+**Nega bu yomonroq emas, balki boshqacha.** Generatsiya qilingan tiplar faqat kompilyatsiya
+vaqtida ishlaydi: serializer jimgina maydonni tashlab ketsa, TypeScript buni bilmaydi va
+xato production'da chiqadi. `v.parse` esa aynan o'sha holatni ushlaydi. Yo'qotilgani —
+avtomatik sinxronizatsiya; qo'lga olingani — haqiqiy javob ustidan nazorat.
+
+**Nima o'zgarganda qaytariladi.** Backend `drf-spectacular` ga o'tsa **va** `/api/schema/`
+ni `DEBUG` dan chiqarsa: `orval.config.ts` qo'shiladi, sxemalardagi maydon tiplari
+generatsiya qilinganlariga almashtiriladi, `parse` **qoladi**.
+
+**`pnpm api:generate` va `api:check`** hozircha ishlamaydi. CI'dagi `api:check` qadami
+`hashFiles('orval.config.ts') != ''` sharti ostida, ya'ni o'zini avtomatik o'chirib turadi.
 
 ---
 
@@ -1686,6 +1747,148 @@ Har bir formatlash chaqiruviga klinika kontekstini uzatish — hozir hech narsa 
 - ➖ Xorijga chiqilsa refaktoring kerak. Narxi past, chunki konvertatsiya
   **faqat bitta modulda** (`shared/lib/datetime.ts`) jamlangan — qoida shuning uchun ham bor
 - ⚠️ Brauzer vaqt zonasi **hech qachon** ishlatilmaydi, hatto konstanta bo'lsa ham
+
+---
+
+### ADR-011 — Validatsiya: Valibot, Zod emas
+**Status:** Qabul qilingan (2026-08-22)
+
+**Kontekst.** `§2.1` `zod ^4` ni belgilaydi. Faza 5 oxirida bundle o'lchandi:
+initial JS **174.3 kB / 180 kB** — bironta biznes moduli yozilmasdan turib atigi
+**5.7 kB zaxira**. Vendor tarkibi (gzip, o'lchangan): React 69 · TanStack 37 ·
+**Zod 29** · i18next 16 · ilova kodi 36.
+
+Zod initial yo'lda, chunki uni ikkita eager modul ishlatadi: sessiya javobini
+tekshirish (`sessionSchema`) va `login.tsx` dagi `validateSearch` — TanStack
+Router `autoCodeSplitting` da faqat komponentni ajratadi, `beforeLoad` va
+`validateSearch` esa route daraxti bilan birga yuklanadi.
+
+**Qaror.** Zod o'rniga **Valibot**. API bir xil (schema + parse + tip chiqarish),
+`@hookform/resolvers` ikkalasini ham qo'llab-quvvatlaydi, Standard Schema orqali
+TanStack Router bilan ham ishlaydi.
+
+**Natija — o'lchangan, taxmin emas.**
+
+| | Initial JS (gzip) |
+|---|---|
+| Zod bilan | 174.3 kB |
+| Valibot bilan | **160.1 kB** |
+| Farq | **−14.2 kB** |
+
+> ⚠️ Dastlab **−27 kB** deb baholangan edi. U raqam Zod alohida vendor chunk
+> bo'lgan o'lchovdan olingan, u yerda har fayl o'z gzip lug'ati bilan siqiladi.
+> Bitta chunk ichida Zod'ning marjinal narxi ikki barobar kam chiqdi. Bashorat
+> emas, o'lchov yozilyapti.
+
+**Oqibatlar.**
+- ➕ Zaxira 5.7 → **19.9 kB**, ya'ni Faza 6–7 uchun haqiqiy joy
+- ➖ Zod ekotizimi kengroq va ko'proq tanish; Valibot API'si funksional
+  (`v.pipe(v.string(), v.minLength(1))`), zanjirli emas
+- ➖ Generatsiya qilingan tiplar (Orval) Zod schema chiqarishi mumkin edi —
+  Faza 2.1 da tekshiriladi; kerak bo'lsa faqat `sessionSchema` qaytariladi
+- ⚖️ `§2.1` jadvali yangilandi
+
+**Qachon qayta ko'riladi.** Agar Orval Valibot chiqara olmasa va qo'lda ko'prik
+yozish narxi 14 kB dan qimmatga tushsa.
+
+---
+
+### ADR-012 — Ruxsatlar roldan olinadi (frontend'da)
+**Status:** Qabul qilingan (2026-08-25) · **`§9.2` dan ongli chetlanish**
+
+**Kontekst.** `§9.2` frontend'da rol→ruxsat xaritasini **taqiqlaydi**, va sabab to'g'ri:
+agar ruxsatlar serverda bo'lsa, ularni roldan chiqaradigan frontend ertami-kechmi server
+bilan kelishmay qoladi va foydalanuvchiga nima mumkinligi haqida **yolg'on gapiradi**.
+
+**Muammo.** Bu backend'da kelishmaydigan narsaning o'zi yo'q. `/api/me/` faqat `role`
+satrini qaytaradi. Ruxsat modeli yo'q, `ViewSet`larda per-view avtorizatsiya yo'q,
+`DEFAULT_PERMISSION_CLASSES` — yolg'iz `IsAuthenticated`. Server admin bilan doktorni
+**umuman ajratmaydi**.
+
+**Qaror.** `entities/session/model/permissions.ts` da rol→ruxsat jadvali. `Can` va `useCan`
+interfeysi o'zgarmaydi.
+
+**⚠️ Buni to'g'ri tushunish muhim.** `§9.1` "frontend hech narsani himoya qilmaydi" deydi;
+bu yerda holat bir daraja yomonroq: jadval **serverdagi qoidalarning aksi ham emas**, chunki
+server qoidalari yo'q. U interfeysni tartibga soladi — doktorga billing tugmalari
+ko'rsatilmaydi — va shundan nariga o'tmaydi. DevTools bilan besh soniyada aylanib o'tiladi
+va server so'ralganini beradi. Buni yopish backend ishi.
+
+**Nega baribir yoziladi.** Ikki sabab. Birinchisi — UI izchilligi: 10 ta modul `Can` ni
+ishlatishga mo'ljallangan va uni olib tashlash har bir modulda alohida shartlar yozishga
+olib keladi. Ikkinchisi — bu **o'rnini bosuvchi shakl**: `/api/me/` `permissions[]` massivini
+chiqara boshlaganda **faqat shu fayl** o'chiriladi, chaqiruv joylari tegilmaydi.
+
+**Oqibat.** `sessionSchema` da `role` yopiq `picklist` — noma'lum rol **rad etiladi**.
+Bu ataylab: `Roles` modeldagi `TextChoices`, uni o'zgartirish migratsiya talab qiladi, ya'ni
+kutilmaganda paydo bo'lmaydi. Jimgina bo'sh ruxsat to'plami berish esa foydalanuvchiga
+butunlay bo'sh ilova ko'rsatardi.
+
+---
+
+### ADR-013 — ID'lar butun son, UUID emas
+**Status:** Majburan qabul qilingan (2026-08-25) · **`§5.4` dan chetlanish**
+
+**Kontekst.** `§5.4` barcha ID'lar UUID bo'lishini talab qiladi, sababi `§13`: ketma-ket
+butun son enumeratsiyaga ochiq — `/patients/1`, `/patients/2`, va hokazo.
+
+**Haqiqat.** Backend'da bironta UUID yo'q. Barcha modellar Django'ning standart
+`AutoField` ini ishlatadi, barcha route'lar `<int:pk>` shaklida.
+
+**Qaror.** Frontend butun sonni qabul qiladi. `sessionSchema` dagi UUID regex olib
+tashlandi, `Session.userId` va `clinicId` — `number`.
+
+**Bu xavfni yopmaydi, faqat qayd etadi.** Enumeratsiya xavfi joyida qoladi va u
+frontend'da hal qilinmaydi. Backend tahlilida (§A3) ko'rsatilgan IDOR zaifliklari bilan
+birga u ancha jiddiy: `get_user(user_id)`, `get_appointment(appointment_id)` va shu
+naqshdagi metodlar tenant tekshiruvisiz ishlaydi, ketma-ket ID esa ularni tizimli
+ravishda aylanib chiqishni oson qiladi.
+
+**Nima qilinishi kerak (backend).** Avval har bir `get_<obyekt>(id)` ga tenant filtri —
+bu ID turidan qat'i nazar majburiy. UUID migratsiyasi ikkinchi darajali va kattaroq ish.
+
+**Qachon qayta ko'riladi.** Backend UUID'ga o'tsa: sxemalarda tip almashtiriladi va
+`§5.4` tiklanadi. Frontend tomonda bu bir necha qatorlik o'zgarish.
+
+---
+
+### ADR-014 — Sessiya: access/refresh token Web Storage'da (`auth-session-storage`)
+**Status:** Qabul qilingan (2026-09-30) · ADR-003ni almashtiradi
+
+**Kontekst.** ADR-003 tokenni faqat RAM'da saqlashga majbur qildi — backend `httpOnly`
+cookie bermaydi, session authentication ham ishlatilmaydi. Narxi ochiq aytilgan edi:
+sahifa yangilanishi = tizimdan chiqish. Amalda bu xodimlar uchun nuqson sifatida
+sezildi: F5 bosilganda ish yo'qoladi, forma qaytadan to'ldiriladi.
+
+**Qaror.** `access_token` va `refresh_token` allowlist qilingan Web Storage orqali
+saqlanadi (`shared/lib/storage.ts`, faqat shu ikki kalit + `locale`). Ilova
+yuklanganda, router yaratilishidan **oldin**, `restoreSession()`
+(`shared/api/authSession.ts`) tokenni RAM'ga tiklaydi — agar mavjud bo'lsa va JWT
+`exp` hali o'tmagan bo'lsa; aks holda ikkala token o'chiriladi.
+
+**Qabul qilingan xavf.** XSS endi joriy sessiyadan tashqari, keyingi reload'gacha
+saqlangan tokenni ham o'qiy oladi — bu ADR-003/ADR-007 aynan shundan ogohlantirgan
+xavf. Endi qabul qilinadi, chunki:
+- Asosiy himoya XSS'ning o'ziga qaratilgan: `dangerouslySetInnerHTML` yo'q,
+  dependency'lar nazorat qilinadi, CSP kelajakda qo'shiladi — token qayerda
+  saqlanishidan qat'i nazar kerak bo'ladigan himoya.
+- Token storage'da **eng qisqa vaqt** turadi: muddati o'tgani ishlatilmaydi
+  (`restoreSession`), `401`da darhol o'chiriladi (`AppProviders.onUnauthorized`),
+  logout va klinika almashtirishda tozalanadi.
+- Bemor ma'lumoti (PHI) bu qarorga kirmaydi — query kesh hamon faqat RAM'da,
+  `persistQueryClient` ishlatilmaydi (`ADR-007` o'zgarmadi).
+
+**Oqibatlar.**
+- ➕ F5 endi sessiyani yo'qotmaydi; login sahifasi miltillab ham ko'rinmaydi.
+- ➕ Umumiy registratura kompyuterida xavf cheklangan: faqat qisqa umrli token,
+  bemor bazasi emas.
+- ➖ XSS'ning ta'sir doirasi kengaydi (yuqoridagi "qabul qilingan xavf"ga qarang).
+- ➖ `refresh_token` saqlanadi, lekin backend'da uni almashtiradigan endpoint hozircha
+  yo'q — bu faqat kelajak uchun tayyorgarlik, hech narsa uni ishlatmaydi.
+
+**Qachon qayta ko'riladi.** Backend token refresh endpoint yoki `httpOnly` cookie
+qo'shsa: token storage'dan butunlay olib tashlanadi, ADR-003ning asl (RAM'da yoki
+cookie'da) yo'nalishiga qaytiladi.
 
 ---
 
@@ -1807,7 +2010,7 @@ pnpm create vite@latest salomatos-web -- --template react-ts
 cd salomatos-web
 
 # Yadro
-pnpm add @tanstack/react-router @tanstack/react-query zustand zod \
+pnpm add @tanstack/react-router @tanstack/react-query zustand valibot \
          react-hook-form @hookform/resolvers ky nuqs \
          date-fns @date-fns/tz
 
@@ -1816,7 +2019,7 @@ pnpm add tailwindcss @tailwindcss/vite motion lucide-react sonner cmdk \
          @tanstack/react-table @tanstack/react-virtual
 
 # i18n
-pnpm add i18next react-i18next i18next-icu i18next-browser-languagedetector
+pnpm add i18next react-i18next i18next-resources-to-backend
 
 # Dev
 pnpm add -D @biomejs/biome vitest @testing-library/react @testing-library/user-event \

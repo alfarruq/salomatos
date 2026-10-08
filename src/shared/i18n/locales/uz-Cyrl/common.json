@@ -1,0 +1,51 @@
+{
+  "app": {
+    "name": "SalomatOS"
+  },
+  "currency": {
+    "som": "сўм"
+  },
+  "action": {
+    "save": "Сақлаш",
+    "cancel": "Бекор қилиш",
+    "retry": "Қайта уриниш",
+    "close": "Ёпиш",
+    "signOut": "Чиқиш",
+    "next": "Кейинги",
+    "previous": "Олдинги",
+    "edit": "Таҳрирлаш",
+    "delete": "Ўчириш"
+  },
+  "nav": {
+    "skipToContent": "Асосий қисмга ўтиш",
+    "openNavigation": "Менюни очиш",
+    "navigation": "Асосий меню",
+    "breadcrumb": "Саҳифалар занжири",
+    "dashboard": "Бошқарув панели",
+    "patients": "Беморлар",
+    "appointments": "Учрашувлар",
+    "billing": "Тўловлар",
+    "admin": "Бошқарув"
+  },
+  "language": {
+    "label": "Тил",
+    "change": "Тилни ўзгартириш"
+  },
+  "error": {
+    "pageTitle": "Бу саҳифа очилмади",
+    "pageBody": "Саҳифани қайта юкланг ёки бошқа бўлимга ўтинг.",
+    "network": "Серверга уланиб бўлмади. Интернетни текширинг.",
+    "unknown": "Амал бажарилмади. Қайта уриниб кўринг."
+  },
+  "patientCount_one": "{{count}} бемор",
+  "patientCount_other": "{{count}} бемор",
+  "weekday": {
+    "mon": "Душанба",
+    "tue": "Сешанба",
+    "wed": "Чоршанба",
+    "thu": "Пайшанба",
+    "fri": "Жума",
+    "sat": "Шанба",
+    "sun": "Якшанба"
+  }
+}

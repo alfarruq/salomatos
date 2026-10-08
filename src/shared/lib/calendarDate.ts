@@ -48,3 +48,31 @@ export function isSameCalendarDay(a: Date, b: Date): boolean {
 export function todayCalendarDate(): CalendarDate {
   return toCalendarDate(new Date())
 }
+
+/**
+ * `2026-08-24` → `24 avg 2026`, in the active language.
+ *
+ * No `timeZone` option, deliberately: the `Date` built by `parseCalendarDate`
+ * is local midnight of that calendar day, so `Intl` formats the day that was
+ * asked for. Passing a zone here would reintroduce the shift this module
+ * exists to prevent.
+ *
+ * Returns null for a value that is not a real date, so a caller renders
+ * nothing rather than "Invalid Date".
+ */
+export function formatCalendarDate(value: CalendarDate, locale: string): string | null {
+  const parsed = parseCalendarDate(value)
+  if (parsed === null) return null
+
+  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(parsed)
+}
+
+/**
+ * `dd.MM.yyyy`, the same in every language — for the dense lists and printed
+ * forms that ask for one fixed shape rather than `formatCalendarDate`'s
+ * locale-aware one.
+ */
+export function formatFixedDate(value: CalendarDate): string {
+  const [year, month, day] = value.split('-')
+  return `${day}.${month}.${year}`
+}

@@ -1,0 +1,13 @@
+{
+  "required": "This field is required",
+  "email": "Enter a valid email",
+  "tooShort": "Too short",
+  "phoneUz": "Enter a valid phone number",
+  "blank": "This field cannot be empty",
+  "null": "This field cannot be empty",
+  "invalid": "This value is not valid",
+  "unique": "This value is already taken",
+  "max_length": "Too long",
+  "min_length": "Too short",
+  "invalid_choice": "Choose one of the available options"
+}

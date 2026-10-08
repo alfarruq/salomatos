@@ -1,0 +1,51 @@
+{
+  "app": {
+    "name": "SalomatOS"
+  },
+  "currency": {
+    "som": "so'm"
+  },
+  "action": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "retry": "Try again",
+    "close": "Close",
+    "signOut": "Sign out",
+    "next": "Next",
+    "previous": "Previous",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "nav": {
+    "skipToContent": "Skip to content",
+    "openNavigation": "Open menu",
+    "navigation": "Main menu",
+    "breadcrumb": "Breadcrumb",
+    "dashboard": "Dashboard",
+    "patients": "Patients",
+    "appointments": "Appointments",
+    "billing": "Billing",
+    "admin": "Administration"
+  },
+  "language": {
+    "label": "Language",
+    "change": "Change language"
+  },
+  "error": {
+    "pageTitle": "This page did not open",
+    "pageBody": "Reload the page or go to another section.",
+    "network": "Could not reach the server. Check your connection.",
+    "unknown": "That did not work. Please try again."
+  },
+  "patientCount_one": "{{count}} patient",
+  "patientCount_other": "{{count}} patients",
+  "weekday": {
+    "mon": "Monday",
+    "tue": "Tuesday",
+    "wed": "Wednesday",
+    "thu": "Thursday",
+    "fri": "Friday",
+    "sat": "Saturday",
+    "sun": "Sunday"
+  }
+}

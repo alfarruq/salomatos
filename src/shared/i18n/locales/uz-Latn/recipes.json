@@ -1,0 +1,101 @@
+{
+  "list": {
+    "medicineCount_one": "{{count}} ta dori",
+    "medicineCount_other": "{{count}} ta dori",
+    "print": "Chop etish"
+  },
+  "doseForm": {
+    "tablet_one": "{{count}} tabletka",
+    "tablet_other": "{{count}} tabletka",
+    "capsule_one": "{{count}} kapsula",
+    "capsule_other": "{{count}} kapsula",
+    "sachet_one": "{{count}} paket",
+    "sachet_other": "{{count}} paket",
+    "gel_one": "{{count}} marta surtish",
+    "gel_other": "{{count}} marta surtish",
+    "spray_one": "{{count}} purkash",
+    "spray_other": "{{count}} purkash",
+    "drops_one": "{{count}} tomchi",
+    "drops_other": "{{count}} tomchi",
+    "injection_one": "{{count}} ampula",
+    "injection_other": "{{count}} ampula",
+    "cream_one": "{{count}} marta surtish",
+    "cream_other": "{{count}} marta surtish",
+    "rinse_one": "{{count}} marta chayqash",
+    "rinse_other": "{{count}} marta chayqash"
+  },
+  "frequency": {
+    "od": "1 mahal/kun",
+    "bid": "2 mahal/kun",
+    "tid": "3 mahal/kun",
+    "qid": "4 mahal/kun",
+    "q6h": "Har 6 soatda",
+    "q8h": "Har 8 soatda",
+    "q12h": "Har 12 soatda",
+    "prn": "Kerak bo'lganda"
+  },
+  "meal": {
+    "before": "Ovqatdan oldin",
+    "after": "Ovqatdan keyin",
+    "with": "Ovqat bilan",
+    "none": "Ovqatga bog'liq emas",
+    "beforeMinutes": "Ovqatdan {{minutes}} daq oldin",
+    "afterMinutes": "Ovqatdan {{minutes}} daq keyin"
+  },
+  "duration": {
+    "days_one": "{{count}} kun",
+    "days_other": "{{count}} kun",
+    "weeks_one": "{{count}} hafta",
+    "weeks_other": "{{count}} hafta"
+  },
+  "doseFormName": {
+    "tablet": "Tabletka",
+    "capsule": "Kapsula",
+    "sachet": "Paket",
+    "gel": "Gel",
+    "spray": "Sprey",
+    "drops": "Tomchi",
+    "injection": "Ampula",
+    "cream": "Krem",
+    "rinse": "Chayqash"
+  },
+  "durationUnit": {
+    "days": "Kun",
+    "weeks": "Hafta"
+  },
+  "category": {
+    "antibiotic": "Antibiotiklar",
+    "analgesic": "Og'riq qoldiruvchi",
+    "topical": "Mahalliy / chayqash",
+    "other": "Qo'shimcha"
+  },
+  "editor": {
+    "title": "Retsept yozish",
+    "doctorLabel": "Shifokor",
+    "doctorPlaceholder": "Shifokorni tanlang",
+    "medicinesTitle": "Dori-darmonlar",
+    "addMedicine": "Dori qo'shish",
+    "noMedicines": "Hali dori qo'shilmagan. \"Dori qo'shish\" tugmasini bosing.",
+    "nameLabel": "Dori nomi",
+    "namePlaceholder": "Dorini tanlang yoki yozing",
+    "searchPlaceholder": "Dori nomini qidiring…",
+    "notInCatalog": "Katalogda topilmadi",
+    "addCustom": "\"{{name}}\" ni qo'shish",
+    "doseLabel": "Doza",
+    "formLabel": "Shakli",
+    "frequencyLabel": "Qabul",
+    "mealLabel": "Ovqat",
+    "minutesLabel": "Daqiqa",
+    "durationLabel": "Muddat",
+    "unitLabel": "Birlik",
+    "removeMedicine": "Dorini olib tashlash",
+    "removeNamedMedicine": "{{name}} ni olib tashlash",
+    "incomplete": "Har bir dorida doza va muddat butun son bo'lishi kerak.",
+    "notesLabel": "Izoh",
+    "save": "Retseptni saqlash",
+    "saved": "Retsept saqlandi",
+    "saveFailed": "Retseptni saqlab bo'lmadi. Qaytadan urinib ko'ring.",
+    "patientLabel": "Bemor",
+    "notesPlaceholder": "Bemor uchun qo'shimcha izohlar…"
+  }
+}

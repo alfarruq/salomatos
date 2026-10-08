@@ -20,6 +20,8 @@ export default [
       'node_modules/**',
       'src/shared/api/generated/**',
       'src/routeTree.gen.ts',
+      // Vendored by `msw init`; not our source.
+      'public/mockServiceWorker.js',
     ],
   },
   {

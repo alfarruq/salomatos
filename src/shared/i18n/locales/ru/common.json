@@ -1,0 +1,53 @@
+{
+  "app": {
+    "name": "SalomatOS"
+  },
+  "currency": {
+    "som": "сум"
+  },
+  "action": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "retry": "Повторить",
+    "close": "Закрыть",
+    "signOut": "Выйти",
+    "next": "Вперёд",
+    "previous": "Назад",
+    "edit": "Изменить",
+    "delete": "Удалить"
+  },
+  "nav": {
+    "skipToContent": "Перейти к содержимому",
+    "openNavigation": "Открыть меню",
+    "navigation": "Главное меню",
+    "breadcrumb": "Хлебные крошки",
+    "dashboard": "Панель управления",
+    "patients": "Пациенты",
+    "appointments": "Записи на приём",
+    "billing": "Платежи",
+    "admin": "Администрирование"
+  },
+  "language": {
+    "label": "Язык",
+    "change": "Сменить язык"
+  },
+  "error": {
+    "pageTitle": "Страница не открылась",
+    "pageBody": "Обновите страницу или перейдите в другой раздел.",
+    "network": "Не удалось связаться с сервером. Проверьте интернет.",
+    "unknown": "Действие не выполнено. Попробуйте ещё раз."
+  },
+  "patientCount_one": "{{count}} пациент",
+  "patientCount_few": "{{count}} пациента",
+  "patientCount_many": "{{count}} пациентов",
+  "patientCount_other": "{{count}} пациента",
+  "weekday": {
+    "mon": "Понедельник",
+    "tue": "Вторник",
+    "wed": "Среда",
+    "thu": "Четверг",
+    "fri": "Пятница",
+    "sat": "Суббота",
+    "sun": "Воскресенье"
+  }
+}

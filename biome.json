@@ -6,7 +6,12 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!src/shared/api/generated", "!src/routeTree.gen.ts"]
+    "includes": [
+      "**",
+      "!src/shared/api/generated",
+      "!src/routeTree.gen.ts",
+      "!public/mockServiceWorker.js"
+    ]
   },
   "formatter": {
     "enabled": true,

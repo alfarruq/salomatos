@@ -4,7 +4,7 @@ import { cn } from '@/shared/lib/cn'
 
 export interface TabItem {
   value: string
-  label: string
+  label: ReactNode
   content: ReactNode
   disabled?: boolean
 }

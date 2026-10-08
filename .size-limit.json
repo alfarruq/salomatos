@@ -1,7 +1,7 @@
 [
   {
     "name": "Initial JS (entry + vendors)",
-    "path": ["dist/assets/index-*.js", "dist/assets/vendor-*.js"],
+    "path": ["dist/assets/entry-*.js", "dist/assets/vendor-*.js"],
     "limit": "180 kB",
     "gzip": true
   },

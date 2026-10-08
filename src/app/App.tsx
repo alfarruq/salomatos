@@ -1,24 +1,26 @@
-import { lazy, Suspense } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { RouterProvider } from '@tanstack/react-router'
+import { lazy, Suspense, useState } from 'react'
+import { createAppRouter } from './router'
 
 /**
- * Lazy rather than a plain import guarded by `import.meta.env.DEV`.
+ * Lazy, and behind a constant-folded condition, so a production build emits no
+ * chunk for it at all.
  *
- * The guard alone is not enough: dead-code elimination cannot drop a module
- * that has side effects at import time — sonner injects its stylesheet on
- * load — so the reference page was dragging its dependencies into the
- * production entry chunk. A dynamic import puts them in a chunk that is only
- * ever requested by /dev/ui.
+ * The reference page stays outside the router rather than becoming a route:
+ * a file-based route is always compiled into the tree, so it would ship as a
+ * chunk even though nothing links to it. The pathname check keeps the
+ * guarantee that CI enforces — dist/ contains none of it.
  */
 const UiGallery = import.meta.env.DEV
   ? lazy(async () => ({ default: (await import('./dev/UiGallery')).UiGallery }))
   : () => null
 
-/**
- * Placeholder shell. The router, providers and real layout arrive in phase 4
- * (ROADMAP 4.2), at which point /dev/ui becomes a proper dev-only route and
- * this pathname check goes away.
- */
 export function App() {
+  const queryClient = useQueryClient()
+  // Once for the app's lifetime: a new router would remount every page.
+  const [router] = useState(() => createAppRouter(queryClient))
+
   if (import.meta.env.DEV && window.location.pathname === '/dev/ui') {
     return (
       <Suspense fallback={null}>
@@ -27,9 +29,5 @@ export function App() {
     )
   }
 
-  return (
-    <main>
-      <h1>SalomatOS</h1>
-    </main>
-  )
+  return <RouterProvider router={router} />
 }

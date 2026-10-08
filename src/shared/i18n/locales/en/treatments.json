@@ -1,0 +1,76 @@
+{
+  "table": {
+    "totalLabel": "Total",
+    "inProgressLabel": "In progress",
+    "completedLabel": "Completed",
+    "columnTooth": "Tooth",
+    "columnType": "Treatment",
+    "columnDate": "Date",
+    "columnStatus": "Status",
+    "columnCost": "Cost",
+    "columnDebt": "Debt",
+    "columnActions": "Actions",
+    "toothCellHint": "Double-click for details",
+    "actionsMenuLabel": "Actions — {{type}}, {{date}}",
+    "actionDetail": "Details",
+    "actionEdit": "Edit",
+    "actionComplete": "Mark as completed",
+    "empty": "No treatments yet",
+    "emptyDescription": "Nothing has been added for this patient yet.",
+    "emptyAction": "Add the first treatment"
+  },
+  "detail": {
+    "title": "Treatment details",
+    "toothLabel": "Tooth: {{tooth}}",
+    "dateLabel": "Date",
+    "doctorLabel": "Doctor",
+    "totalCostLabel": "Total cost",
+    "totalPaidLabel": "Total paid",
+    "remainingLabel": "Remaining",
+    "notesLabel": "Notes",
+    "delete": "Delete treatment",
+    "edit": "Edit",
+    "takePayment": "Take payment",
+    "complete": "Mark as completed"
+  },
+  "delete": {
+    "title": "Delete treatment",
+    "description": "Delete “{{type}}” (tooth {{tooth}}) entirely?",
+    "warning": "Its cost and payments are deleted with it. This cannot be undone.",
+    "wait": "Delete ({{seconds}})",
+    "failed": "Could not delete the treatment. Please try again."
+  },
+  "composer": {
+    "title": "New treatment",
+    "editTitle": "Edit treatment",
+    "doctorLabel": "Doctor",
+    "doctorPlaceholder": "Select a doctor",
+    "statusLabel": "Status",
+    "notesLabel": "Notes",
+    "toothHint": "Click the chart to pick a tooth",
+    "treatmentTypePlaceholder": "Treatment",
+    "chooseDoctorFirst": "Choose a doctor first — the treatments offered depend on their specialty.",
+    "doctorHasNoType": "This doctor has no specialty (doctor type) set. Assign one to see treatments.",
+    "noTypesForSpecialty": "No treatments have been added for “{{specialty}}” yet.",
+    "addTreatmentLabel": "Add a treatment",
+    "rowType": "Treatment",
+    "rowCost": "Total cost",
+    "rowPaid": "Total paid",
+    "totalsLabel": "Total",
+    "save": "Save",
+    "saveFailed": "Could not save the treatment. Please try again.",
+    "toothType": {
+      "incisor": "incisor",
+      "canine": "canine",
+      "premolar": "premolar",
+      "molar": "molar",
+      "upper": "Upper jaw",
+      "lower": "Lower jaw",
+      "tooth": "Tooth"
+    }
+  },
+  "chart": {
+    "completed": "Completed",
+    "inProgress": "In progress"
+  }
+}

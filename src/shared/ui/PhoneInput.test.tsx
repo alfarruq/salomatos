@@ -22,14 +22,14 @@ describe('subscriberDigitsOf', () => {
 
 describe('formatSubscriber', () => {
   it('groups a full number', () => {
-    expect(formatSubscriber('901234567')).toBe('90 123 45 67')
+    expect(formatSubscriber('901234567')).toBe('90-123-45-67')
   })
 
   it('groups every prefix while typing', () => {
     expect(formatSubscriber('9')).toBe('9')
-    expect(formatSubscriber('901')).toBe('90 1')
-    expect(formatSubscriber('90123')).toBe('90 123')
-    expect(formatSubscriber('9012345')).toBe('90 123 45')
+    expect(formatSubscriber('901')).toBe('90-1')
+    expect(formatSubscriber('90123')).toBe('90-123')
+    expect(formatSubscriber('9012345')).toBe('90-123-45')
   })
 })
 
@@ -73,7 +73,7 @@ describe('PhoneInput', () => {
   it('shows the number grouped but stores it plain', () => {
     render(<PhoneInput value="+998901234567" />)
 
-    expect(screen.getByRole('textbox')).toHaveValue('90 123 45 67')
+    expect(screen.getByRole('textbox')).toHaveValue('90-123-45-67')
   })
 
   it('emits an empty string rather than a bare country code', async () => {

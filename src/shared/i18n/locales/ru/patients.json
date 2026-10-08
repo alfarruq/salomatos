@@ -1,0 +1,115 @@
+{
+  "status": {
+    "in_progress": "В лечении",
+    "completed": "Завершено",
+    "none": "Без лечения"
+  },
+  "form": {
+    "fullName": "Ф. И. О.",
+    "phoneNumber": "Номер телефона",
+    "doctor": "Врач",
+    "doctorPlaceholder": "Выберите врача",
+    "birthDate": "Дата рождения",
+    "birthDatePlaceholder": "Выберите дату",
+    "previousMonth": "Предыдущий месяц",
+    "nextMonth": "Следующий месяц",
+    "address": "Адрес",
+    "office": "Кабинет"
+  },
+  "create": {
+    "title": "Новый пациент",
+    "description": "Имя, номер телефона и врач обязательны.",
+    "submit": "Добавить пациента",
+    "failed": "Не удалось добавить пациента. Попробуйте ещё раз."
+  },
+  "edit": {
+    "title": "Изменить пациента",
+    "description": "Изменения сохраняются сразу.",
+    "failed": "Не удалось сохранить изменения. Попробуйте ещё раз."
+  },
+  "delete": {
+    "title": "Удалить пациента",
+    "description": "Удалить пациента «{{name}}» полностью?",
+    "warning": "Это действие нельзя отменить. Неизвестно, что произойдёт с историей лечения, записей и платежей пациента — она тоже может удалиться или остаться без владельца.",
+    "wait": "Удалить ({{seconds}})",
+    "failed": "Не удалось удалить пациента. Попробуйте ещё раз."
+  },
+  "search": {
+    "label": "Поиск пациентов",
+    "placeholder": "Имя",
+    "clear": "Очистить поиск"
+  },
+  "filters": {
+    "treatmentTypeLabel": "Фильтр по лечению",
+    "treatmentTypeAll": "Все виды лечения",
+    "statusLabel": "Фильтр по статусу",
+    "statusAll": "Все статусы",
+    "doctorLabel": "Фильтр по врачу",
+    "doctorPlaceholder": "Врач",
+    "doctorAll": "Все врачи"
+  },
+  "title": "Пациенты",
+  "column": {
+    "fullName": "Имя",
+    "phoneNumber": "Телефон",
+    "status": "Статус",
+    "doctor": "Врач",
+    "lastAppointment": "Последний приём",
+    "remaining": "Остаток"
+  },
+  "empty": {
+    "title": "Пациентов пока нет",
+    "description": "Добавьте первого пациента, чтобы начать.",
+    "noMatch": "Ничего не найдено",
+    "searchDescription": "Попробуйте другое имя.",
+    "showAll": "Показать всех пациентов"
+  },
+  "pagination": {
+    "summary": "{{from}}–{{to}} из {{count}}"
+  },
+  "detail": {
+    "backToList": "← Все пациенты",
+    "notFound": "Пациент не найден",
+    "notFoundBody": "Эта ссылка ведёт на несуществующего пациента.",
+    "birthDateWithAge": "{{date}} ({{age}})",
+    "visitNumber": "Визитов",
+    "totalCost": "Сумма лечения",
+    "totalPaid": "Оплачено",
+    "treatments": "Лечение",
+    "treatmentWithTooth": "{{name}} · зуб {{tooth}}",
+    "newTreatment": "Новое лечение",
+    "writePrescription": "Выписать рецепт",
+    "newAppointment": "Новая запись",
+    "comingSoon": "Эта функция скоро появится.",
+    "toothChart": "Карта зубов",
+    "tabGeneral": "Общая информация",
+    "tabTreatments": "Лечение",
+    "tabPrescriptions": "Рецепты",
+    "tabGallery": "Галерея",
+    "noTreatments": "Лечения нет",
+    "noTreatmentsDescription": "Для этого пациента пока не записано ни одного лечения.",
+    "ageYears": "{{age}} лет",
+    "totalPaidOf": "Всего оплачено: {{paid}} / {{total}}",
+    "visitCount_one": "{{count}} визит",
+    "visitCount_few": "{{count}} визита",
+    "visitCount_many": "{{count}} визитов",
+    "visitCount_other": "{{count}} визита",
+    "history": {
+      "date": "Дата",
+      "type": "Лечение",
+      "tooth": "Зуб",
+      "doctor": "Врач",
+      "status": "Статус",
+      "paid": "Оплачено"
+    },
+    "galleryEmpty": "Пока нет фото",
+    "galleryEmptyDescription": "Фотографии, добавленные для этого пациента, появятся здесь.",
+    "galleryImage": "Фото",
+    "galleryDropHere": "Перетащите фото сюда",
+    "galleryOrBrowse": "или нажмите, чтобы выбрать",
+    "galleryUploading": "Загрузка...",
+    "galleryUploadFailed": "Не удалось загрузить фото. Попробуйте ещё раз.",
+    "prescriptionsEmpty": "Пока нет рецептов",
+    "prescriptionsEmptyDescription": "Рецепты, выписанные этому пациенту, появятся здесь."
+  }
+}

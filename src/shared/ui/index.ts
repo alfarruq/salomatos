@@ -14,6 +14,19 @@ export {
   useCommandShortcut,
 } from './CommandPalette'
 export { DatePicker, type DatePickerProps } from './DatePicker'
+export {
+  DentalChart,
+  type DentalChartLabels,
+  type DentalChartProps,
+  type FDI,
+  getToothTransform,
+  type Quadrant,
+  TEETH,
+  type ToothMeta,
+  type ToothStatusDef,
+  type ToothTransform,
+  type ToothType,
+} from './DentalChart'
 export { Dialog, DialogClose, type DialogProps } from './Dialog'
 export {
   DropdownMenu,
@@ -32,6 +45,7 @@ export {
 export { ErrorState, type ErrorStateProps } from './ErrorState'
 export { Field, type FieldProps, useFieldControl } from './Field'
 export { Input, type InputProps, type InputSize } from './Input'
+export { digitsOf, formatThousands, MoneyInput, type MoneyInputProps } from './MoneyInput'
 export { Pagination, type PaginationProps } from './Pagination'
 export {
   formatSubscriber,

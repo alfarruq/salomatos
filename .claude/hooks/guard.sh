@@ -90,12 +90,19 @@ Edit the Django serializer, then run 'pnpm api:generate'." ;;
 
     VIOLATIONS=""
 
-    if grep -nE '\b(localStorage|sessionStorage|indexedDB)\b' "$FILE" >/dev/null 2>&1; then
-      VIOLATIONS+="P0 — browser storage is forbidden (PHI / token leakage on shared machines):
+    # shared/lib/storage.ts is the sole allowlisted Web Storage entry point
+    # (CLAUDE.md §3/§10) — every other file must go through it.
+    case "$FILE" in
+      */src/shared/lib/storage.ts) ;;
+      *)
+        if grep -nE '\b(localStorage|sessionStorage|indexedDB)\b' "$FILE" >/dev/null 2>&1; then
+          VIOLATIONS+="P0 — browser storage is forbidden outside shared/lib/storage.ts's allowlist wrapper (CLAUDE.md §3):
 $(grep -nE '\b(localStorage|sessionStorage|indexedDB)\b' "$FILE")
 
 "
-    fi
+        fi
+        ;;
+    esac
 
     if grep -nE 'console\.(log|debug|info)\(' "$FILE" >/dev/null 2>&1; then
       VIOLATIONS+="P0 — console output survives into the production bundle and may carry PHI:

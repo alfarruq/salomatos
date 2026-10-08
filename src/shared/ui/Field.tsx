@@ -5,6 +5,7 @@ interface FieldContextValue {
   controlId: string
   describedBy: string | undefined
   isInvalid: boolean
+  isRequired: boolean
 }
 
 const FieldContext = createContext<FieldContextValue | null>(null)
@@ -20,12 +21,12 @@ export function useFieldControl(): FieldContextValue | null {
 export interface FieldProps {
   label: string
   /** Hint shown under the control. Never used to carry an error. */
-  description?: string
+  description?: string | undefined
   /**
    * Validation message. Both Zod and the server write here (§10), which is why
    * it is a plain string: the caller has already translated it.
    */
-  error?: string
+  error?: string | undefined
   /** Marks the control required for assistive tech as well as visually. */
   isRequired?: boolean
   children: ReactNode
@@ -52,16 +53,26 @@ export function Field({
   const describedBy = error ? errorId : description ? descriptionId : undefined
 
   return (
-    <FieldContext.Provider value={{ controlId, describedBy, isInvalid: Boolean(error) }}>
+    <FieldContext.Provider
+      value={{ controlId, describedBy, isInvalid: Boolean(error), isRequired }}
+    >
       <div className={cn('flex flex-col gap-2', className)}>
-        <label className="text-callout font-medium text-text" htmlFor={controlId}>
-          {label}
+        {/*
+         * The asterisk sits beside the label, not inside it. Inside, it becomes
+         * part of the control's accessible name — a screen reader would read
+         * "Telefon star" — while the actual requirement is carried by
+         * `aria-required` on the control itself.
+         */}
+        <div className="flex items-center gap-1">
+          <label className="text-callout font-medium text-text" htmlFor={controlId}>
+            {label}
+          </label>
           {isRequired ? (
-            <span aria-hidden="true" className="ml-1 text-danger">
+            <span aria-hidden="true" className="text-danger">
               *
             </span>
           ) : null}
-        </label>
+        </div>
 
         {children}
 

@@ -1,0 +1,51 @@
+{
+  "app": {
+    "name": "SalomatOS"
+  },
+  "currency": {
+    "som": "so'm"
+  },
+  "action": {
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "retry": "Qayta urinish",
+    "close": "Yopish",
+    "signOut": "Chiqish",
+    "next": "Keyingi",
+    "previous": "Oldingi",
+    "edit": "Tahrirlash",
+    "delete": "O'chirish"
+  },
+  "nav": {
+    "skipToContent": "Asosiy qismga o'tish",
+    "openNavigation": "Menyuni ochish",
+    "navigation": "Asosiy menyu",
+    "breadcrumb": "Sahifalar zanjiri",
+    "dashboard": "Boshqaruv paneli",
+    "patients": "Bemorlar",
+    "appointments": "Uchrashuvlar",
+    "billing": "To'lovlar",
+    "admin": "Boshqaruv"
+  },
+  "language": {
+    "label": "Til",
+    "change": "Tilni o'zgartirish"
+  },
+  "error": {
+    "pageTitle": "Bu sahifa ochilmadi",
+    "pageBody": "Sahifani qayta yuklang yoki boshqa bo'limga o'ting.",
+    "network": "Serverga ulanib bo'lmadi. Internetni tekshiring.",
+    "unknown": "Amal bajarilmadi. Qayta urinib ko'ring."
+  },
+  "patientCount_one": "{{count}} bemor",
+  "patientCount_other": "{{count}} bemor",
+  "weekday": {
+    "mon": "Dushanba",
+    "tue": "Seshanba",
+    "wed": "Chorshanba",
+    "thu": "Payshanba",
+    "fri": "Juma",
+    "sat": "Shanba",
+    "sun": "Yakshanba"
+  }
+}

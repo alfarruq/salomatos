@@ -1,0 +1,72 @@
+{
+  "title": "Appointments",
+  "status": {
+    "in_progress": "In progress",
+    "completed": "Completed"
+  },
+  "form": {
+    "patient": "Patient",
+    "patientSearchPlaceholder": "Search by name",
+    "unlinkPatient": "Unlink patient",
+    "fullName": "Full name",
+    "fullNameLinkedHint": "A patient is linked — the name shown always comes from their own record.",
+    "phoneNumber": "Phone number",
+    "doctor": "Doctor",
+    "doctorPlaceholder": "Not assigned",
+    "date": "Date",
+    "datePlaceholder": "Select a date",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "time": "Time",
+    "status": "Status",
+    "notes": "Notes"
+  },
+  "create": {
+    "title": "New appointment",
+    "description": "Pick an existing patient, or enter a walk-in's name and phone number.",
+    "submit": "Add appointment",
+    "failed": "Could not add the appointment. Please try again."
+  },
+  "edit": {
+    "title": "Edit appointment",
+    "failed": "Could not save the changes. Please try again."
+  },
+  "delete": {
+    "title": "Delete appointment",
+    "description": "Delete the appointment for “{{name}}”?",
+    "failed": "Could not delete the appointment. Please try again."
+  },
+  "view": {
+    "label": "View",
+    "day": "Day",
+    "week": "Week",
+    "all": "All",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "currentWeek": "This week"
+  },
+  "column": {
+    "date": "Date",
+    "time": "Time",
+    "patient": "Patient",
+    "doctor": "Doctor",
+    "status": "Status"
+  },
+  "empty": {
+    "title": "No appointments",
+    "description": "Add an appointment to see it here."
+  },
+  "search": {
+    "placeholder": "Search by name or phone",
+    "empty": "Nothing found."
+  },
+  "weekday": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  }
+}

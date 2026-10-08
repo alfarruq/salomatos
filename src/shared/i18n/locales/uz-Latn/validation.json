@@ -1,0 +1,13 @@
+{
+  "required": "Bu maydon to'ldirilishi shart",
+  "email": "Email manzil noto'g'ri",
+  "tooShort": "Juda qisqa",
+  "phoneUz": "Telefon raqami noto'g'ri",
+  "blank": "Bu maydon bo'sh bo'lmasligi kerak",
+  "null": "Bu maydon bo'sh bo'lmasligi kerak",
+  "invalid": "Qiymat noto'g'ri",
+  "unique": "Bu qiymat allaqachon band",
+  "max_length": "Juda uzun",
+  "min_length": "Juda qisqa",
+  "invalid_choice": "Mavjud variantlardan birini tanlang"
+}

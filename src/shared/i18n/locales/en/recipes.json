@@ -1,0 +1,101 @@
+{
+  "list": {
+    "medicineCount_one": "{{count}} medicine",
+    "medicineCount_other": "{{count}} medicines",
+    "print": "Print"
+  },
+  "doseForm": {
+    "tablet_one": "{{count}} tablet",
+    "tablet_other": "{{count}} tablets",
+    "capsule_one": "{{count}} capsule",
+    "capsule_other": "{{count}} capsules",
+    "sachet_one": "{{count}} sachet",
+    "sachet_other": "{{count}} sachets",
+    "gel_one": "{{count}} application",
+    "gel_other": "{{count}} applications",
+    "spray_one": "{{count}} spray",
+    "spray_other": "{{count}} sprays",
+    "drops_one": "{{count}} drop",
+    "drops_other": "{{count}} drops",
+    "injection_one": "{{count}} ampoule",
+    "injection_other": "{{count}} ampoules",
+    "cream_one": "{{count}} application",
+    "cream_other": "{{count}} applications",
+    "rinse_one": "{{count}} rinse",
+    "rinse_other": "{{count}} rinses"
+  },
+  "frequency": {
+    "od": "Once a day",
+    "bid": "Twice a day",
+    "tid": "3 times a day",
+    "qid": "4 times a day",
+    "q6h": "Every 6 hours",
+    "q8h": "Every 8 hours",
+    "q12h": "Every 12 hours",
+    "prn": "As needed"
+  },
+  "meal": {
+    "before": "Before meals",
+    "after": "After meals",
+    "with": "With meals",
+    "none": "Regardless of meals",
+    "beforeMinutes": "{{minutes}} min before meals",
+    "afterMinutes": "{{minutes}} min after meals"
+  },
+  "duration": {
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "weeks_one": "{{count}} week",
+    "weeks_other": "{{count}} weeks"
+  },
+  "doseFormName": {
+    "tablet": "Tablet",
+    "capsule": "Capsule",
+    "sachet": "Sachet",
+    "gel": "Gel",
+    "spray": "Spray",
+    "drops": "Drops",
+    "injection": "Ampoule",
+    "cream": "Cream",
+    "rinse": "Rinse"
+  },
+  "durationUnit": {
+    "days": "Days",
+    "weeks": "Weeks"
+  },
+  "category": {
+    "antibiotic": "Antibiotics",
+    "analgesic": "Pain relief",
+    "topical": "Topical / rinses",
+    "other": "Other"
+  },
+  "editor": {
+    "title": "Write a prescription",
+    "doctorLabel": "Doctor",
+    "doctorPlaceholder": "Choose a doctor",
+    "medicinesTitle": "Medicines",
+    "addMedicine": "Add medicine",
+    "noMedicines": "No medicines yet. Press \"Add medicine\".",
+    "nameLabel": "Medicine name",
+    "namePlaceholder": "Pick or type a medicine",
+    "searchPlaceholder": "Search medicines…",
+    "notInCatalog": "Not in the catalog",
+    "addCustom": "Add \"{{name}}\"",
+    "doseLabel": "Dose",
+    "formLabel": "Form",
+    "frequencyLabel": "Intake",
+    "mealLabel": "Food",
+    "minutesLabel": "Minutes",
+    "durationLabel": "Duration",
+    "unitLabel": "Unit",
+    "removeMedicine": "Remove medicine",
+    "removeNamedMedicine": "Remove {{name}}",
+    "incomplete": "Every medicine needs a whole-number dose and duration.",
+    "notesLabel": "Note",
+    "save": "Save prescription",
+    "saved": "Prescription saved",
+    "saveFailed": "Couldn't save the prescription. Please try again.",
+    "patientLabel": "Patient",
+    "notesPlaceholder": "Extra instructions for the patient…"
+  }
+}

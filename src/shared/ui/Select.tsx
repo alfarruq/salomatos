@@ -23,6 +23,8 @@ export interface SelectProps {
   disabled?: boolean
   name?: string
   id?: string
+  /** Names the trigger where no visible `Field` label fits, e.g. a table cell. */
+  'aria-label'?: string
   className?: string
 }
 
@@ -63,20 +65,37 @@ export function Select({
   disabled,
   name,
   id,
+  'aria-label': ariaLabel,
   className,
 }: SelectProps) {
   const field = useFieldControl()
+
+  /*
+   * Whenever a `<form>` ancestor is present — always, here — Radix renders a
+   * hidden native <select> for plain HTML form submission. That native
+   * element only gets its <option>s once each item has actually mounted,
+   * which for a closed select never happened yet; assigning it a value with
+   * no matching option makes the browser reset it to "", and Radix bubbles
+   * that reset back through `onValueChange('')`. No option in this app is
+   * ever legitimately `''` — that always means "nothing chosen" — so this is
+   * safe to treat as the native-select artefact it is, not a real change.
+   */
+  const handleValueChange = (next: string) => {
+    if (next === '') return
+    onValueChange?.(next)
+  }
 
   return (
     <SelectPrimitive.Root
       {...(value === undefined ? {} : { value })}
       {...(defaultValue === undefined ? {} : { defaultValue })}
-      {...(onValueChange === undefined ? {} : { onValueChange })}
+      {...(onValueChange === undefined ? {} : { onValueChange: handleValueChange })}
       {...(name === undefined ? {} : { name })}
       disabled={disabled ?? false}
     >
       <SelectPrimitive.Trigger
         id={id ?? field?.controlId}
+        aria-label={ariaLabel}
         aria-describedby={field?.describedBy}
         aria-invalid={field?.isInvalid ?? undefined}
         className={cn(
@@ -93,7 +112,9 @@ export function Select({
           className,
         )}
       >
-        <SelectPrimitive.Value placeholder={placeholder} />
+        <SelectPrimitive.Value placeholder={placeholder}>
+          {options.find((option) => option.value === value)?.label}
+        </SelectPrimitive.Value>
         <SelectPrimitive.Icon>
           <ChevronDown aria-hidden="true" className="size-4 shrink-0 text-text-secondary" />
         </SelectPrimitive.Icon>

@@ -9,6 +9,8 @@ export interface ErrorStateProps {
    */
   title: string
   description?: string
+  /** See EmptyState — the title is a heading, and this picks its level. */
+  headingLevel?: 1 | 2 | 3
   /** Label for the retry button. Omit `onRetry` when nothing can be retried. */
   retryLabel?: string
   onRetry?: () => void
@@ -23,11 +25,14 @@ export interface ErrorStateProps {
 export function ErrorState({
   title,
   description,
+  headingLevel = 2,
   retryLabel,
   onRetry,
   requestId,
   className,
 }: ErrorStateProps) {
+  const Heading = `h${headingLevel}` as const
+
   return (
     <div
       role="alert"
@@ -39,7 +44,7 @@ export function ErrorState({
       <AlertTriangle aria-hidden="true" className="size-6 text-danger" />
 
       <div className="flex max-w-sm flex-col gap-2">
-        <p className="text-title2 text-text">{title}</p>
+        <Heading className="text-title2 text-text">{title}</Heading>
         {description ? <p className="text-callout text-text-secondary">{description}</p> : null}
       </div>
 
