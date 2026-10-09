@@ -10,7 +10,7 @@
     "doctor": "Shifokor",
     "doctorPlaceholder": "Shifokorni tanlang",
     "birthDate": "Tug'ilgan sana",
-    "birthDatePlaceholder": "Sanani tanlang",
+    "birthDatePlaceholder": "kk.oo.yyyy",
     "previousMonth": "Oldingi oy",
     "nextMonth": "Keyingi oy",
     "address": "Manzil",

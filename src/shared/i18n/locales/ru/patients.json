@@ -10,7 +10,7 @@
     "doctor": "Врач",
     "doctorPlaceholder": "Выберите врача",
     "birthDate": "Дата рождения",
-    "birthDatePlaceholder": "Выберите дату",
+    "birthDatePlaceholder": "дд.мм.гггг",
     "previousMonth": "Предыдущий месяц",
     "nextMonth": "Следующий месяц",
     "address": "Адрес",
