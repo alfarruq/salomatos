@@ -1,5 +1,6 @@
 import { HttpResponse, http } from 'msw'
 import { PAGE_SIZE } from '@/shared/api/pagination'
+import { clinicNow } from '@/shared/lib/datetime'
 import { readJwtPayload } from '@/shared/lib/jwt'
 import {
   accessTokenFor,
@@ -541,7 +542,9 @@ export const handlers = [
   http.get('/api/v1/calendars/appointments/', ({ request }) => {
     if (authenticate(request) === null) return unauthorized()
 
-    const date = new URL(request.url).searchParams.get('date')
+    const raw = new URL(request.url).searchParams.get('date')
+    // `day` is the server's own "today", confirmed live.
+    const date = raw === 'day' ? clinicNow().date : raw
     const matched =
       date === 'week' || date === null
         ? MOCK_APPOINTMENTS

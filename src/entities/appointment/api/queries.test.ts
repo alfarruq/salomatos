@@ -3,6 +3,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import { accessTokenFor } from '@/shared/api/mocks/fixtures'
 import { server } from '@/shared/api/mocks/server'
 import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
+import { clinicNow } from '@/shared/lib/datetime'
 import { fetchAppointments } from './queries'
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
@@ -87,6 +88,49 @@ describe('fetchAppointments', () => {
     const appointments = await fetchAppointments({ view: 'day', date: '2026-09-27' })
 
     expect(appointments).toHaveLength(1)
+  })
+
+  it('follows `next` so a day with more than one page loses no appointment', async () => {
+    const row = (id: number) => ({
+      id,
+      patient: 'Test',
+      doctor: null,
+      date: '2026-09-27',
+      time: '10:00',
+      status: 'in_progress',
+    })
+    server.use(
+      http.get('/api/v1/calendars/appointments/', ({ request }) => {
+        const page = new URL(request.url).searchParams.get('page')
+        return HttpResponse.json(
+          page === '2'
+            ? { count: 2, next: null, previous: null, results: [row(2)] }
+            : {
+                count: 2,
+                next: 'https://salomatos.uz/api/v1/calendars/appointments/?date=day&page=2',
+                previous: null,
+                results: [row(1)],
+              },
+        )
+      }),
+    )
+
+    const appointments = await fetchAppointments({ view: 'day', date: '2026-09-27' })
+
+    expect(appointments.map((appointment) => appointment.id)).toEqual([1, 2])
+  })
+
+  it("asks for today with the server's `day` shortcut — a real date is ignored there", async () => {
+    let requested: string | null = null
+    server.events.on('request:start', ({ request }) => {
+      if (request.url.includes('/calendars/appointments/')) {
+        requested = new URL(request.url).searchParams.get('date')
+      }
+    })
+
+    await fetchAppointments({ view: 'day', date: clinicNow().date })
+
+    expect(requested).toBe('day')
   })
 
   it('falls back to `in_progress` for a status it does not recognise, rather than throwing', async () => {

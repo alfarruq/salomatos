@@ -1,7 +1,9 @@
 import { queryOptions } from '@tanstack/react-query'
 import * as v from 'valibot'
 import { httpClient } from '@/shared/api/httpClient'
+import { pathFromNext } from '@/shared/api/pagination'
 import { cachePolicy } from '@/shared/config/cache'
+import { clinicNow } from '@/shared/lib/datetime'
 import { appointmentListSchema, toAppointment } from '../model/schema'
 import type { Appointment, AppointmentFilters } from '../model/types'
 
@@ -13,46 +15,57 @@ export const appointmentKeys = {
 }
 
 /**
- * ⚠️ Day/week are still a guess for anything but today: the endpoint was
- * shown as `?date=day` / `?date=week`, with no example of viewing a day
- * other than today. Day navigation needs an actual date, so this sends one
- * (`?date=2026-09-28`) instead of the literal word. Week navigation was
- * asked to wait for backend confirmation, so it still sends the literal
- * `week` shortcut unconditionally. `all` is confirmed, not guessed: no
- * `date` parameter at all.
+ * Confirmed live on 2026-10-09: `?date=day` is the only form that filters to
+ * today. ⚠️ A real date (`?date=2026-10-09`) is **ignored** — the server
+ * answers with every appointment, exactly as with no parameter — so today
+ * goes out as the `day` shortcut, and any other day still sends its date and
+ * gets the unfiltered list until the backend supports one. "Today" is then
+ * the server's own day, in its time zone, not Tashkent's. Week navigation
+ * still sends the literal `week` shortcut; `all` sends no `date` at all.
  */
 function toQueryString(filters: AppointmentFilters): string {
   if (filters.view === 'all') return ''
-  return `?date=${filters.view === 'week' ? 'week' : filters.date}`
+  if (filters.view === 'week') return '?date=week'
+  return `?date=${filters.date === clinicNow().date ? 'day' : filters.date}`
 }
 
 /**
- * Reads either a plain array or a paginated envelope — unconfirmed which this
- * endpoint sends, and `entities/treatment-type` already learned the cost of
- * guessing wrong here: assuming "plain array" silently dropped every row past
- * the first page in production.
+ * One response's rows and where the next page is. The live endpoint sends
+ * DRF's page envelope (`count`/`next`, ten per page — confirmed 2026-10-09);
+ * a plain array is still read, as one complete page.
  */
-function rowsOf(raw: unknown): unknown[] {
-  if (Array.isArray(raw)) return raw
+function pageOf(raw: unknown): { rows: unknown[]; next: string | null } {
+  if (Array.isArray(raw)) return { rows: raw, next: null }
   if (
     typeof raw === 'object' &&
     raw !== null &&
     Array.isArray((raw as { results?: unknown }).results)
   ) {
-    return (raw as { results: unknown[] }).results
+    const { results, next } = raw as { results: unknown[]; next?: unknown }
+    return { rows: results, next: typeof next === 'string' ? next : null }
   }
-  return raw as unknown[]
+  return { rows: raw as unknown[], next: null }
 }
 
+/**
+ * Follows every page: reading only the first silently dropped the eleventh
+ * appointment of a day, and today's counts are computed from this list.
+ */
 export async function fetchAppointments(
   filters: AppointmentFilters,
   signal?: AbortSignal,
 ): Promise<Appointment[]> {
-  const raw = await httpClient<unknown>(
-    `v1/calendars/appointments/${toQueryString(filters)}`,
-    signal === undefined ? {} : { signal },
-  )
-  return v.parse(appointmentListSchema, rowsOf(raw)).map(toAppointment)
+  const rows: unknown[] = []
+  let path: string | null = `v1/calendars/appointments/${toQueryString(filters)}`
+
+  while (path !== null) {
+    const raw: unknown = await httpClient<unknown>(path, signal === undefined ? {} : { signal })
+    const page = pageOf(raw)
+    rows.push(...page.rows)
+    path = page.next === null ? null : pathFromNext(page.next)
+  }
+
+  return v.parse(appointmentListSchema, rows).map(toAppointment)
 }
 
 export const appointmentQueries = {
