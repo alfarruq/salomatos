@@ -14,7 +14,7 @@
     "doctor": "Врач",
     "doctorPlaceholder": "Не назначен",
     "date": "Дата",
-    "datePlaceholder": "Выберите дату",
+    "datePlaceholder": "дд.мм.гггг",
     "previousMonth": "Предыдущий месяц",
     "nextMonth": "Следующий месяц",
     "time": "Время",

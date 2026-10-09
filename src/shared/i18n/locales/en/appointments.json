@@ -14,7 +14,7 @@
     "doctor": "Doctor",
     "doctorPlaceholder": "Not assigned",
     "date": "Date",
-    "datePlaceholder": "Select a date",
+    "datePlaceholder": "dd.mm.yyyy",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
     "time": "Time",

@@ -10,7 +10,7 @@
     "doctor": "Doctor",
     "doctorPlaceholder": "Select a doctor",
     "birthDate": "Date of birth",
-    "birthDatePlaceholder": "Select a date",
+    "birthDatePlaceholder": "dd.mm.yyyy",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
     "address": "Address",
