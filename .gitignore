@@ -43,3 +43,6 @@ pnpm-debug.log*
 
 # Claude Code local overrides (shared settings.json IS committed)
 .claude/settings.local.json
+
+# Vite dependency pre-bundling cache — regenerated on every dev start.
+.vite/

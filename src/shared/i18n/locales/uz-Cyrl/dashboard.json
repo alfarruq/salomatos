@@ -1,0 +1,32 @@
+{
+  "counters": {
+    "total": "Жами қабуллар",
+    "completed": "Тугалланган",
+    "remaining": "Қолган"
+  },
+  "queue": {
+    "title": "Бугунги навбат",
+    "time": "Вақт",
+    "patient": "Бемор",
+    "doctor": "Шифокор",
+    "status": "Ҳолат",
+    "next": "Навбатдаги",
+    "empty": "Бугун қабул йўқ",
+    "emptyDescription": "Бугунги кунга ҳали ҳеч ким ёзилмаган.",
+    "addAppointment": "Қабул қўшиш"
+  },
+  "filter": {
+    "doctorLabel": "Шифокор бўйича фильтр",
+    "doctorAll": "Барча шифокорлар"
+  },
+  "actions": {
+    "newAppointment": "Янги қабул",
+    "newPatient": "Янги бемор"
+  },
+  "search": {
+    "results": "Топилган беморлар",
+    "searching": "Қидирилмоқда…",
+    "noResults": "Бемор топилмади",
+    "failed": "Қидириб бўлмади. Қайтадан уриниб кўринг."
+  }
+}

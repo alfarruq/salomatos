@@ -78,3 +78,21 @@ export function clinicDayOf(utcIso: string, timeZone: string = CLINIC_TZ): strin
     timeZone,
   }).format(parseInstant(utcIso))
 }
+
+/**
+ * The clinic's wall clock right now: its calendar day (`yyyy-MM-dd`) and time
+ * (`HH:mm`). The browser's own clock and zone are both the wrong answer for
+ * "what is next today" on a laptop that travelled or was set by hand.
+ */
+export function clinicNow(
+  now: Date = new Date(),
+  timeZone: string = CLINIC_TZ,
+): { date: string; time: string } {
+  const time = new Intl.DateTimeFormat('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    timeZone,
+  }).format(now)
+  return { date: clinicDayOf(now.toISOString(), timeZone), time }
+}

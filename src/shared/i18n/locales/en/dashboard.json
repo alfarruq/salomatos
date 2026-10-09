@@ -1,0 +1,32 @@
+{
+  "counters": {
+    "total": "Appointments",
+    "completed": "Completed",
+    "remaining": "Remaining"
+  },
+  "queue": {
+    "title": "Today's queue",
+    "time": "Time",
+    "patient": "Patient",
+    "doctor": "Doctor",
+    "status": "Status",
+    "next": "Next",
+    "empty": "No appointments today",
+    "emptyDescription": "Nobody is booked for today yet.",
+    "addAppointment": "Add appointment"
+  },
+  "filter": {
+    "doctorLabel": "Filter by doctor",
+    "doctorAll": "All doctors"
+  },
+  "actions": {
+    "newAppointment": "New appointment",
+    "newPatient": "New patient"
+  },
+  "search": {
+    "results": "Matching patients",
+    "searching": "Searching…",
+    "noResults": "No patient found",
+    "failed": "Search failed. Please try again."
+  }
+}

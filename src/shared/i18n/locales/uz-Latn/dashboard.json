@@ -1,0 +1,32 @@
+{
+  "counters": {
+    "total": "Jami qabullar",
+    "completed": "Tugallangan",
+    "remaining": "Qolgan"
+  },
+  "queue": {
+    "title": "Bugungi navbat",
+    "time": "Vaqt",
+    "patient": "Bemor",
+    "doctor": "Shifokor",
+    "status": "Holat",
+    "next": "Navbatdagi",
+    "empty": "Bugun qabul yo'q",
+    "emptyDescription": "Bugungi kunga hali hech kim yozilmagan.",
+    "addAppointment": "Qabul qo'shish"
+  },
+  "filter": {
+    "doctorLabel": "Shifokor bo'yicha filtr",
+    "doctorAll": "Barcha shifokorlar"
+  },
+  "actions": {
+    "newAppointment": "Yangi qabul",
+    "newPatient": "Yangi bemor"
+  },
+  "search": {
+    "results": "Topilgan bemorlar",
+    "searching": "Qidirilmoqda…",
+    "noResults": "Bemor topilmadi",
+    "failed": "Qidirib bo'lmadi. Qaytadan urinib ko'ring."
+  }
+}

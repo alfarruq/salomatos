@@ -1,45 +1,64 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import * as v from 'valibot'
 import { useSession } from '@/entities/session'
-import { Card } from '@/shared/ui'
+import { DashboardToday } from '@/widgets/dashboard-today'
+
+/** An id only (§3): a doctor's id is not PHI, a name would be needless. */
+const dashboardSearchSchema = v.object({
+  doctor: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
+})
+
+type DashboardSearch = v.InferOutput<typeof dashboardSearchSchema>
 
 export const Route = createFileRoute('/_auth/dashboard')({
+  // A hand-edited URL falls back to "all doctors" rather than an error page.
+  validateSearch: (search): DashboardSearch => {
+    const result = v.safeParse(dashboardSearchSchema, search)
+    return result.success ? result.output : {}
+  },
   component: DashboardPage,
 })
 
 /**
- * A placeholder until the real modules land in phases 6 and 7. It exists now so
- * the authenticated shell and the guard can be used and tested end to end.
+ * "Today" — the staff's starting screen, not a report.
  *
- * The clinic switcher that used to sit here is gone: `User.clinic` is a single
- * foreign key on this backend and `/api/me/` returns no clinic list, so there
- * is nothing to switch between (see ADR-003, revised).
+ * A doctor sees only their own queue. That match is reliable here, not
+ * guessed: a doctor is a `User` row, the session's `userId` is that row's id
+ * (the token's `user_id`), and an appointment's `doctor_id` was confirmed live
+ * to hold exactly the ids `/clinic/doctors/` lists. ⚠️ It is UX, not access
+ * control — whether the server itself narrows a doctor's list is unknown.
  */
 function DashboardPage() {
-  const { t } = useTranslation(['common', 'auth'])
+  const { t } = useTranslation('common')
+  const { clinicId } = Route.useRouteContext()
+  const search = Route.useSearch()
+  const navigate = useNavigate()
   const session = useSession()
 
   if (session === undefined) return null
 
+  const isDoctor = session.role === 'doctor'
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-title1 text-text">{t('common:nav.dashboard')}</h1>
-        <p className="text-callout text-text-secondary">
-          {session.fullName} · {session.role}
-        </p>
-      </div>
+      <h1 className="text-title1 text-text">{t('nav.dashboard')}</h1>
 
-      <Card className="flex flex-col gap-3 p-6">
-        <h2 className="text-title2 text-text">{t('auth:clinic.permissions')}</h2>
-        <ul className="flex flex-wrap gap-2">
-          {[...session.permissions].map((permission) => (
-            <li className="text-caption text-text-secondary" key={permission}>
-              {permission}
-            </li>
-          ))}
-        </ul>
-      </Card>
+      {isDoctor ? (
+        <DashboardToday clinicId={clinicId} doctorId={session.userId} />
+      ) : (
+        <DashboardToday
+          clinicId={clinicId}
+          doctorFilter={{
+            onChange: (doctor) =>
+              void navigate({
+                search: (): DashboardSearch => (doctor === null ? {} : { doctor }),
+                to: '/dashboard',
+              }),
+          }}
+          doctorId={search.doctor ?? null}
+        />
+      )}
     </div>
   )
 }
