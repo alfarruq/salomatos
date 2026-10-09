@@ -10,3 +10,20 @@ allowBuilds:
   # Native binding for eslint-import-resolver-typescript, which lets the
   # boundaries plugin follow the `@/` alias (§3.3).
   unrs-resolver: true
+
+# Security floors for transitive packages whose parents have not shipped the
+# fix yet (`pnpm audit`, 2026-10-09). Each pins only the patched minimum inside
+# the same major; drop an entry once its parent depends on the fixed version.
+overrides:
+  # via @hookform/resolvers > ajv
+  fast-uri@<3.1.7: ^3.1.7
+  # via eslint-plugin-boundaries (lint only)
+  handlebars@<4.7.10: ^4.7.10
+
+auditConfig:
+  ignoreGhsas:
+    # braces <=3.0.3, stack exhaustion on deeply nested patterns. No fixed
+    # version is published yet (3.0.3 is the latest), so there is nothing to
+    # upgrade to. Reached only through eslint-plugin-boundaries at lint time,
+    # never shipped to the browser. Remove once braces 3.0.4 is released.
+    - GHSA-vfj7-8cjw-p6xm
