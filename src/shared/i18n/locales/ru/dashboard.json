@@ -1,0 +1,32 @@
+{
+  "counters": {
+    "total": "Всего приёмов",
+    "completed": "Завершено",
+    "remaining": "Осталось"
+  },
+  "queue": {
+    "title": "Очередь на сегодня",
+    "time": "Время",
+    "patient": "Пациент",
+    "doctor": "Врач",
+    "status": "Статус",
+    "next": "Следующий",
+    "empty": "Сегодня приёмов нет",
+    "emptyDescription": "На сегодня ещё никто не записан.",
+    "addAppointment": "Добавить приём"
+  },
+  "filter": {
+    "doctorLabel": "Фильтр по врачу",
+    "doctorAll": "Все врачи"
+  },
+  "actions": {
+    "newAppointment": "Новый приём",
+    "newPatient": "Новый пациент"
+  },
+  "search": {
+    "results": "Найденные пациенты",
+    "searching": "Поиск…",
+    "noResults": "Пациент не найден",
+    "failed": "Не удалось выполнить поиск. Попробуйте ещё раз."
+  }
+}
