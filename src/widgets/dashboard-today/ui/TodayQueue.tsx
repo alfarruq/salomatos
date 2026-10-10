@@ -25,7 +25,10 @@ export function TodayQueue({ queue, nextId }: TodayQueueProps) {
     <div className="flex flex-col">
       <div
         aria-hidden="true"
-        className={cn(rowGrid, 'border-b border-border px-3 pb-2 text-caption text-text-tertiary')}
+        className={cn(
+          rowGrid,
+          'border-b border-border px-3 pb-2 text-caption text-text-tertiary max-sm:hidden',
+        )}
       >
         <span>{t('queue.time')}</span>
         <span>{t('queue.patient')}</span>
@@ -50,7 +53,9 @@ function QueueRow({ appointment, isNext }: { appointment: Appointment; isNext: b
 
   const content: ReactNode = (
     <>
-      <span className="text-callout font-medium text-text tabular-nums">{appointment.time}</span>
+      <span className="text-callout font-medium text-text tabular-nums max-sm:text-body max-sm:font-semibold">
+        {appointment.time}
+      </span>
       <span className="flex min-w-0 flex-col">
         <span className="truncate text-callout text-text">{appointment.fullName}</span>
         <span className="truncate text-caption text-text-secondary sm:hidden">{doctor}</span>
@@ -68,7 +73,7 @@ function QueueRow({ appointment, isNext }: { appointment: Appointment; isNext: b
 
   const className = cn(
     rowGrid,
-    'min-h-11 rounded-control border-l-4 border-transparent px-3 py-2',
+    'min-h-11 rounded-control border-l-4 border-transparent px-3 py-2 max-sm:min-h-16',
     isNext && 'border-accent bg-accent-soft',
   )
 

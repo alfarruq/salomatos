@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { useState } from 'react'
+import { SlidersHorizontal, UserPlus } from 'lucide-react'
+import { type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { doctorQueries } from '@/entities/doctor'
 import type { PatientFilters, PatientId, PatientListItem, PatientStatus } from '@/entities/patient'
@@ -17,6 +18,7 @@ import { formatSom } from '@/shared/lib/money'
 import { PHONE_QUERY, useMediaQuery } from '@/shared/lib/useMediaQuery'
 import {
   Button,
+  Dialog,
   EmptyState,
   ErrorState,
   formatSubscriber,
@@ -71,6 +73,7 @@ export function PatientTable({
   const [isCreateOpen, setCreateOpen] = useState(false)
   const [editing, setEditing] = useState<PatientListItem | null>(null)
   const [deleting, setDeleting] = useState<PatientListItem | null>(null)
+  const [isFiltersOpen, setFiltersOpen] = useState(false)
 
   const search = usePatientSearch()
   const query = useQuery(
@@ -147,65 +150,154 @@ export function PatientTable({
 
   const columns = usePatientColumns({ onDelete: setDeleting, onEdit: setEditing })
   const isPhone = useMediaQuery(PHONE_QUERY)
+  const extraFilterCount =
+    (filters.treatmentTypeId === null ? 0 : 1) + (filters.doctor === '' ? 0 : 1)
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-          <div className="min-w-0 flex-1 basis-full sm:basis-auto">
-            <PatientSearchInput
-              onChange={handleSearchChange}
-              onClear={() => handleSearchChange('')}
-              value={search.term}
+      {isPhone ? (
+        <div className="flex flex-col gap-3">
+          <PatientSearchInput
+            onChange={handleSearchChange}
+            onClear={() => handleSearchChange('')}
+            value={search.term}
+          />
+          {/* Status is the filter used most, so it stays one tap away; the
+              rest wait behind "Filter" in a sheet rather than three selects
+              stacked above the list. */}
+          <div className="-mx-4 flex gap-2 overflow-x-auto px-4">
+            <FilterChip onClick={() => setFiltersOpen(true)}>
+              <SlidersHorizontal aria-hidden="true" className="size-4" />
+              {t('patients:filters.title')}
+              {extraFilterCount > 0 ? (
+                <span className="tabular-nums">· {extraFilterCount}</span>
+              ) : null}
+            </FilterChip>
+            {statusOptions.map((option) => (
+              <FilterChip
+                isActive={(filters.status ?? FILTER_ALL) === option.value}
+                key={option.value}
+                onClick={() => handleStatusChange(option.value)}
+              >
+                {option.label}
+              </FilterChip>
+            ))}
+          </div>
+          <Dialog
+            footer={
+              <Button className="w-full" onClick={() => setFiltersOpen(false)} variant="primary">
+                {t('patients:filters.apply')}
+              </Button>
+            }
+            onOpenChange={setFiltersOpen}
+            open={isFiltersOpen}
+            title={t('patients:filters.title')}
+          >
+            <div className="flex flex-col gap-4">
+              {/* Not shown — the select's own visible options already say what it
+              filters. Kept for assistive tech, which still needs a name for it. */}
+              <label className="sr-only" htmlFor="patient-treatment-type-filter">
+                {t('patients:filters.treatmentTypeLabel')}
+              </label>
+              <Select
+                className="w-full"
+                id="patient-treatment-type-filter"
+                onValueChange={handleTreatmentTypeChange}
+                options={treatmentTypeOptions}
+                size="sm"
+                value={
+                  filters.treatmentTypeId === null ? FILTER_ALL : String(filters.treatmentTypeId)
+                }
+              />
+
+              <label className="sr-only" htmlFor="patient-doctor-filter">
+                {t('patients:filters.doctorLabel')}
+              </label>
+              <Select
+                className="w-full"
+                id="patient-doctor-filter"
+                onValueChange={handleDoctorChange}
+                options={doctorOptions}
+                size="sm"
+                value={filters.doctor === '' ? FILTER_ALL : filters.doctor}
+              />
+            </div>
+          </Dialog>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+            <div className="min-w-0 flex-1 basis-full sm:basis-auto">
+              <PatientSearchInput
+                onChange={handleSearchChange}
+                onClear={() => handleSearchChange('')}
+                value={search.term}
+              />
+            </div>
+
+            <label className="sr-only" htmlFor="patient-status-filter">
+              {t('patients:filters.statusLabel')}
+            </label>
+            <Select
+              className="w-auto shrink-0"
+              id="patient-status-filter"
+              onValueChange={handleStatusChange}
+              options={statusOptions}
+              size="sm"
+              value={filters.status ?? FILTER_ALL}
+            />
+
+            {/* Not shown — the select's own visible options already say what it
+              filters. Kept for assistive tech, which still needs a name for it. */}
+            <label className="sr-only" htmlFor="patient-treatment-type-filter">
+              {t('patients:filters.treatmentTypeLabel')}
+            </label>
+            <Select
+              className="w-auto shrink-0"
+              id="patient-treatment-type-filter"
+              onValueChange={handleTreatmentTypeChange}
+              options={treatmentTypeOptions}
+              size="sm"
+              value={
+                filters.treatmentTypeId === null ? FILTER_ALL : String(filters.treatmentTypeId)
+              }
+            />
+
+            <label className="sr-only" htmlFor="patient-doctor-filter">
+              {t('patients:filters.doctorLabel')}
+            </label>
+            <Select
+              className="w-auto shrink-0"
+              id="patient-doctor-filter"
+              onValueChange={handleDoctorChange}
+              options={doctorOptions}
+              size="sm"
+              value={filters.doctor === '' ? FILTER_ALL : filters.doctor}
             />
           </div>
 
-          <label className="sr-only" htmlFor="patient-status-filter">
-            {t('patients:filters.statusLabel')}
-          </label>
-          <Select
-            className="w-auto shrink-0"
-            id="patient-status-filter"
-            onValueChange={handleStatusChange}
-            options={statusOptions}
-            size="sm"
-            value={filters.status ?? FILTER_ALL}
-          />
-
-          {/* Not shown — the select's own visible options already say what it
-              filters. Kept for assistive tech, which still needs a name for it. */}
-          <label className="sr-only" htmlFor="patient-treatment-type-filter">
-            {t('patients:filters.treatmentTypeLabel')}
-          </label>
-          <Select
-            className="w-auto shrink-0"
-            id="patient-treatment-type-filter"
-            onValueChange={handleTreatmentTypeChange}
-            options={treatmentTypeOptions}
-            size="sm"
-            value={filters.treatmentTypeId === null ? FILTER_ALL : String(filters.treatmentTypeId)}
-          />
-
-          <label className="sr-only" htmlFor="patient-doctor-filter">
-            {t('patients:filters.doctorLabel')}
-          </label>
-          <Select
-            className="w-auto shrink-0"
-            id="patient-doctor-filter"
-            onValueChange={handleDoctorChange}
-            options={doctorOptions}
-            size="sm"
-            value={filters.doctor === '' ? FILTER_ALL : filters.doctor}
-          />
+          {/* UX only — Django decides what may actually be created (§9.1). */}
+          <Can permission="patient:write">
+            <Button onClick={() => setCreateOpen(true)} size="sm" variant="primary">
+              {t('patients:create.submit')}
+            </Button>
+          </Can>
         </div>
+      )}
 
-        {/* UX only — Django decides what may actually be created (§9.1). */}
+      {isPhone ? (
         <Can permission="patient:write">
-          <Button onClick={() => setCreateOpen(true)} size="sm" variant="primary">
+          <Button
+            iconLeft={<UserPlus aria-hidden="true" className="size-4" />}
+            isFloatingOnPhone
+            onClick={() => setCreateOpen(true)}
+            size="sm"
+            variant="primary"
+          >
             {t('patients:create.submit')}
           </Button>
         </Can>
-      </div>
+      ) : null}
 
       <QueryBoundary
         empty={
@@ -432,5 +524,32 @@ function PatientCards({
         </li>
       ))}
     </ul>
+  )
+}
+
+function FilterChip({
+  isActive = false,
+  onClick,
+  children,
+}: {
+  isActive?: boolean
+  onClick: () => void
+  children: ReactNode
+}) {
+  return (
+    <button
+      aria-pressed={isActive}
+      className={cn(
+        'flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-callout font-medium',
+        'transition-colors duration-150 ease-out-apple',
+        isActive
+          ? 'border-transparent bg-text text-canvas'
+          : 'border-border-strong bg-surface text-text',
+      )}
+      onClick={onClick}
+      type="button"
+    >
+      {children}
+    </button>
   )
 }

@@ -43,7 +43,9 @@
     "all": "Ҳаммаси",
     "previousDay": "Олдинги кун",
     "nextDay": "Кейинги кун",
-    "currentWeek": "Жорий ҳафта"
+    "currentWeek": "Жорий ҳафта",
+    "previousWeek": "Олдинги ҳафта",
+    "nextWeek": "Кейинги ҳафта"
   },
   "column": {
     "date": "Сана",

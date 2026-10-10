@@ -46,7 +46,9 @@
     "statusAll": "All statuses",
     "doctorLabel": "Filter by doctor",
     "doctorPlaceholder": "Doctor",
-    "doctorAll": "All doctors"
+    "doctorAll": "All doctors",
+    "title": "Filters",
+    "apply": "Show results"
   },
   "title": "Patients",
   "column": {
@@ -108,6 +110,12 @@
     "galleryUploading": "Uploading...",
     "galleryUploadFailed": "Could not upload the photo. Please try again.",
     "prescriptionsEmpty": "No prescriptions yet",
-    "prescriptionsEmptyDescription": "Prescriptions written for this patient will appear here."
+    "prescriptionsEmptyDescription": "Prescriptions written for this patient will appear here.",
+    "quick": {
+      "call": "Call",
+      "appointment": "Appointment",
+      "treatment": "Treatment",
+      "prescription": "Prescription"
+    }
   }
 }

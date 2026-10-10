@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import * as v from 'valibot'
 import { useSession } from '@/entities/session'
+import { CLINIC_TZ } from '@/shared/lib/datetime'
 import { DashboardToday } from '@/widgets/dashboard-today'
 
 /** An id only (§3): a doctor's id is not PHI, a name would be needless. */
@@ -30,7 +31,7 @@ export const Route = createFileRoute('/_auth/dashboard')({
  * control — whether the server itself narrows a doctor's list is unknown.
  */
 function DashboardPage() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { clinicId } = Route.useRouteContext()
   const search = Route.useSearch()
   const navigate = useNavigate()
@@ -42,7 +43,18 @@ function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-title1 text-text">{t('nav.dashboard')}</h1>
+      <div className="flex flex-col gap-1">
+        {/* Which day "today" is, in the clinic's zone (§14), not the browser's. */}
+        <span className="text-callout text-text-tertiary first-letter:uppercase">
+          {new Intl.DateTimeFormat(i18n.language, {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            timeZone: CLINIC_TZ,
+          }).format(new Date())}
+        </span>
+        <h1 className="text-title1 text-text">{t('nav.dashboard')}</h1>
+      </div>
 
       {isDoctor ? (
         <DashboardToday clinicId={clinicId} doctorId={session.userId} />

@@ -32,6 +32,7 @@ import { RecipeEditor } from '@/features/recipe-editor'
 import { TreatmentComposer } from '@/features/treatment-composer'
 import { DeleteTreatmentDialog } from '@/features/treatment-delete'
 import { formatCalendarDate, todayCalendarDate } from '@/shared/lib/calendarDate'
+import { cn } from '@/shared/lib/cn'
 import { formatSom } from '@/shared/lib/money'
 import {
   Badge,
@@ -126,6 +127,7 @@ function PatientDetailPage() {
 
             <div className="flex flex-wrap gap-2">
               <Button
+                className="max-md:hidden"
                 iconLeft={<Stethoscope aria-hidden="true" className="size-4" />}
                 onClick={() => openComposer(null)}
                 size="sm"
@@ -134,6 +136,7 @@ function PatientDetailPage() {
                 {t('patients:detail.newTreatment')}
               </Button>
               <Button
+                className="max-md:hidden"
                 iconLeft={<Pill aria-hidden="true" className="size-4" />}
                 onClick={openRecipeEditor}
                 size="sm"
@@ -142,6 +145,7 @@ function PatientDetailPage() {
                 {t('patients:detail.writePrescription')}
               </Button>
               <Button
+                className="max-md:hidden"
                 iconLeft={<CalendarPlus aria-hidden="true" className="size-4" />}
                 onClick={() => setAppointmentOpen(true)}
                 size="sm"
@@ -172,7 +176,12 @@ function PatientDetailPage() {
           </div>
 
           <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
-            <PatientSidebar patient={patient} />
+            <PatientSidebar
+              onNewAppointment={() => setAppointmentOpen(true)}
+              onNewTreatment={() => openComposer(null)}
+              onWritePrescription={openRecipeEditor}
+              patient={patient}
+            />
             <PatientTabs
               onOpenComposer={openComposer}
               onOpenRecipeEditor={openRecipeEditor}
@@ -231,6 +240,31 @@ function PatientDetailPage() {
   )
 }
 
+const quickActionClassName = cn(
+  'flex min-h-16 flex-col items-center justify-center gap-1 rounded-control bg-accent-soft px-1',
+  'text-caption font-medium text-accent-text transition-colors duration-150 ease-out-apple',
+  'disabled:pointer-events-none disabled:opacity-40',
+)
+
+function QuickAction({
+  icon,
+  label,
+  onClick,
+  disabled = false,
+}: {
+  icon: ReactNode
+  label: string
+  onClick?: () => void
+  disabled?: boolean
+}) {
+  return (
+    <button className={quickActionClassName} disabled={disabled} onClick={onClick} type="button">
+      <span aria-hidden="true">{icon}</span>
+      {label}
+    </button>
+  )
+}
+
 function SidebarFact({ icon, value }: { icon: ReactNode; value: string | null }) {
   if (value === null) return null
   return (
@@ -243,7 +277,17 @@ function SidebarFact({ icon, value }: { icon: ReactNode; value: string | null })
   )
 }
 
-function PatientSidebar({ patient }: { patient: Patient }) {
+function PatientSidebar({
+  patient,
+  onNewAppointment,
+  onNewTreatment,
+  onWritePrescription,
+}: {
+  patient: Patient
+  onNewAppointment: () => void
+  onNewTreatment: () => void
+  onWritePrescription: () => void
+}) {
   const { t, i18n } = useTranslation(['patients', 'common'])
   const locale = i18n.language
   const currencyLabel = t('common:currency.som')
@@ -262,13 +306,45 @@ function PatientSidebar({ patient }: { patient: Patient }) {
   const progressPercent = Math.min(100, Math.max(0, Math.round(paidRatio * 100)))
 
   return (
-    <Card className="flex flex-col gap-4 p-6">
+    <Card className="flex flex-col gap-4 p-4 sm:p-6">
       <div className="flex flex-col items-center gap-3 text-center">
         <PatientAvatar imageUrl={patient.imageUrl} name={patient.fullName} size="lg" />
         <div className="flex flex-col items-center gap-1">
           <h1 className="text-title2 text-text">{patient.fullName}</h1>
           <PatientStatusBadge status={patient.status} />
         </div>
+      </div>
+
+      {/* Phone replacement for the header's button row, which would wrap into
+          three lines there. The header keeps edit/delete, used far less. */}
+      <div className="grid grid-cols-4 gap-2 md:hidden">
+        {patient.phoneNumber === null ? (
+          <QuickAction
+            disabled
+            icon={<Phone className="size-5" />}
+            label={t('patients:detail.quick.call')}
+          />
+        ) : (
+          <a className={quickActionClassName} href={`tel:${patient.phoneNumber}`}>
+            <Phone aria-hidden="true" className="size-5" />
+            {t('patients:detail.quick.call')}
+          </a>
+        )}
+        <QuickAction
+          icon={<CalendarPlus className="size-5" />}
+          label={t('patients:detail.quick.appointment')}
+          onClick={onNewAppointment}
+        />
+        <QuickAction
+          icon={<Stethoscope className="size-5" />}
+          label={t('patients:detail.quick.treatment')}
+          onClick={onNewTreatment}
+        />
+        <QuickAction
+          icon={<Pill className="size-5" />}
+          label={t('patients:detail.quick.prescription')}
+          onClick={onWritePrescription}
+        />
       </div>
 
       <div className="flex flex-col gap-2 border-t border-border pt-4">

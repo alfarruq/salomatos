@@ -8,6 +8,7 @@ import { Can } from '@/entities/session'
 import { clinicNow } from '@/shared/lib/datetime'
 import { Button, Card, EmptyState, ErrorState, QueryBoundary, Select, Skeleton } from '@/shared/ui'
 import { countToday, findNextAppointment, todaysQueue } from '../model/today'
+import { NextPatientCard } from './NextPatientCard'
 import { QuickActions } from './QuickActions'
 import { TodayCounters } from './TodayCounters'
 import { TodayQueue } from './TodayQueue'
@@ -74,7 +75,21 @@ export function DashboardToday({ clinicId, doctorId, doctorFilter }: DashboardTo
         }
         query={query}
       >
-        {(queue) => <TodayCounters counts={countToday(queue)} />}
+        {(queue) => {
+          const next = findNextAppointment(queue, now.time)
+          return (
+            <>
+              <TodayCounters counts={countToday(queue)} />
+              {/* Phone only: on a wide screen the highlighted queue row is
+                  already in view, so a second copy would only repeat it. */}
+              {next === null ? null : (
+                <div className="md:hidden">
+                  <NextPatientCard appointment={next} />
+                </div>
+              )}
+            </>
+          )
+        }}
       </QueryBoundary>
 
       <Card className="flex flex-col gap-3 p-4">

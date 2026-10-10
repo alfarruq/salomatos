@@ -46,7 +46,9 @@
     "statusAll": "Все статусы",
     "doctorLabel": "Фильтр по врачу",
     "doctorPlaceholder": "Врач",
-    "doctorAll": "Все врачи"
+    "doctorAll": "Все врачи",
+    "title": "Фильтры",
+    "apply": "Показать"
   },
   "title": "Пациенты",
   "column": {
@@ -110,6 +112,12 @@
     "galleryUploading": "Загрузка...",
     "galleryUploadFailed": "Не удалось загрузить фото. Попробуйте ещё раз.",
     "prescriptionsEmpty": "Пока нет рецептов",
-    "prescriptionsEmptyDescription": "Рецепты, выписанные этому пациенту, появятся здесь."
+    "prescriptionsEmptyDescription": "Рецепты, выписанные этому пациенту, появятся здесь.",
+    "quick": {
+      "call": "Позвонить",
+      "appointment": "Запись",
+      "treatment": "Лечение",
+      "prescription": "Рецепт"
+    }
   }
 }

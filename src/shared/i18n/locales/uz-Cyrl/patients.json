@@ -46,7 +46,9 @@
     "statusAll": "Барча ҳолатлар",
     "doctorLabel": "Шифокор бўйича филтр",
     "doctorPlaceholder": "Шифокор",
-    "doctorAll": "Барча шифокорлар"
+    "doctorAll": "Барча шифокорлар",
+    "title": "Филтр",
+    "apply": "Натижаларни кўрсатиш"
   },
   "title": "Беморлар",
   "column": {
@@ -108,6 +110,12 @@
     "galleryUploading": "Юкланмоқда...",
     "galleryUploadFailed": "Расмни юклаб бўлмади. Қайта уриниб кўринг.",
     "prescriptionsEmpty": "Ҳозирча рецепт йўқ",
-    "prescriptionsEmptyDescription": "Бу беморга ёзилган рецептлар шу ерда кўринади."
+    "prescriptionsEmptyDescription": "Бу беморга ёзилган рецептлар шу ерда кўринади.",
+    "quick": {
+      "call": "Қўнғироқ",
+      "appointment": "Қабул",
+      "treatment": "Муолажа",
+      "prescription": "Рецепт"
+    }
   }
 }

@@ -28,5 +28,9 @@
     "searching": "Searching…",
     "noResults": "No patient found",
     "failed": "Search failed. Please try again."
+  },
+  "next": {
+    "label": "Next patient",
+    "openCard": "Open card"
   }
 }
