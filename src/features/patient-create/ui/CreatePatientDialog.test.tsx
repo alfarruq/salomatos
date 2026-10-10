@@ -8,6 +8,8 @@ import { accessTokenFor } from '@/shared/api/mocks/fixtures'
 import { server } from '@/shared/api/mocks/server'
 import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
 import { createI18n } from '@/shared/i18n'
+import { formatFixedDate } from '@/shared/lib/calendarDate'
+import { clinicNow } from '@/shared/lib/datetime'
 import { CreatePatientDialog } from './CreatePatientDialog'
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
@@ -56,6 +58,12 @@ function renderDialog() {
 
 describe('CreatePatientDialog', () => {
   beforeEach(() => setAccessToken(accessTokenFor('clinic')))
+
+  it("opens with today's date as the birth date", async () => {
+    renderDialog()
+
+    expect(await screen.findByText(formatFixedDate(clinicNow().date))).toBeInTheDocument()
+  })
 
   it('creates a patient and closes', async () => {
     const { onCreated, onOpenChange } = renderDialog()

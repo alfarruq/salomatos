@@ -55,13 +55,13 @@ function AdminLayout() {
        * back button works and a link to one can be sent to somebody (§7.3).
        */}
       <nav aria-label={t('admin:title')}>
-        <ul className="flex flex-wrap gap-1 border-b border-border">
+        <ul className="flex gap-1 overflow-x-auto border-b border-border">
           {SECTIONS.map((section) => (
-            <li key={section.to}>
+            <li className="shrink-0" key={section.to}>
               <Link
                 activeProps={{ 'data-active': 'true' }}
                 className={cn(
-                  'block rounded-t-control px-4 py-2 text-body text-text-secondary',
+                  'block rounded-t-control px-4 py-2 text-body whitespace-nowrap text-text-secondary',
                   'border-b-2 border-transparent transition-colors duration-150 ease-out-apple',
                   'hover:text-text data-[active=true]:border-accent data-[active=true]:text-text',
                 )}

@@ -3,6 +3,7 @@ import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import {
   type CalendarDate,
+  formatFixedDate,
   isSameCalendarDay,
   parseCalendarDate,
   toCalendarDate,
@@ -136,9 +137,9 @@ export function DatePicker({
     }
   }
 
-  const triggerLabel = selected
-    ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(selected)
-    : placeholder
+  // `dd.MM.yyyy` — the same day.month.year shape the placeholder shows, so
+  // an empty field and a filled one read alike.
+  const triggerLabel = selected && value !== undefined ? formatFixedDate(value) : placeholder
 
   return (
     <Popover

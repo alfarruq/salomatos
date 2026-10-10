@@ -24,6 +24,9 @@ const EMPTY = '—'
  * rows — matches the reference layout the person asked to copy. Client-side
  * grouping by `appointment.date`: whatever the week endpoint sends, only rows
  * that actually land in this Monday–Sunday range get a column to sit in.
+ *
+ * Below `md` the columns become stacked rows: seven columns on a phone leave
+ * each card about forty pixels wide.
  */
 export function AppointmentWeekBoard({
   appointments,
@@ -35,7 +38,7 @@ export function AppointmentWeekBoard({
   const dates = weekDatesOf(referenceDate)
 
   return (
-    <div className="grid grid-cols-7 gap-3">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-7 md:gap-3">
       {dates.map((date, index) => {
         const dayNumber = Number(date.slice(-2))
         const dayAppointments = appointments
@@ -44,7 +47,7 @@ export function AppointmentWeekBoard({
 
         return (
           <div className="flex flex-col gap-2" key={date}>
-            <div className="flex flex-col items-center gap-1 pb-1">
+            <div className="flex items-center gap-2 pb-1 md:flex-col md:gap-1">
               <span className="text-caption text-text-secondary">
                 {t(`appointments:weekday.${WEEKDAY_KEYS[index]}`)}
               </span>
@@ -111,7 +114,7 @@ export function AppointmentWeekBoard({
 /** Matches `AppointmentWeekBoard`'s column layout, not a generic table skeleton. */
 export function AppointmentWeekBoardSkeleton() {
   return (
-    <div className="grid grid-cols-7 gap-3">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-7 md:gap-3">
       {Array.from({ length: 7 }, (_, index) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: placeholders have no identity and never reorder
         <div className="flex flex-col gap-2" key={`weekday-skeleton-${index}`}>

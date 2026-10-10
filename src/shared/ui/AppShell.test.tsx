@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { AppShell } from './AppShell'
@@ -46,5 +46,15 @@ describe('AppShell', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Menyuni ochish' }))
 
     expect(screen.getByRole('dialog', { name: 'Asosiy menyu' })).toBeInTheDocument()
+  })
+
+  it('closes the navigation sheet once a link in it is followed', async () => {
+    render(shell())
+
+    await userEvent.click(screen.getByRole('button', { name: 'Menyuni ochish' }))
+    const sheet = screen.getByRole('dialog', { name: 'Asosiy menyu' })
+    await userEvent.click(within(sheet).getByRole('link', { name: 'Bemorlar' }))
+
+    expect(screen.queryByRole('dialog', { name: 'Asosiy menyu' })).not.toBeInTheDocument()
   })
 })

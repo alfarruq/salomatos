@@ -68,7 +68,7 @@ export function AppointmentCalendar({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <fieldset
             aria-label={t('appointments:view.label')}
             className="m-0 flex gap-1 border-0 p-0"

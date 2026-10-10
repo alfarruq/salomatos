@@ -101,7 +101,22 @@ export function AppShell({
       </div>
 
       <Sheet onOpenChange={setIsNavOpen} open={isNavOpen} title={labels.navigation}>
-        {sidebar}
+        {/*
+         * Client-side navigation keeps this component mounted, so the sheet
+         * would stay open over the page the user just asked for. Delegated so
+         * the sidebar can stay plain links that know nothing about the sheet.
+         */}
+        {/* biome-ignore lint/a11y/noStaticElementInteractions: the links inside are the interactive elements; this only observes their clicks. */}
+        {/* biome-ignore lint/a11y/useKeyWithClickEvents: Enter on a link fires click, so keyboard users are covered. */}
+        <div
+          onClick={(event) => {
+            if (event.target instanceof Element && event.target.closest('a') !== null) {
+              setIsNavOpen(false)
+            }
+          }}
+        >
+          {sidebar}
+        </div>
       </Sheet>
     </div>
   )

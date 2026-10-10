@@ -111,7 +111,9 @@ export function TableCell({ align = 'left', isNumeric, className, ...props }: Ta
     <td
       className={cn(
         densityPadding[density],
-        'text-callout text-text',
+        // On a phone, cells keep one line and the table scrolls inside its own
+        // container (above): wrapping squeezed a phone number onto four lines.
+        'text-callout text-text max-md:whitespace-nowrap',
         align === 'right' && 'text-right',
         align === 'center' && 'text-center',
         isNumeric === true && 'font-mono tabular-nums',

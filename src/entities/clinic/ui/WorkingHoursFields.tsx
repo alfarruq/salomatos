@@ -43,10 +43,10 @@ export function WorkingHoursFields({ form, isDisabled = false }: WorkingHoursFie
             />
 
             {form.watch(`hours.${day}.isOpen`) ? (
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 <input
                   aria-label={t('admin:clinic.opensAt', { day: t(`common:weekday.${day}`) })}
-                  className="rounded-control border border-border bg-surface px-2 py-1 text-body text-text"
+                  className="min-w-0 rounded-control border border-border bg-surface px-2 py-1 text-body text-text"
                   disabled={isDisabled}
                   type="time"
                   {...form.register(`hours.${day}.open`)}
@@ -54,7 +54,7 @@ export function WorkingHoursFields({ form, isDisabled = false }: WorkingHoursFie
                 <span className="text-text-tertiary">–</span>
                 <input
                   aria-label={t('admin:clinic.closesAt', { day: t(`common:weekday.${day}`) })}
-                  className="rounded-control border border-border bg-surface px-2 py-1 text-body text-text"
+                  className="min-w-0 rounded-control border border-border bg-surface px-2 py-1 text-body text-text"
                   disabled={isDisabled}
                   type="time"
                   {...form.register(`hours.${day}.close`)}
