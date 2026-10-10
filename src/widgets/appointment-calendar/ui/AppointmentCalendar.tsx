@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -130,7 +130,13 @@ export function AppointmentCalendar({
           ) : null}
         </div>
 
-        <Button onClick={() => setCreateOpen(true)} size="sm" variant="primary">
+        <Button
+          iconLeft={<Plus aria-hidden="true" className="size-4" />}
+          isFloatingOnPhone
+          onClick={() => setCreateOpen(true)}
+          size="sm"
+          variant="primary"
+        >
           {t('appointments:create.submit')}
         </Button>
       </div>

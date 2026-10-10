@@ -57,4 +57,24 @@ describe('AppShell', () => {
 
     expect(screen.queryByRole('dialog', { name: 'Asosiy menyu' })).not.toBeInTheDocument()
   })
+
+  it('replaces the menu button with a tab bar whose last tab opens the full menu', async () => {
+    render(
+      <AppShell
+        brand={<span>SalomatOS</span>}
+        labels={{ ...labels, more: 'Yana' }}
+        sidebar={<a href="/p">Bemorlar</a>}
+        tabBar={<a href="/d">Bugun</a>}
+      >
+        <h1>Bemorlar</h1>
+      </AppShell>,
+    )
+
+    expect(screen.getByRole('button', { name: 'Menyuni ochish' })).toHaveClass('hidden')
+    expect(screen.getByRole('link', { name: 'Bugun' })).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Yana' }))
+
+    expect(screen.getByRole('dialog', { name: 'Asosiy menyu' })).toBeInTheDocument()
+  })
 })

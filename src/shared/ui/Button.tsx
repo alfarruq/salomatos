@@ -12,6 +12,12 @@ export interface ButtonProps extends Omit<ComponentPropsWithoutRef<'button'>, 'c
   /** Blocks interaction and announces the wait, keeping the label in place. */
   isLoading?: boolean
   iconLeft?: ReactNode
+  /**
+   * On a phone, pins the button to the bottom-right corner above the tab bar,
+   * where a thumb reaches it without scrolling. Use for a page's one primary
+   * action only.
+   */
+  isFloatingOnPhone?: boolean
   className?: string
 }
 
@@ -31,6 +37,11 @@ const variants: Record<ButtonVariant, string> = {
   danger: 'bg-danger-fill text-on-danger hover:bg-danger-hover',
 }
 
+const floatingOnPhone = [
+  'max-sm:fixed max-sm:right-4 max-sm:z-30 max-sm:bottom-[calc(80px+env(safe-area-inset-bottom))]',
+  'max-sm:h-14 max-sm:rounded-full max-sm:px-6 max-sm:text-body max-sm:shadow-popover',
+].join(' ')
+
 const sizes: Record<ButtonSize, string> = {
   /*
    * The dense variant is 32px tall so a staff member sees more rows at once,
@@ -46,6 +57,7 @@ export function Button({
   size = 'md',
   isLoading = false,
   iconLeft,
+  isFloatingOnPhone = false,
   disabled,
   children,
   className,
@@ -59,7 +71,13 @@ export function Button({
       type={type}
       disabled={disabled === true || isLoading}
       aria-busy={isLoading || undefined}
-      className={cn(base, variants[variant], sizes[size], className)}
+      className={cn(
+        base,
+        variants[variant],
+        sizes[size],
+        isFloatingOnPhone && floatingOnPhone,
+        className,
+      )}
       {...props}
     >
       {isLoading ? (

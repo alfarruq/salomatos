@@ -95,6 +95,27 @@ describe('PatientTable', () => {
     expect(screen.getAllByText('—').length).toBeGreaterThan(0)
   })
 
+  it('shows a card list instead of a table on a phone', async () => {
+    const original = window.matchMedia
+    window.matchMedia = vi.fn((query: string) => ({
+      ...original(query),
+      matches: query.includes('max-width'),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })) as unknown as typeof window.matchMedia
+
+    try {
+      const { onOpenPatient } = renderTable()
+
+      await userEvent.click(await screen.findByRole('button', { name: /Vali Aliyev/ }))
+
+      expect(screen.queryByRole('table')).not.toBeInTheDocument()
+      expect(onOpenPatient).toHaveBeenCalledWith(101)
+    } finally {
+      window.matchMedia = original
+    }
+  })
+
   it('opens a patient when the row is clicked', async () => {
     const { onOpenPatient } = renderTable()
 

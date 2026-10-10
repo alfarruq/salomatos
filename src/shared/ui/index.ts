@@ -1,5 +1,5 @@
 export { Alert, type AlertProps, type AlertTone } from './Alert'
-export { AppShell, type AppShellProps } from './AppShell'
+export { AppShell, type AppShellProps, tabBarItemClassName } from './AppShell'
 export { Avatar, type AvatarProps, type AvatarSize } from './Avatar'
 export { Badge, type BadgeProps, type BadgeTone } from './Badge'
 export { Breadcrumb, type BreadcrumbItem, type BreadcrumbProps } from './Breadcrumb'

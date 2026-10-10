@@ -75,6 +75,13 @@ export function Dialog({
             'max-h-[calc(100dvh-32px)] overflow-y-auto',
             'rounded-card border border-border bg-elevated p-6 shadow-popover',
             'data-[state=open]:animate-modal-in data-[state=closed]:animate-modal-out',
+            // On a phone it rises from the bottom edge instead, where the
+            // thumb already is, and spans the full width.
+            'max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:translate-x-0 max-sm:translate-y-0',
+            'max-sm:w-full max-sm:max-w-none max-sm:max-h-[calc(100dvh-48px)]',
+            'max-sm:rounded-t-sheet max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0',
+            'max-sm:pb-[calc(24px+env(safe-area-inset-bottom))]',
+            'max-sm:data-[state=open]:animate-sheet-up-in max-sm:data-[state=closed]:animate-sheet-up-out',
             className,
           )}
         >

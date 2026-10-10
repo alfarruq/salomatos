@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from '@tanstack/react-router'
-import { LogOut } from 'lucide-react'
+import { CalendarDays, House, LogOut, Users } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Can, sessionQueries, useSession } from '@/entities/session'
 import { useLogout } from '@/features/auth-logout'
@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  tabBarItemClassName,
 } from '@/shared/ui'
 
 /**
@@ -136,7 +137,40 @@ function AuthenticatedLayout() {
         skipToContent: t('nav.skipToContent'),
         openNavigation: t('nav.openNavigation'),
         navigation: t('nav.navigation'),
+        more: t('nav.more'),
       }}
+      tabBar={
+        <>
+          <Link
+            activeProps={{ 'data-active': 'true' }}
+            className={tabBarItemClassName}
+            to="/dashboard"
+          >
+            <House aria-hidden="true" className="size-6" />
+            {t('nav.dashboard')}
+          </Link>
+          <Can permission="patient:read">
+            <Link
+              activeProps={{ 'data-active': 'true' }}
+              className={tabBarItemClassName}
+              to="/patients"
+            >
+              <Users aria-hidden="true" className="size-6" />
+              {t('nav.patients')}
+            </Link>
+          </Can>
+          <Can permission="appointment:read">
+            <Link
+              activeProps={{ 'data-active': 'true' }}
+              className={tabBarItemClassName}
+              to="/appointments"
+            >
+              <CalendarDays aria-hidden="true" className="size-6" />
+              {t('nav.appointments')}
+            </Link>
+          </Can>
+        </>
+      }
       sidebar={
         <ul className="flex flex-col gap-1">
           <li>
