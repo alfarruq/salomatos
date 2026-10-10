@@ -11,7 +11,7 @@ const labels = {
 }
 
 async function open() {
-  await userEvent.click(screen.getByRole('button', { name: /Sanani tanlang|August|2026/ }))
+  await userEvent.click(screen.getByRole('button', { name: /Sanani tanlang|\d{2}\.\d{2}\.\d{4}/ }))
 }
 
 /*
@@ -27,11 +27,11 @@ describe('DatePicker', () => {
     expect(screen.getByRole('button', { name: 'Sanani tanlang' })).toBeInTheDocument()
   })
 
-  it('formats the chosen date for the locale instead of showing the wire format', () => {
+  it('shows the chosen date as day.month.year, like the placeholder, not the wire format', () => {
     render(<DatePicker {...labels} value="2026-08-21" />)
 
-    // Never "2026-08-21" — §12.4 puts every date through Intl.
-    expect(screen.getByRole('button', { name: '21 Aug 2026' })).toBeInTheDocument()
+    // Never "2026-08-21".
+    expect(screen.getByRole('button', { name: '21.08.2026' })).toBeInTheDocument()
   })
 
   it('emits the calendar date on selection', async () => {

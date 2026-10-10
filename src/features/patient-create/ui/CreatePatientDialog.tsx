@@ -1,5 +1,6 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { doctorQueries } from '@/entities/doctor'
@@ -11,6 +12,7 @@ import {
   patientFormSchema,
 } from '@/entities/patient'
 import { ApiError } from '@/shared/api/errors'
+import { clinicNow } from '@/shared/lib/datetime'
 import { Alert, Button, Dialog } from '@/shared/ui'
 import { useCreatePatient } from '../model/useCreatePatient'
 
@@ -35,6 +37,19 @@ export function CreatePatientDialog({
     mode: 'onBlur',
     defaultValues: emptyPatientForm,
   })
+
+  /*
+   * The birth date opens on today, by the clinic's own decision (2026-10-09).
+   * ⚠️ That means a skipped field saves today as the birth date rather than
+   * nothing. Set on every opening, not via `defaultValues` — those are read
+   * once and this dialog stays mounted — and only while the user has not
+   * picked a date themselves.
+   */
+  useEffect(() => {
+    if (open && !form.getFieldState('birthDate').isDirty) {
+      form.setValue('birthDate', clinicNow().date)
+    }
+  }, [open, form])
 
   const { mutate, isPending } = useCreatePatient(clinicId)
 

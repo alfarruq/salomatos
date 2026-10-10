@@ -1,6 +1,6 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
@@ -66,6 +66,19 @@ export function CreateAppointmentDialog({
     mode: 'onBlur',
     defaultValues: initialFormValues(defaultDate, initialPatient),
   })
+
+  /*
+   * `defaultValues` is read once, on mount, and this dialog stays mounted —
+   * so without this it reopened on whatever day it first saw: yesterday's
+   * date on a page left open overnight, or the first day viewed in the
+   * calendar. Each opening takes today (the caller's `defaultDate`) again,
+   * unless the user already picked a date themselves.
+   */
+  useEffect(() => {
+    if (open && !form.getFieldState('date').isDirty) {
+      form.setValue('date', defaultDate)
+    }
+  }, [open, defaultDate, form])
 
   const { mutate, isPending } = useCreateAppointment(clinicId)
 
