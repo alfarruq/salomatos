@@ -43,7 +43,9 @@
     "all": "Hammasi",
     "previousDay": "Oldingi kun",
     "nextDay": "Keyingi kun",
-    "currentWeek": "Joriy hafta"
+    "currentWeek": "Joriy hafta",
+    "previousWeek": "Oldingi hafta",
+    "nextWeek": "Keyingi hafta"
   },
   "column": {
     "date": "Sana",

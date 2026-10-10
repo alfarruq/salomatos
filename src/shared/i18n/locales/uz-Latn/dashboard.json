@@ -28,5 +28,9 @@
     "searching": "Qidirilmoqda…",
     "noResults": "Bemor topilmadi",
     "failed": "Qidirib bo'lmadi. Qaytadan urinib ko'ring."
+  },
+  "next": {
+    "label": "Keyingi bemor",
+    "openCard": "Kartasini ochish"
   }
 }

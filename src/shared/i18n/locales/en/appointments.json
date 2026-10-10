@@ -43,7 +43,9 @@
     "all": "All",
     "previousDay": "Previous day",
     "nextDay": "Next day",
-    "currentWeek": "This week"
+    "currentWeek": "This week",
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week"
   },
   "column": {
     "date": "Date",

@@ -43,7 +43,9 @@
     "all": "Все",
     "previousDay": "Предыдущий день",
     "nextDay": "Следующий день",
-    "currentWeek": "Текущая неделя"
+    "currentWeek": "Текущая неделя",
+    "previousWeek": "Предыдущая неделя",
+    "nextWeek": "Следующая неделя"
   },
   "column": {
     "date": "Дата",

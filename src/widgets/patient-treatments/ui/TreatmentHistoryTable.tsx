@@ -6,6 +6,7 @@ import type { Treatment } from '@/entities/treatment'
 import { TreatmentStatusBadge, treatmentQueries } from '@/entities/treatment'
 import { formatFixedDate } from '@/shared/lib/calendarDate'
 import { formatSom } from '@/shared/lib/money'
+import { PHONE_QUERY, useMediaQuery } from '@/shared/lib/useMediaQuery'
 import {
   Badge,
   Button,
@@ -56,6 +57,7 @@ export function TreatmentHistoryTable({
   const { t, i18n } = useTranslation(['treatments', 'patients', 'common'])
   const query = useQuery(treatmentQueries.list(clinicId, patientId))
   const [detailTreatment, setDetailTreatment] = useState<Treatment | null>(null)
+  const isPhone = useMediaQuery(PHONE_QUERY)
 
   return (
     <div className="flex flex-col gap-4">
@@ -108,7 +110,11 @@ export function TreatmentHistoryTable({
               </Button>
             </div>
 
-            <Table density="compact">
+            {isPhone ? (
+              <TreatmentCards onOpen={setDetailTreatment} treatments={treatments} />
+            ) : null}
+
+            <Table className={isPhone ? 'hidden' : ''} density="compact">
               <TableHeader>
                 <TableRow>
                   <TableHead>{t('treatments:table.columnTooth')}</TableHead>
@@ -229,5 +235,62 @@ export function TreatmentHistoryTable({
         />
       )}
     </div>
+  )
+}
+
+/**
+ * Phone layout of the table. A tap opens the detail dialog, which already
+ * carries edit/complete/delete — a per-card menu would duplicate it.
+ */
+function TreatmentCards({
+  treatments,
+  onOpen,
+}: {
+  treatments: Treatment[]
+  onOpen: (treatment: Treatment) => void
+}) {
+  const { t, i18n } = useTranslation(['treatments', 'common'])
+  const currency = t('common:currency.som')
+
+  return (
+    <ul className="flex flex-col gap-2">
+      {treatments.map((treatment) => {
+        const debt = Math.max(treatment.remaining ?? 0, 0)
+        return (
+          <li key={treatment.id}>
+            <button
+              className="flex w-full flex-col gap-3 rounded-card border border-border bg-surface p-4 text-left transition-colors duration-150 ease-out-apple active:bg-sunken"
+              onClick={() => onOpen(treatment)}
+              type="button"
+            >
+              <div className="flex w-full items-center gap-3">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-control bg-accent-soft text-callout font-semibold text-accent-text">
+                  {treatment.toothNumber ?? EMPTY}
+                </span>
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                  <span className="truncate text-body font-medium text-text">
+                    {treatment.treatmentTypeName ?? EMPTY}
+                  </span>
+                  <span className="text-caption text-text-secondary">
+                    {treatment.startDate === null ? EMPTY : formatFixedDate(treatment.startDate)}
+                  </span>
+                </div>
+                <TreatmentStatusBadge status={treatment.status} />
+              </div>
+              <div className="flex w-full items-center justify-between border-t border-border pt-3 text-callout tabular-nums">
+                <span className="text-text-secondary">
+                  {treatment.totalTreatmentCost === null
+                    ? EMPTY
+                    : formatSom(treatment.totalTreatmentCost, i18n.language, currency)}
+                </span>
+                <span className={debt > 0 ? 'font-semibold text-danger' : 'text-text-tertiary'}>
+                  {t('treatments:table.columnDebt')}: {formatSom(debt, i18n.language, currency)}
+                </span>
+              </div>
+            </button>
+          </li>
+        )
+      })}
+    </ul>
   )
 }

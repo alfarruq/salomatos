@@ -13,6 +13,7 @@ import { DeleteAppointmentDialog } from '@/features/appointment-delete'
 import { EditAppointmentDialog } from '@/features/appointment-edit'
 import { formatCalendarDate, parseCalendarDate, todayCalendarDate } from '@/shared/lib/calendarDate'
 import { useDebounce } from '@/shared/lib/useDebounce'
+import { PHONE_QUERY, useMediaQuery } from '@/shared/lib/useMediaQuery'
 import {
   Button,
   EmptyState,
@@ -28,6 +29,7 @@ import {
   TableSkeleton,
 } from '@/shared/ui'
 import { shiftCalendarDate } from '../model/dateNav'
+import { AppointmentDayStrip } from './AppointmentDayStrip'
 import { AppointmentWeekBoard, AppointmentWeekBoardSkeleton } from './AppointmentWeekBoard'
 
 const SEARCH_DEBOUNCE_MS = 300
@@ -64,6 +66,7 @@ export function AppointmentCalendar({
   const debouncedSearch = useDebounce(searchTerm, SEARCH_DEBOUNCE_MS).trim().toLowerCase()
 
   const query = useQuery(appointmentQueries.list(clinicId, filters))
+  const isPhone = useMediaQuery(PHONE_QUERY)
 
   return (
     <div className="flex flex-col gap-4">
@@ -88,7 +91,7 @@ export function AppointmentCalendar({
             ))}
           </fieldset>
 
-          {filters.view === 'day' ? (
+          {filters.view === 'day' && isPhone ? null : filters.view === 'day' ? (
             <div className="flex items-center gap-1">
               <Button
                 aria-label={t('appointments:view.previousDay')}
@@ -140,6 +143,13 @@ export function AppointmentCalendar({
           {t('appointments:create.submit')}
         </Button>
       </div>
+
+      {filters.view === 'day' && isPhone ? (
+        <AppointmentDayStrip
+          onSelect={(date) => onFiltersChange({ ...filters, date })}
+          selected={filters.date}
+        />
+      ) : null}
 
       <Input
         className="max-w-sm"
@@ -212,6 +222,17 @@ export function AppointmentCalendar({
           const sorted = [...matched].sort((a, b) =>
             a.date === b.date ? a.time.localeCompare(b.time) : a.date.localeCompare(b.date),
           )
+
+          if (isPhone) {
+            return (
+              <AppointmentList
+                appointments={sorted}
+                onDelete={setDeleting}
+                onEdit={setEditing}
+                showDate={filters.view !== 'day'}
+              />
+            )
+          }
 
           return (
             <Table density="compact">
@@ -308,5 +329,73 @@ export function AppointmentCalendar({
         />
       )}
     </div>
+  )
+}
+
+/**
+ * Phone layout of the day/all table: time leads each row because that is
+ * what staff scan for, and nothing has to scroll sideways.
+ */
+function AppointmentList({
+  appointments,
+  showDate,
+  onEdit,
+  onDelete,
+}: {
+  appointments: Appointment[]
+  showDate: boolean
+  onEdit: (appointment: Appointment) => void
+  onDelete: (appointment: Appointment) => void
+}) {
+  const { t, i18n } = useTranslation(['appointments', 'common'])
+
+  return (
+    <ul className="flex flex-col divide-y divide-border rounded-card border border-border bg-surface">
+      {appointments.map((appointment) => (
+        <li className="flex min-h-16 items-center gap-3 py-2 pr-1 pl-4" key={appointment.id}>
+          <div className="flex w-14 shrink-0 flex-col">
+            {showDate ? (
+              <span className="text-caption text-text-tertiary">
+                {formatCalendarDate(appointment.date, i18n.language) ?? EMPTY}
+              </span>
+            ) : null}
+            <span className="text-body font-semibold tabular-nums text-text">
+              {appointment.time}
+            </span>
+          </div>
+
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="truncate text-body font-medium text-text">{appointment.fullName}</span>
+            <div className="flex min-w-0 items-center gap-2">
+              <AppointmentStatusBadge status={appointment.status} />
+              <span className="truncate text-caption text-text-secondary">
+                {appointment.doctorName ?? appointment.phoneNumber ?? EMPTY}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex shrink-0">
+            <Button
+              aria-label={`${t('common:action.edit')} — ${appointment.fullName}`}
+              className="size-11 px-0"
+              onClick={() => onEdit(appointment)}
+              size="sm"
+              variant="ghost"
+            >
+              <Pencil aria-hidden="true" className="size-4" />
+            </Button>
+            <Button
+              aria-label={`${t('common:action.delete')} — ${appointment.fullName}`}
+              className="size-11 px-0"
+              onClick={() => onDelete(appointment)}
+              size="sm"
+              variant="ghost"
+            >
+              <Trash2 aria-hidden="true" className="size-4" />
+            </Button>
+          </div>
+        </li>
+      ))}
+    </ul>
   )
 }

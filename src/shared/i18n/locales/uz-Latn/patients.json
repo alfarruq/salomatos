@@ -46,7 +46,9 @@
     "statusAll": "Barcha holatlar",
     "doctorLabel": "Shifokor bo'yicha filtr",
     "doctorPlaceholder": "Shifokor",
-    "doctorAll": "Barcha shifokorlar"
+    "doctorAll": "Barcha shifokorlar",
+    "title": "Filtr",
+    "apply": "Natijalarni ko'rsatish"
   },
   "title": "Bemorlar",
   "column": {
@@ -108,6 +110,12 @@
     "galleryUploading": "Yuklanmoqda...",
     "galleryUploadFailed": "Rasmni yuklab bo'lmadi. Qayta urinib ko'ring.",
     "prescriptionsEmpty": "Hozircha retsept yo'q",
-    "prescriptionsEmptyDescription": "Bu bemorga yozilgan retseptlar shu yerda ko'rinadi."
+    "prescriptionsEmptyDescription": "Bu bemorga yozilgan retseptlar shu yerda ko'rinadi.",
+    "quick": {
+      "call": "Qo'ng'iroq",
+      "appointment": "Qabul",
+      "treatment": "Muolaja",
+      "prescription": "Retsept"
+    }
   }
 }
