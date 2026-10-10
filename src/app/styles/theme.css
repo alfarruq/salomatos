@@ -139,6 +139,8 @@
   --animate-popover-out: popover-out 100ms var(--ease-out-apple);
   --animate-sheet-in: sheet-in 220ms var(--ease-out-apple);
   --animate-sheet-out: sheet-out 180ms var(--ease-out-apple);
+  --animate-sheet-up-in: sheet-up-in 320ms var(--ease-out-apple);
+  --animate-sheet-up-out: sheet-up-out 180ms var(--ease-out-apple);
 
   @keyframes overlay-in {
     from {
@@ -217,6 +219,24 @@
     }
     to {
       transform: translateX(100%);
+    }
+  }
+
+  @keyframes sheet-up-in {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes sheet-up-out {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(100%);
     }
   }
 }

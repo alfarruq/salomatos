@@ -47,6 +47,7 @@ export function QuickActions({
         <Can permission="appointment:write">
           <Button
             iconLeft={<CalendarPlus aria-hidden="true" className="size-4" />}
+            isFloatingOnPhone
             onClick={() => onAppointmentOpenChange(true)}
             variant="primary"
           >

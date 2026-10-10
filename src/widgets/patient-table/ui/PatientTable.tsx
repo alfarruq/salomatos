@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { doctorQueries } from '@/entities/doctor'
 import type { PatientFilters, PatientId, PatientListItem, PatientStatus } from '@/entities/patient'
-import { patientQueries } from '@/entities/patient'
+import { PatientAvatar, PatientStatusBadge, patientQueries } from '@/entities/patient'
 import { Can } from '@/entities/session'
 import { treatmentTypeQueries } from '@/entities/treatment-type'
 import { CreatePatientDialog } from '@/features/patient-create'
@@ -12,13 +12,18 @@ import { DeletePatientDialog } from '@/features/patient-delete'
 import { EditPatientDialog } from '@/features/patient-edit'
 import { PatientSearchInput, usePatientSearch } from '@/features/patient-search'
 import { PAGE_SIZE } from '@/shared/api/pagination'
+import { cn } from '@/shared/lib/cn'
+import { formatSom } from '@/shared/lib/money'
+import { PHONE_QUERY, useMediaQuery } from '@/shared/lib/useMediaQuery'
 import {
   Button,
   EmptyState,
   ErrorState,
+  formatSubscriber,
   Pagination,
   QueryBoundary,
   Select,
+  subscriberDigitsOf,
   Table,
   TableBody,
   TableCell,
@@ -141,6 +146,7 @@ export function PatientTable({
   }
 
   const columns = usePatientColumns({ onDelete: setDeleting, onEdit: setEditing })
+  const isPhone = useMediaQuery(PHONE_QUERY)
 
   return (
     <div className="flex flex-col gap-4">
@@ -255,12 +261,16 @@ export function PatientTable({
       >
         {(page) => (
           <>
-            <PatientRows
-              columns={columns}
-              onOpenPatient={onOpenPatient}
-              onPrefetch={prefetchPatient}
-              rows={page.results}
-            />
+            {isPhone ? (
+              <PatientCards onOpenPatient={onOpenPatient} rows={page.results} />
+            ) : (
+              <PatientRows
+                columns={columns}
+                onOpenPatient={onOpenPatient}
+                onPrefetch={prefetchPatient}
+                rows={page.results}
+              />
+            )}
 
             <Pagination
               hasNext={page.next !== null}
@@ -371,5 +381,56 @@ function PatientRows({
         ))}
       </TableBody>
     </Table>
+  )
+}
+
+/**
+ * The phone layout: one tappable row per patient carrying what the desk
+ * scans for (name, phone, status, debt). Edit and delete stay on the card
+ * page, a tap away, rather than behind a third control squeezed into the row.
+ */
+function PatientCards({
+  rows,
+  onOpenPatient,
+}: {
+  rows: PatientListItem[]
+  onOpenPatient: (patientId: PatientId) => void
+}) {
+  const { t, i18n } = useTranslation(['patients', 'common'])
+
+  return (
+    <ul aria-label={t('patients:title')} className="divide-y divide-border rounded-card bg-surface">
+      {rows.map((patient) => (
+        <li key={patient.id}>
+          <button
+            className={cn(
+              'flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left',
+              'transition-colors duration-150 ease-out-apple active:bg-sunken',
+            )}
+            onClick={() => onOpenPatient(patient.id)}
+            type="button"
+          >
+            <PatientAvatar name={patient.fullName} />
+            <span className="flex min-w-0 flex-1 flex-col gap-1">
+              <span className="flex items-center justify-between gap-2">
+                <span className="truncate text-body font-medium text-text">{patient.fullName}</span>
+                <PatientStatusBadge status={patient.status} />
+              </span>
+              {patient.phoneNumber === null ? null : (
+                <span className="text-callout text-text-secondary tabular-nums">
+                  {`+998-${formatSubscriber(subscriberDigitsOf(patient.phoneNumber))}`}
+                </span>
+              )}
+              {/* Its own line: beside the phone number it squeezed both. */}
+              {patient.totalRemaining > 0 ? (
+                <span className="text-caption font-medium text-danger tabular-nums">
+                  {formatSom(patient.totalRemaining, i18n.language, t('common:currency.som'))}
+                </span>
+              ) : null}
+            </span>
+          </button>
+        </li>
+      ))}
+    </ul>
   )
 }

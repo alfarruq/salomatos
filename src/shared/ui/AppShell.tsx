@@ -1,4 +1,4 @@
-import { Menu } from 'lucide-react'
+import { Menu, MoreHorizontal } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
 import { cn } from '@/shared/lib/cn'
 import { Sheet } from './Sheet'
@@ -10,12 +10,21 @@ export interface AppShellProps {
   headerActions?: ReactNode
   /** Product or clinic name shown in the rail. */
   brand: ReactNode
+  /**
+   * Primary destinations for the bottom tab bar below `lg`. When given, the
+   * bar replaces the header's menu button: a thumb reaches the bottom of a
+   * phone, not its top-left corner. A trailing "more" tab opens the full
+   * navigation in the sheet.
+   */
+  tabBar?: ReactNode
   children: ReactNode
   /** Accessible names — this layer holds no copy of its own. */
   labels: {
     skipToContent: string
     openNavigation: string
     navigation: string
+    /** The tab bar's last item, which opens the full navigation. */
+    more?: string
   }
   className?: string
 }
@@ -31,6 +40,7 @@ export function AppShell({
   sidebar,
   headerActions,
   brand,
+  tabBar,
   children,
   labels,
   className,
@@ -78,6 +88,7 @@ export function AppShell({
               aria-label={labels.openNavigation}
               className={cn(
                 'flex size-11 items-center justify-center rounded-control lg:hidden',
+                tabBar !== undefined && 'hidden',
                 'text-text-secondary transition-colors duration-150 ease-out-apple',
                 'hover:bg-sunken hover:text-text',
               )}
@@ -94,11 +105,35 @@ export function AppShell({
 
           {/* `min-w-0` above and here so a wide table scrolls itself instead of
               stretching the whole layout. */}
-          <main className="min-w-0 flex-1 p-4 lg:p-6" id="main">
+          <main
+            className={cn(
+              'min-w-0 flex-1 p-4 lg:p-6',
+              // Room for the fixed tab bar and the home indicator below it.
+              tabBar !== undefined && 'pb-[calc(96px+env(safe-area-inset-bottom))] lg:pb-6',
+            )}
+            id="main"
+          >
             {children}
           </main>
         </div>
       </div>
+
+      {tabBar === undefined ? null : (
+        <nav
+          aria-label={labels.navigation}
+          className={cn(
+            'fixed inset-x-0 bottom-0 z-40 grid auto-cols-fr grid-flow-col lg:hidden',
+            'border-t border-border bg-surface/90 px-2 pt-1 backdrop-blur',
+            'pb-[calc(4px+env(safe-area-inset-bottom))]',
+          )}
+        >
+          {tabBar}
+          <button className={tabBarItemClassName} onClick={() => setIsNavOpen(true)} type="button">
+            <MoreHorizontal aria-hidden="true" className="size-6" />
+            {labels.more ?? labels.openNavigation}
+          </button>
+        </nav>
+      )}
 
       <Sheet onOpenChange={setIsNavOpen} open={isNavOpen} title={labels.navigation}>
         {/*
@@ -121,3 +156,14 @@ export function AppShell({
     </div>
   )
 }
+
+/**
+ * Shared by the "more" tab and the caller's links so every tab looks the same.
+ * Callers mark the current page with `data-active="true"`.
+ */
+export const tabBarItemClassName = cn(
+  'flex min-h-14 flex-col items-center justify-center gap-1 rounded-control',
+  'text-caption font-medium text-text-tertiary',
+  'transition-colors duration-150 ease-out-apple',
+  'data-[active=true]:text-accent-text',
+)
