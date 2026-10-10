@@ -29,7 +29,7 @@ export function Tabs({ items, value, defaultValue, onValueChange, className }: T
       {...(onValueChange === undefined ? {} : { onValueChange })}
       className={cn('flex flex-col gap-6', className)}
     >
-      <TabsPrimitive.List className="flex gap-1 border-b border-border">
+      <TabsPrimitive.List className="flex gap-1 overflow-x-auto border-b border-border">
         {items.map((item) => (
           <TabsPrimitive.Trigger
             key={item.value}

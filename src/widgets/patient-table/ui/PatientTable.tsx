@@ -146,7 +146,7 @@ export function PatientTable({
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 basis-full sm:basis-auto">
             <PatientSearchInput
               onChange={handleSearchChange}
               onClear={() => handleSearchChange('')}

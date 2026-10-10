@@ -171,7 +171,7 @@ function PatientDetailPage() {
             </div>
           </div>
 
-          <div className="grid items-start gap-6 lg:grid-cols-[320px_1fr]">
+          <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
             <PatientSidebar patient={patient} />
             <PatientTabs
               onOpenComposer={openComposer}
@@ -430,7 +430,7 @@ function PatientDetailSkeleton() {
   return (
     <div className="flex flex-col gap-6">
       <Skeleton className="h-6 w-32" />
-      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
         <Skeleton className="h-96 w-full" />
         <Skeleton className="h-96 w-full" />
       </div>

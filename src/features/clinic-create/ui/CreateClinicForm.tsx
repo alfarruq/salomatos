@@ -61,7 +61,7 @@ export function CreateClinicForm({ clinicId }: CreateClinicFormProps) {
   const rootError = form.formState.errors.root?.message
 
   return (
-    <Card className="flex max-w-lg flex-col gap-6 p-6">
+    <Card className="flex max-w-lg flex-col gap-6 p-4 sm:p-6">
       <div className="flex flex-col gap-1">
         <h2 className="text-title2 text-text">{t('admin:clinic.setupTitle')}</h2>
         <p className="text-callout text-text-secondary">{t('admin:clinic.setupDescription')}</p>
