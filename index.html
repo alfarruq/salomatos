@@ -6,6 +6,15 @@
     <!-- §13.4 — never leak a patient URL to a third party via Referer -->
     <meta name="referrer" content="no-referrer" />
     <title>SalomatOS</title>
+    <!--
+      Installable to the home screen, deliberately without a service worker: a
+      worker's cache would keep API responses (PHI) on the device (§3).
+    -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icon-192.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-title" content="SalomatOS" />
   </head>
   <body>
     <div id="root"></div>
