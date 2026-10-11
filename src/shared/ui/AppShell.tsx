@@ -162,8 +162,10 @@ export function AppShell({
  * Callers mark the current page with `data-active="true"`.
  */
 export const tabBarItemClassName = cn(
-  'flex min-h-14 flex-col items-center justify-center gap-1 rounded-control',
-  'text-caption font-medium text-text-tertiary',
+  // Top-aligned and centred: a label that wraps to two lines (long uz/ru
+  // words) must not push its icon out of line with the other tabs.
+  'flex min-h-14 min-w-0 flex-col items-center justify-start gap-1 rounded-control px-1 pt-2',
+  'text-center text-caption leading-tight font-medium text-text-tertiary',
   'transition-colors duration-150 ease-out-apple',
   'data-[active=true]:text-accent-text',
 )
