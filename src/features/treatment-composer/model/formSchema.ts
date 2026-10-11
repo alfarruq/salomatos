@@ -20,9 +20,8 @@ export interface NewTreatmentPayload {
   total_paid: number
   visit_number: number
   /**
-   * ⚠️ `null` for a non-dental treatment. The live endpoint currently answers
-   * 400 to that (omitted and `null` alike) — it needs `tooth_number` made
-   * optional server-side; there is no honest tooth to send instead.
+   * `null` for a non-dental treatment — sent explicitly, not omitted, per the
+   * agreed contract (the backend made `tooth_number` nullable).
    */
   tooth_number: number | null
   start_date: string

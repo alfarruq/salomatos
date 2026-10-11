@@ -37,6 +37,15 @@ describe('toNewTreatmentPayload', () => {
     })
   })
 
+  it('sends tooth_number as an explicit null for a non-dental row, not omitted', () => {
+    const payload = toNewTreatmentPayload({ ...newRow, toothNumber: null }, fields, {
+      patientId: 101,
+      startDate: '2026-10-05',
+      visitNumber: 4,
+    })
+    expect(payload).toHaveProperty('tooth_number', null)
+  })
+
   it('refuses a row with no treatment type — nothing to send', () => {
     const row = { ...newRow, treatmentTypeId: null }
     expect(
