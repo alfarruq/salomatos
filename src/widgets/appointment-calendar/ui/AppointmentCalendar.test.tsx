@@ -31,6 +31,7 @@ function renderCalendar(filters: AppointmentFilters, onFiltersChange = vi.fn()) 
             onFiltersChange={onFiltersChange}
             onPageChange={vi.fn()}
             page={1}
+            title={null}
           />
         </Suspense>
       </I18nextProvider>

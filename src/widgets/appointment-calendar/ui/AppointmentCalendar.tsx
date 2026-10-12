@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   type Appointment,
@@ -13,6 +13,7 @@ import { DeleteAppointmentDialog } from '@/features/appointment-delete'
 import { EditAppointmentDialog } from '@/features/appointment-edit'
 import { PAGE_SIZE, type Page } from '@/shared/api/pagination'
 import { formatCalendarDate, parseCalendarDate, todayCalendarDate } from '@/shared/lib/calendarDate'
+import { cn } from '@/shared/lib/cn'
 import { useDebounce } from '@/shared/lib/useDebounce'
 import { PHONE_QUERY, useMediaQuery } from '@/shared/lib/useMediaQuery'
 import {
@@ -44,6 +45,8 @@ export interface AppointmentCalendarProps {
   /** Server page for the all view; day and week always read every page. */
   page: number
   onPageChange: (page: number) => void
+  /** The page heading — shares the date picker's row on a phone, sits above the toolbar otherwise. */
+  title: ReactNode
 }
 
 /** Shown when the server had nothing to send for a cell. */
@@ -62,6 +65,7 @@ export function AppointmentCalendar({
   onFiltersChange,
   page,
   onPageChange,
+  title,
 }: AppointmentCalendarProps) {
   const { t, i18n } = useTranslation(['appointments', 'common'])
   const [isCreateOpen, setCreateOpen] = useState(false)
@@ -103,12 +107,21 @@ export function AppointmentCalendar({
 
   return (
     <div className="flex flex-col gap-4">
+      {/* pb-2 on top of the column's gap keeps the page's 24px heading spacing. */}
+      {isPhone ? null : <div className="pb-2">{title}</div>}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
+        {isPhone ? title : null}
+        <div
+          className={cn(
+            'flex flex-wrap items-center gap-2',
+            // Shrinks the date input rather than wrapping it under the heading at 360px.
+            isPhone && 'min-w-0 flex-1 justify-end',
+          )}
+        >
           {isPhone ? (
             <Input
               aria-label={t('appointments:form.date')}
-              className="w-48"
+              className="w-full max-w-48"
               onChange={(event) => selectDate(event.target.value)}
               type="date"
               value={filters.date}
