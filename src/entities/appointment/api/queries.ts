@@ -3,7 +3,6 @@ import * as v from 'valibot'
 import { httpClient } from '@/shared/api/httpClient'
 import { pathFromNext } from '@/shared/api/pagination'
 import { cachePolicy } from '@/shared/config/cache'
-import { clinicNow } from '@/shared/lib/datetime'
 import { appointmentListSchema, toAppointment } from '../model/schema'
 import type { Appointment, AppointmentFilters } from '../model/types'
 
@@ -15,18 +14,16 @@ export const appointmentKeys = {
 }
 
 /**
- * Confirmed live on 2026-10-09: `?date=day` is the only form that filters to
- * today. ⚠️ A real date (`?date=2026-10-09`) is **ignored** — the server
- * answers with every appointment, exactly as with no parameter — so today
- * goes out as the `day` shortcut, and any other day still sends its date and
- * gets the unfiltered list until the backend supports one. "Today" is then
- * the server's own day, in its time zone, not Tashkent's. Week navigation
- * still sends the literal `week` shortcut; `all` sends no `date` at all.
+ * The backend filters by a real date since its 2026-10-12 update
+ * (`?date=2026-10-12`), so the day view always sends the date it shows —
+ * including today, which is then the clinic's day rather than the server's.
+ * Week navigation still sends the literal `week` shortcut; `all` sends no
+ * `date` at all.
  */
 function toQueryString(filters: AppointmentFilters): string {
   if (filters.view === 'all') return ''
   if (filters.view === 'week') return '?date=week'
-  return `?date=${filters.date === clinicNow().date ? 'day' : filters.date}`
+  return `?date=${filters.date}`
 }
 
 /**

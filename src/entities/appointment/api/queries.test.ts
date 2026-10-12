@@ -120,7 +120,7 @@ describe('fetchAppointments', () => {
     expect(appointments.map((appointment) => appointment.id)).toEqual([1, 2])
   })
 
-  it("asks for today with the server's `day` shortcut — a real date is ignored there", async () => {
+  it('asks for the viewed day by its real date, today included', async () => {
     let requested: string | null = null
     server.events.on('request:start', ({ request }) => {
       if (request.url.includes('/calendars/appointments/')) {
@@ -130,7 +130,7 @@ describe('fetchAppointments', () => {
 
     await fetchAppointments({ view: 'day', date: clinicNow().date })
 
-    expect(requested).toBe('day')
+    expect(requested).toBe(clinicNow().date)
   })
 
   it('falls back to `in_progress` for a status it does not recognise, rather than throwing', async () => {
