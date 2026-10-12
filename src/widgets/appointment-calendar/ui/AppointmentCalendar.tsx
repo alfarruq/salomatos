@@ -58,7 +58,7 @@ const EMPTY = '—'
  */
 export function AppointmentCalendar({
   clinicId,
-  filters,
+  filters: routeFilters,
   onFiltersChange,
   page,
   onPageChange,
@@ -72,6 +72,10 @@ export function AppointmentCalendar({
   const [searchTerm, setSearchTerm] = useState('')
   const debouncedSearch = useDebounce(searchTerm, SEARCH_DEBOUNCE_MS).trim().toLowerCase()
 
+  const isPhone = useMediaQuery(PHONE_QUERY)
+  // Phone is date-only: a shared week/all link still opens as one day there.
+  const filters: AppointmentFilters =
+    isPhone && routeFilters.view !== 'day' ? { ...routeFilters, view: 'day' } : routeFilters
   // The day view stays whole (today's counts and the day strip need every
   // row); week and all can grow past what one screen should load at once.
   const isPaged = filters.view !== 'day'
@@ -90,32 +94,46 @@ export function AppointmentCalendar({
     enabled: isPaged,
   })
   const query = isPaged ? pageQuery : dayQuery
-  const isPhone = useMediaQuery(PHONE_QUERY)
+
+  const selectDate = (value: string) => {
+    // An emptied or half-typed date input reports '' — keep the current day.
+    if (parseCalendarDate(value) !== null) onFiltersChange({ ...filters, date: value })
+  }
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <fieldset
-            aria-label={t('appointments:view.label')}
-            className="m-0 flex gap-1 border-0 p-0"
-          >
-            {(['day', 'week', 'all'] as const).map((view) => (
-              <Button
-                key={view}
-                // A week/all-time view has no navigable "current date" (§
-                // widget doc) — switching always lands on today rather than
-                // keeping whatever day was mid-navigation in day view.
-                onClick={() => onFiltersChange({ view, date: todayCalendarDate() })}
-                size="sm"
-                variant={filters.view === view ? 'primary' : 'secondary'}
-              >
-                {t(`appointments:view.${view}`)}
-              </Button>
-            ))}
-          </fieldset>
+          {isPhone ? (
+            <Input
+              aria-label={t('appointments:form.date')}
+              className="w-48"
+              onChange={(event) => selectDate(event.target.value)}
+              type="date"
+              value={filters.date}
+            />
+          ) : (
+            <fieldset
+              aria-label={t('appointments:view.label')}
+              className="m-0 flex gap-1 border-0 p-0"
+            >
+              {(['day', 'week', 'all'] as const).map((view) => (
+                <Button
+                  key={view}
+                  // A week/all-time view has no navigable "current date" (§
+                  // widget doc) — switching always lands on today rather than
+                  // keeping whatever day was mid-navigation in day view.
+                  onClick={() => onFiltersChange({ view, date: todayCalendarDate() })}
+                  size="sm"
+                  variant={filters.view === view ? 'primary' : 'secondary'}
+                >
+                  {t(`appointments:view.${view}`)}
+                </Button>
+              ))}
+            </fieldset>
+          )}
 
-          {filters.view === 'day' && isPhone ? null : filters.view === 'day' ? (
+          {isPhone ? null : filters.view === 'day' ? (
             <div className="flex items-center gap-1">
               <Button
                 aria-label={t('appointments:view.previousDay')}
@@ -130,11 +148,7 @@ export function AppointmentCalendar({
               <Input
                 aria-label={t('appointments:form.date')}
                 className="w-40"
-                onChange={(event) => {
-                  const value = event.target.value
-                  if (parseCalendarDate(value) !== null)
-                    onFiltersChange({ ...filters, date: value })
-                }}
+                onChange={(event) => selectDate(event.target.value)}
                 size="sm"
                 type="date"
                 value={filters.date}
@@ -168,7 +182,7 @@ export function AppointmentCalendar({
         </Button>
       </div>
 
-      {filters.view === 'day' && isPhone ? (
+      {isPhone ? (
         <AppointmentDayStrip
           onSelect={(date) => onFiltersChange({ ...filters, date })}
           selected={filters.date}
