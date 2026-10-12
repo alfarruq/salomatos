@@ -6,7 +6,7 @@
   },
   "form": {
     "patient": "Patient",
-    "patientSearchPlaceholder": "Search by name",
+    "patientSearchPlaceholder": "Type a name or search patients",
     "unlinkPatient": "Unlink patient",
     "fullName": "Full name",
     "fullNameLinkedHint": "A patient is linked — the name shown always comes from their own record.",

@@ -6,7 +6,7 @@
   },
   "form": {
     "patient": "Бемор",
-    "patientSearchPlaceholder": "Исм бўйича қидириш",
+    "patientSearchPlaceholder": "Исм ёзинг ёки беморни қидиринг",
     "unlinkPatient": "Беморни боғлашни бекор қилиш",
     "fullName": "Ф. И. Ш.",
     "fullNameLinkedHint": "Бемор бириктирилган — исм доим унинг ўз картасидан олинади.",

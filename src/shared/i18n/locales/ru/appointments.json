@@ -6,7 +6,7 @@
   },
   "form": {
     "patient": "Пациент",
-    "patientSearchPlaceholder": "Поиск по имени",
+    "patientSearchPlaceholder": "Введите имя или найдите пациента",
     "unlinkPatient": "Отвязать пациента",
     "fullName": "Ф. И. О.",
     "fullNameLinkedHint": "Пациент привязан — имя всегда берётся из его карточки.",

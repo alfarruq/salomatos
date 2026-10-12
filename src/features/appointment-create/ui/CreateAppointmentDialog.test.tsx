@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { Suspense } from 'react'
 import { I18nextProvider } from 'react-i18next'
@@ -46,5 +46,31 @@ describe('CreateAppointmentDialog', () => {
 
     expect(await screen.findByText('09.10.2026')).toBeInTheDocument()
     expect(screen.queryByText('08.10.2026')).not.toBeInTheDocument()
+  })
+
+  it('uses one input for both a new name and the patient search', async () => {
+    render(
+      wrap(
+        <CreateAppointmentDialog
+          clinicId={MOCK_USERS.clinic.id}
+          defaultDate="2026-10-08"
+          onOpenChange={vi.fn()}
+          open
+        />,
+      ),
+    )
+
+    const input = await screen.findByRole('textbox', { name: 'Bemor' })
+    fireEvent.change(input, { target: { value: 'Vali' } })
+
+    // Typed text stays as the name even before anything is picked (walk-in)...
+    expect(input).toHaveValue('Vali')
+
+    // ...and the same text finds the existing patient, who can be linked.
+    fireEvent.click(await screen.findByRole('button', { name: /Vali Aliyev/ }))
+    expect(input).toHaveValue('Vali Aliyev')
+    expect(
+      screen.getByRole('button', { name: "Bemorni bog'lashni bekor qilish" }),
+    ).toBeInTheDocument()
   })
 })

@@ -2,6 +2,7 @@ import { X } from 'lucide-react'
 import { Controller, type UseFormReturn } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
+  Button,
   DatePicker,
   Field,
   Input,
@@ -77,53 +78,12 @@ export function AppointmentFormFields({
 
   return (
     <div className="flex flex-col gap-4">
-      <Field label={t('appointments:form.patient')}>
-        {patientPicker.linkedPatientName === null ? (
-          <div className="flex flex-col gap-2">
-            <Input
-              autoComplete="off"
-              disabled={isDisabled}
-              onChange={(event) => patientPicker.onSearchTermChange(event.target.value)}
-              placeholder={t('appointments:form.patientSearchPlaceholder')}
-              type="search"
-              value={patientPicker.searchTerm}
-            />
-            {patientPicker.searchTerm === '' || patientPicker.results.length === 0 ? null : (
-              <ul className="flex flex-col gap-1 rounded-control border border-border bg-elevated p-1">
-                {patientPicker.results.map((result) => (
-                  <li key={result.id}>
-                    <button
-                      className="flex w-full flex-col rounded-[8px] px-3 py-2 text-left hover:bg-sunken"
-                      onClick={() => patientPicker.onSelect(result)}
-                      type="button"
-                    >
-                      <span className="text-body text-text">{result.fullName}</span>
-                      {result.phoneNumber === null ? null : (
-                        <span className="text-caption text-text-secondary">
-                          {result.phoneNumber}
-                        </span>
-                      )}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        ) : (
-          <div className="flex items-center justify-between gap-2 rounded-control border border-border bg-sunken px-4 py-2">
-            <span className="text-body text-text">{patientPicker.linkedPatientName}</span>
-            <button
-              aria-label={t('appointments:form.unlinkPatient')}
-              disabled={isDisabled}
-              onClick={patientPicker.onUnlink}
-              type="button"
-            >
-              <X aria-hidden="true" className="size-4 text-text-secondary" />
-            </button>
-          </div>
-        )}
-      </Field>
-
+      {/*
+       * One input does both jobs: what is typed is the walk-in's name and,
+       * at the same time, the search term for an existing patient. Picking a
+       * result links that patient; typing again after that unlinks them, so
+       * the name sent never disagrees with the record it is linked to.
+       */}
       <Field
         description={
           patientPicker.linkedPatientName === null
@@ -132,13 +92,64 @@ export function AppointmentFormFields({
         }
         error={message(errors.fullName?.message)}
         isRequired
-        label={t('appointments:form.fullName')}
+        label={t('appointments:form.patient')}
       >
-        <Input
-          autoComplete="off"
-          disabled={isDisabled || patientPicker.linkedPatientName !== null}
-          {...form.register('fullName')}
-        />
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <Controller
+              control={form.control}
+              name="fullName"
+              render={({ field }) => (
+                <Input
+                  autoComplete="off"
+                  className="flex-1"
+                  disabled={isDisabled}
+                  name={field.name}
+                  onBlur={field.onBlur}
+                  onChange={(event) => {
+                    const value = event.target.value
+                    field.onChange(value)
+                    if (patientPicker.linkedPatientName !== null) patientPicker.onUnlink()
+                    patientPicker.onSearchTermChange(value.trim())
+                  }}
+                  placeholder={t('appointments:form.patientSearchPlaceholder')}
+                  ref={field.ref}
+                  value={field.value}
+                />
+              )}
+            />
+            {patientPicker.linkedPatientName === null ? null : (
+              <Button
+                aria-label={t('appointments:form.unlinkPatient')}
+                disabled={isDisabled}
+                onClick={patientPicker.onUnlink}
+                size="sm"
+                type="button"
+                variant="ghost"
+              >
+                <X aria-hidden="true" className="size-4" />
+              </Button>
+            )}
+          </div>
+          {patientPicker.searchTerm === '' || patientPicker.results.length === 0 ? null : (
+            <ul className="flex flex-col gap-1 rounded-control border border-border bg-elevated p-1">
+              {patientPicker.results.map((result) => (
+                <li key={result.id}>
+                  <button
+                    className="flex w-full flex-col rounded-[8px] px-3 py-2 text-left hover:bg-sunken"
+                    onClick={() => patientPicker.onSelect(result)}
+                    type="button"
+                  >
+                    <span className="text-body text-text">{result.fullName}</span>
+                    {result.phoneNumber === null ? null : (
+                      <span className="text-caption text-text-secondary">{result.phoneNumber}</span>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </Field>
 
       <Field
