@@ -97,7 +97,8 @@ export function AppointmentCalendar({
 
   const selectDate = (value: string) => {
     // An emptied or half-typed date input reports '' — keep the current day.
-    if (parseCalendarDate(value) !== null) onFiltersChange({ ...filters, date: value })
+    // Picking a date always means "show me that day", whichever view was open.
+    if (parseCalendarDate(value) !== null) onFiltersChange({ view: 'day', date: value })
   }
 
   return (
@@ -164,33 +165,45 @@ export function AppointmentCalendar({
                 <ChevronRight aria-hidden="true" className="size-4" />
               </Button>
             </div>
-          ) : filters.view === 'week' ? (
-            <div className="flex items-center gap-1">
-              <Button
-                aria-label={t('appointments:view.previousWeek')}
-                onClick={() =>
-                  onFiltersChange({ ...filters, date: shiftCalendarDate(filters.date, -7) })
-                }
+          ) : (
+            <>
+              <Input
+                aria-label={t('appointments:form.date')}
+                className="w-40"
+                onChange={(event) => selectDate(event.target.value)}
                 size="sm"
-                variant="ghost"
-              >
-                <ChevronLeft aria-hidden="true" className="size-4" />
-              </Button>
-              <span className="text-callout text-text-secondary tabular-nums">
-                {weekRangeLabel(filters.date, i18n.language)}
-              </span>
-              <Button
-                aria-label={t('appointments:view.nextWeek')}
-                onClick={() =>
-                  onFiltersChange({ ...filters, date: shiftCalendarDate(filters.date, 7) })
-                }
-                size="sm"
-                variant="ghost"
-              >
-                <ChevronRight aria-hidden="true" className="size-4" />
-              </Button>
-            </div>
-          ) : null}
+                type="date"
+                value=""
+              />
+              {filters.view === 'week' ? (
+                <div className="flex items-center gap-1">
+                  <Button
+                    aria-label={t('appointments:view.previousWeek')}
+                    onClick={() =>
+                      onFiltersChange({ ...filters, date: shiftCalendarDate(filters.date, -7) })
+                    }
+                    size="sm"
+                    variant="ghost"
+                  >
+                    <ChevronLeft aria-hidden="true" className="size-4" />
+                  </Button>
+                  <span className="text-callout text-text-secondary tabular-nums">
+                    {weekRangeLabel(filters.date, i18n.language)}
+                  </span>
+                  <Button
+                    aria-label={t('appointments:view.nextWeek')}
+                    onClick={() =>
+                      onFiltersChange({ ...filters, date: shiftCalendarDate(filters.date, 7) })
+                    }
+                    size="sm"
+                    variant="ghost"
+                  >
+                    <ChevronRight aria-hidden="true" className="size-4" />
+                  </Button>
+                </div>
+              ) : null}
+            </>
+          )}
         </div>
 
         <Button

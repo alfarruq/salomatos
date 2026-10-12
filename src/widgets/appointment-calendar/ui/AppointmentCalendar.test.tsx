@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HttpResponse, http } from 'msw'
 import { Suspense } from 'react'
@@ -49,6 +49,14 @@ describe('AppointmentCalendar', () => {
     expect(screen.getByText('Yangi Mijoz')).toBeInTheDocument()
     // A different day's appointment must not leak into this one's table.
     expect(screen.queryByText('Nodira Karimova')).not.toBeInTheDocument()
+  })
+
+  it('opens the picked date as a day view from the week view', async () => {
+    const { onFiltersChange } = renderCalendar({ view: 'week', date: '2026-09-27' })
+
+    fireEvent.change(await screen.findByLabelText('Sana'), { target: { value: '2026-10-05' } })
+
+    expect(onFiltersChange).toHaveBeenLastCalledWith({ view: 'day', date: '2026-10-05' })
   })
 
   it('does not show a date column in day view, but does in week view', async () => {
