@@ -30,7 +30,7 @@ import {
   TableRow,
   TableSkeleton,
 } from '@/shared/ui'
-import { shiftCalendarDate } from '../model/dateNav'
+import { shiftCalendarDate, weekDatesOf } from '../model/dateNav'
 import { AppointmentDayStrip } from './AppointmentDayStrip'
 import { AppointmentWeekBoard, AppointmentWeekBoardSkeleton } from './AppointmentWeekBoard'
 
@@ -41,7 +41,7 @@ export interface AppointmentCalendarProps {
   /** The shareable half of the view state, owned by the route's search params. */
   filters: AppointmentFilters
   onFiltersChange: (next: AppointmentFilters) => void
-  /** Server page for the week and all views; the day view always reads every page. */
+  /** Server page for the all view; day and week always read every page. */
   page: number
   onPageChange: (page: number) => void
 }
@@ -76,9 +76,9 @@ export function AppointmentCalendar({
   // Phone is date-only: a shared week/all link still opens as one day there.
   const filters: AppointmentFilters =
     isPhone && routeFilters.view !== 'day' ? { ...routeFilters, view: 'day' } : routeFilters
-  // The day view stays whole (today's counts and the day strip need every
-  // row); week and all can grow past what one screen should load at once.
-  const isPaged = filters.view !== 'day'
+  // Day and week are bounded by their dates and stay whole; only `all` can
+  // grow past what one screen should load at once.
+  const isPaged = filters.view === 'all'
   const dayQuery = useQuery({
     ...appointmentQueries.list(clinicId, filters),
     enabled: !isPaged,
@@ -176,9 +176,31 @@ export function AppointmentCalendar({
                 value=""
               />
               {filters.view === 'week' ? (
-                <span className="text-callout text-text-secondary">
-                  {t('appointments:view.currentWeek')}
-                </span>
+                <div className="flex items-center gap-1">
+                  <Button
+                    aria-label={t('appointments:view.previousWeek')}
+                    onClick={() =>
+                      onFiltersChange({ ...filters, date: shiftCalendarDate(filters.date, -7) })
+                    }
+                    size="sm"
+                    variant="ghost"
+                  >
+                    <ChevronLeft aria-hidden="true" className="size-4" />
+                  </Button>
+                  <span className="text-callout text-text-secondary tabular-nums">
+                    {weekRangeLabel(filters.date, i18n.language)}
+                  </span>
+                  <Button
+                    aria-label={t('appointments:view.nextWeek')}
+                    onClick={() =>
+                      onFiltersChange({ ...filters, date: shiftCalendarDate(filters.date, 7) })
+                    }
+                    size="sm"
+                    variant="ghost"
+                  >
+                    <ChevronRight aria-hidden="true" className="size-4" />
+                  </Button>
+                </div>
               ) : null}
             </>
           )}
@@ -399,6 +421,14 @@ export function AppointmentCalendar({
       )}
     </div>
   )
+}
+
+/** Monday – Sunday of the week shown, in the viewer's locale. */
+function weekRangeLabel(reference: string, locale: string): string {
+  const dates = weekDatesOf(reference)
+  const first = formatCalendarDate(dates[0] ?? reference, locale) ?? EMPTY
+  const last = formatCalendarDate(dates[6] ?? reference, locale) ?? EMPTY
+  return `${first} – ${last}`
 }
 
 /**
