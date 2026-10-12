@@ -11,6 +11,7 @@ import {
 import { CreateAppointmentDialog } from '@/features/appointment-create'
 import { DeleteAppointmentDialog } from '@/features/appointment-delete'
 import { EditAppointmentDialog } from '@/features/appointment-edit'
+import { PAGE_SIZE, type Page } from '@/shared/api/pagination'
 import { formatCalendarDate, parseCalendarDate, todayCalendarDate } from '@/shared/lib/calendarDate'
 import { useDebounce } from '@/shared/lib/useDebounce'
 import { PHONE_QUERY, useMediaQuery } from '@/shared/lib/useMediaQuery'
@@ -19,6 +20,7 @@ import {
   EmptyState,
   ErrorState,
   Input,
+  Pagination,
   QueryBoundary,
   Table,
   TableBody,
@@ -39,6 +41,9 @@ export interface AppointmentCalendarProps {
   /** The shareable half of the view state, owned by the route's search params. */
   filters: AppointmentFilters
   onFiltersChange: (next: AppointmentFilters) => void
+  /** Server page for the week and all views; the day view always reads every page. */
+  page: number
+  onPageChange: (page: number) => void
 }
 
 /** Shown when the server had nothing to send for a cell. */
@@ -55,6 +60,8 @@ export function AppointmentCalendar({
   clinicId,
   filters: routeFilters,
   onFiltersChange,
+  page,
+  onPageChange,
 }: AppointmentCalendarProps) {
   const { t, i18n } = useTranslation(['appointments', 'common'])
   const [isCreateOpen, setCreateOpen] = useState(false)
@@ -69,7 +76,24 @@ export function AppointmentCalendar({
   // Phone is date-only: a shared week/all link still opens as one day there.
   const filters: AppointmentFilters =
     isPhone && routeFilters.view !== 'day' ? { ...routeFilters, view: 'day' } : routeFilters
-  const query = useQuery(appointmentQueries.list(clinicId, filters))
+  // The day view stays whole (today's counts and the day strip need every
+  // row); week and all can grow past what one screen should load at once.
+  const isPaged = filters.view !== 'day'
+  const dayQuery = useQuery({
+    ...appointmentQueries.list(clinicId, filters),
+    enabled: !isPaged,
+    select: (results): Page<Appointment> => ({
+      count: results.length,
+      next: null,
+      previous: null,
+      results,
+    }),
+  })
+  const pageQuery = useQuery({
+    ...appointmentQueries.page(clinicId, filters, page),
+    enabled: isPaged,
+  })
+  const query = isPaged ? pageQuery : dayQuery
 
   const selectDate = (value: string) => {
     // An emptied or half-typed date input reports '' — keep the current day.
@@ -203,9 +227,10 @@ export function AppointmentCalendar({
             </Table>
           )
         }
+        isEmpty={(data) => data.results.length === 0}
         query={query}
       >
-        {(allAppointments) => {
+        {({ results: allAppointments }) => {
           const matched =
             debouncedSearch === ''
               ? allAppointments
@@ -313,6 +338,23 @@ export function AppointmentCalendar({
           )
         }}
       </QueryBoundary>
+
+      {isPaged && query.data !== undefined && query.data.count > 0 ? (
+        <Pagination
+          hasNext={query.data.next !== null}
+          hasPrevious={query.data.previous !== null}
+          isLoading={query.isFetching}
+          nextLabel={t('common:action.next')}
+          onNext={() => onPageChange(page + 1)}
+          onPrevious={() => onPageChange(page - 1)}
+          previousLabel={t('common:action.previous')}
+          summary={t('appointments:pagination.summary', {
+            count: query.data.count,
+            from: (page - 1) * PAGE_SIZE + 1,
+            to: Math.min(page * PAGE_SIZE, query.data.count),
+          })}
+        />
+      ) : null}
 
       <CreateAppointmentDialog
         clinicId={clinicId}

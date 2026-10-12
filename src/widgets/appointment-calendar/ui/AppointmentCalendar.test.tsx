@@ -25,7 +25,13 @@ function renderCalendar(filters: AppointmentFilters, onFiltersChange = vi.fn()) 
     <QueryClientProvider client={queryClient}>
       <I18nextProvider i18n={createI18n('uz-Latn')}>
         <Suspense fallback={null}>
-          <AppointmentCalendar clinicId={1} filters={filters} onFiltersChange={onFiltersChange} />
+          <AppointmentCalendar
+            clinicId={1}
+            filters={filters}
+            onFiltersChange={onFiltersChange}
+            onPageChange={vi.fn()}
+            page={1}
+          />
         </Suspense>
       </I18nextProvider>
     </QueryClientProvider>,

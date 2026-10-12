@@ -4,7 +4,7 @@ import { accessTokenFor } from '@/shared/api/mocks/fixtures'
 import { server } from '@/shared/api/mocks/server'
 import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
 import { clinicNow } from '@/shared/lib/datetime'
-import { fetchAppointments } from './queries'
+import { fetchAppointmentPage, fetchAppointments } from './queries'
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 afterEach(() => {
@@ -192,5 +192,47 @@ describe('fetchAppointments', () => {
     const appointments = await fetchAppointments({ view: 'day', date: '2026-09-27' })
 
     expect(appointments[0]?.fullName).toBe('')
+  })
+})
+
+describe('fetchAppointmentPage', () => {
+  beforeEach(() => setAccessToken(accessTokenFor('clinic')))
+
+  it("asks for one page of the week and keeps DRF's count and links", async () => {
+    let requested = new URLSearchParams()
+    server.use(
+      http.get('/api/v1/calendars/appointments/', ({ request }) => {
+        requested = new URL(request.url).searchParams
+        return HttpResponse.json({
+          count: 11,
+          next: null,
+          previous: 'https://salomatos.uz/api/v1/calendars/appointments/?date=week',
+          results: [{ id: 11, patient: 'Test', date: '2026-09-27', time: '10:00' }],
+        })
+      }),
+    )
+
+    const page = await fetchAppointmentPage({ view: 'week', date: '2026-09-27' }, 2)
+
+    expect(requested.get('date')).toBe('week')
+    expect(requested.get('page')).toBe('2')
+    expect(page.count).toBe(11)
+    expect(page.next).toBeNull()
+    expect(page.previous).not.toBeNull()
+    expect(page.results.map((appointment) => appointment.id)).toEqual([11])
+  })
+
+  it('sends no `date` and no `page` for the first page of all appointments', async () => {
+    let search: string | null = null
+    server.use(
+      http.get('/api/v1/calendars/appointments/', ({ request }) => {
+        search = new URL(request.url).search
+        return HttpResponse.json({ count: 0, next: null, previous: null, results: [] })
+      }),
+    )
+
+    await fetchAppointmentPage({ view: 'all', date: '2026-09-27' }, 1)
+
+    expect(search).toBe('')
   })
 })
