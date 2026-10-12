@@ -42,9 +42,7 @@ function AppointmentsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-title1 text-text">{t('title')}</h1>
-
+    <div className="flex flex-col">
       <AppointmentCalendar
         clinicId={clinicId}
         filters={filters}
@@ -58,6 +56,7 @@ function AppointmentsPage() {
           })
         }}
         page={search.page ?? 1}
+        title={<h1 className="text-title1 text-text">{t('title')}</h1>}
         onFiltersChange={(next) => {
           // Undefined rather than the default value, so a default never
           // reaches the URL: `/appointments` stays `/appointments` instead of
