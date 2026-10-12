@@ -13,6 +13,7 @@ import { AppointmentCalendar } from '@/widgets/appointment-calendar'
 const appointmentsSearchSchema = v.object({
   view: v.optional(v.picklist(['day', 'week', 'all'])),
   date: v.optional(v.string()),
+  page: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
 })
 
 type AppointmentsSearch = v.InferOutput<typeof appointmentsSearchSchema>
@@ -47,10 +48,21 @@ function AppointmentsPage() {
       <AppointmentCalendar
         clinicId={clinicId}
         filters={filters}
+        onPageChange={(page) => {
+          void navigate({
+            search: (previous): AppointmentsSearch => {
+              const { page: _current, ...rest } = previous
+              return page === 1 ? rest : { ...rest, page }
+            },
+            to: '/appointments',
+          })
+        }}
+        page={search.page ?? 1}
         onFiltersChange={(next) => {
           // Undefined rather than the default value, so a default never
           // reaches the URL: `/appointments` stays `/appointments` instead of
-          // becoming `/appointments?view=day&date=2026-09-27`.
+          // becoming `/appointments?view=day&date=2026-09-27`. `page` is dropped
+          // too: another view or date is a different list, starting at page 1.
           void navigate({
             search: (): AppointmentsSearch => ({
               ...(next.view === 'day' ? {} : { view: next.view }),

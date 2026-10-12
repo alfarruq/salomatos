@@ -1,4 +1,9 @@
-export { appointmentKeys, appointmentQueries, fetchAppointments } from './api/queries'
+export {
+  appointmentKeys,
+  appointmentQueries,
+  fetchAppointmentPage,
+  fetchAppointments,
+} from './api/queries'
 export {
   type AppointmentFormInput,
   appointmentFormFieldOf,

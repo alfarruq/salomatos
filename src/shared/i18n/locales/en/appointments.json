@@ -70,5 +70,8 @@
     "fri": "Fri",
     "sat": "Sat",
     "sun": "Sun"
+  },
+  "pagination": {
+    "summary": "{{from}}–{{to}} of {{count}}"
   }
 }

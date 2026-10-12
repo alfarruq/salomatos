@@ -70,5 +70,8 @@
     "fri": "Ju",
     "sat": "Sha",
     "sun": "Ya"
+  },
+  "pagination": {
+    "summary": "{{count}} tadan {{from}}–{{to}}"
   }
 }

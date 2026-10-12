@@ -70,5 +70,8 @@
     "fri": "Пт",
     "sat": "Сб",
     "sun": "Вс"
+  },
+  "pagination": {
+    "summary": "{{from}}–{{to}} из {{count}}"
   }
 }
