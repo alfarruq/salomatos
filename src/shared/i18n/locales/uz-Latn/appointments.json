@@ -6,7 +6,7 @@
   },
   "form": {
     "patient": "Bemor",
-    "patientSearchPlaceholder": "Ism bo'yicha qidirish",
+    "patientSearchPlaceholder": "Ism yozing yoki bemorni qidiring",
     "unlinkPatient": "Bemorni bog'lashni bekor qilish",
     "fullName": "F. I. Sh.",
     "fullNameLinkedHint": "Bemor biriktirilgan — ism doim uning o'z kartasidan olinadi.",
