@@ -3,6 +3,7 @@ import * as v from 'valibot'
 import { httpClient } from '@/shared/api/httpClient'
 import { type Page, pathFromNext } from '@/shared/api/pagination'
 import { cachePolicy } from '@/shared/config/cache'
+import { weekDatesOf } from '@/shared/lib/calendarDate'
 import { appointmentListSchema, toAppointment } from '../model/schema'
 import type { Appointment, AppointmentFilters } from '../model/types'
 
@@ -19,12 +20,11 @@ export const appointmentKeys = {
  * The backend filters by a real date since its 2026-10-12 update
  * (`?date=2026-10-12`), so the day view always sends the date it shows —
  * including today, which is then the clinic's day rather than the server's.
- * Week navigation still sends the literal `week` shortcut; `all` sends no
- * `date` at all.
+ * A week is read day by day (see `fetchAppointments`); `all` sends no `date`
+ * at all.
  */
 function toQueryString(filters: AppointmentFilters): string {
   if (filters.view === 'all') return ''
-  if (filters.view === 'week') return '?date=week'
   return `?date=${filters.date}`
 }
 
@@ -64,6 +64,16 @@ export async function fetchAppointments(
   filters: AppointmentFilters,
   signal?: AbortSignal,
 ): Promise<Appointment[]> {
+  // The `?date=week` shortcut only ever answers for the server's current
+  // week, so any other week could not be shown. Seven dated requests reach
+  // every week through the one filter the backend does support.
+  if (filters.view === 'week') {
+    const days = await Promise.all(
+      weekDatesOf(filters.date).map((date) => fetchAppointments({ view: 'day', date }, signal)),
+    )
+    return days.flat()
+  }
+
   const rows: unknown[] = []
   let path: string | null = `v1/calendars/appointments/${toQueryString(filters)}`
 

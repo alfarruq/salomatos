@@ -1,7 +1,7 @@
 import { MoreVertical } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { Appointment } from '@/entities/appointment'
-import type { CalendarDate } from '@/shared/lib/calendarDate'
+import { type CalendarDate, todayCalendarDate } from '@/shared/lib/calendarDate'
 import { cn } from '@/shared/lib/cn'
 import { DropdownMenu, DropdownMenuItem, Skeleton } from '@/shared/ui'
 import { weekDatesOf } from '../model/dateNav'
@@ -36,6 +36,7 @@ export function AppointmentWeekBoard({
 }: AppointmentWeekBoardProps) {
   const { t } = useTranslation(['appointments', 'common'])
   const dates = weekDatesOf(referenceDate)
+  const today = todayCalendarDate()
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-7 md:gap-3">
@@ -54,7 +55,7 @@ export function AppointmentWeekBoard({
               <span
                 className={cn(
                   'flex size-8 items-center justify-center rounded-full text-callout font-semibold',
-                  date === referenceDate ? 'bg-accent text-on-accent' : 'text-text',
+                  date === today ? 'bg-accent text-on-accent' : 'text-text',
                 )}
               >
                 {dayNumber}

@@ -133,6 +133,30 @@ describe('fetchAppointments', () => {
     expect(requested).toBe(clinicNow().date)
   })
 
+  it('reads a week as its seven dated days, so any week can be shown', async () => {
+    const requested: (string | null)[] = []
+    server.use(
+      http.get('/api/v1/calendars/appointments/', ({ request }) => {
+        const date = new URL(request.url).searchParams.get('date')
+        requested.push(date)
+        return HttpResponse.json([{ id: requested.length, patient: 'Test', date, time: '10:00' }])
+      }),
+    )
+
+    const appointments = await fetchAppointments({ view: 'week', date: '2026-10-21' })
+
+    expect([...requested].sort()).toEqual([
+      '2026-10-19',
+      '2026-10-20',
+      '2026-10-21',
+      '2026-10-22',
+      '2026-10-23',
+      '2026-10-24',
+      '2026-10-25',
+    ])
+    expect(appointments).toHaveLength(7)
+  })
+
   it('falls back to `in_progress` for a status it does not recognise, rather than throwing', async () => {
     server.use(
       http.get('/api/v1/calendars/appointments/', () =>
@@ -198,7 +222,7 @@ describe('fetchAppointments', () => {
 describe('fetchAppointmentPage', () => {
   beforeEach(() => setAccessToken(accessTokenFor('clinic')))
 
-  it("asks for one page of the week and keeps DRF's count and links", async () => {
+  it("asks for one page of all appointments and keeps DRF's count and links", async () => {
     let requested = new URLSearchParams()
     server.use(
       http.get('/api/v1/calendars/appointments/', ({ request }) => {
@@ -212,9 +236,9 @@ describe('fetchAppointmentPage', () => {
       }),
     )
 
-    const page = await fetchAppointmentPage({ view: 'week', date: '2026-09-27' }, 2)
+    const page = await fetchAppointmentPage({ view: 'all', date: '2026-09-27' }, 2)
 
-    expect(requested.get('date')).toBe('week')
+    expect(requested.get('date')).toBeNull()
     expect(requested.get('page')).toBe('2')
     expect(page.count).toBe(11)
     expect(page.next).toBeNull()

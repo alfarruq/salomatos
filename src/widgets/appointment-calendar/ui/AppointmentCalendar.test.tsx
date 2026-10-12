@@ -63,8 +63,10 @@ describe('AppointmentCalendar', () => {
     // straddles a week boundary (27th is the *previous* week’s Sunday) and so
     // cannot exercise both a Monday and a later-in-the-week column at once.
     server.use(
-      http.get('/api/v1/calendars/appointments/', () =>
-        HttpResponse.json([
+      // A week is fetched day by day, so answer each `?date=` with its own rows.
+      http.get('/api/v1/calendars/appointments/', ({ request }) => {
+        const date = new URL(request.url).searchParams.get('date')
+        const rows = [
           {
             id: 601,
             patient_id: null,
@@ -91,8 +93,9 @@ describe('AppointmentCalendar', () => {
             notes: null,
             status: 'completed',
           },
-        ]),
-      ),
+        ]
+        return HttpResponse.json(rows.filter((row) => row.date === date))
+      }),
     )
 
     renderCalendar({ view: 'week', date: '2026-09-28' })
