@@ -97,7 +97,8 @@ export function AppointmentCalendar({
 
   const selectDate = (value: string) => {
     // An emptied or half-typed date input reports '' — keep the current day.
-    if (parseCalendarDate(value) !== null) onFiltersChange({ ...filters, date: value })
+    // Picking a date always means "show me that day", whichever view was open.
+    if (parseCalendarDate(value) !== null) onFiltersChange({ view: 'day', date: value })
   }
 
   return (
@@ -164,11 +165,23 @@ export function AppointmentCalendar({
                 <ChevronRight aria-hidden="true" className="size-4" />
               </Button>
             </div>
-          ) : filters.view === 'week' ? (
-            <span className="text-callout text-text-secondary">
-              {t('appointments:view.currentWeek')}
-            </span>
-          ) : null}
+          ) : (
+            <>
+              <Input
+                aria-label={t('appointments:form.date')}
+                className="w-40"
+                onChange={(event) => selectDate(event.target.value)}
+                size="sm"
+                type="date"
+                value=""
+              />
+              {filters.view === 'week' ? (
+                <span className="text-callout text-text-secondary">
+                  {t('appointments:view.currentWeek')}
+                </span>
+              ) : null}
+            </>
+          )}
         </div>
 
         <Button
