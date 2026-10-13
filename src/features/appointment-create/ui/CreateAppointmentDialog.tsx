@@ -16,7 +16,7 @@ import { defaultPatientFilters, patientQueries } from '@/entities/patient'
 import { ApiError } from '@/shared/api/errors'
 import type { CalendarDate } from '@/shared/lib/calendarDate'
 import { useDebounce } from '@/shared/lib/useDebounce'
-import { Alert, Button, Dialog } from '@/shared/ui'
+import { Alert, Button, Dialog, toast } from '@/shared/ui'
 import { isDoctorBusyError } from '../model/isDoctorBusyError'
 import { useCreateAppointment } from '../model/useCreateAppointment'
 
@@ -35,6 +35,7 @@ export interface CreateAppointmentDialogProps {
 
 const FORM_ID = 'create-appointment-form'
 const PATIENT_SEARCH_DEBOUNCE_MS = 300
+const RESULT_TOAST = { duration: 3000, richColors: true } as const
 
 function initialFormValues(
   defaultDate: CalendarDate,
@@ -130,15 +131,21 @@ export function CreateAppointmentDialog({
         setLinkedPatient(initialPatient ?? null)
         setPatientTerm('')
         onOpenChange(false)
+        toast.success(t('appointments:create.added'), RESULT_TOAST)
       },
       onError: (error) => {
+        const failed = (message: string) => {
+          form.setError('root', { message })
+          toast.error(message, RESULT_TOAST)
+        }
+
         if (isDoctorBusyError(error)) {
-          form.setError('root', { message: t('appointments:create.doctorBusy') })
+          failed(t('appointments:create.doctorBusy'))
           return
         }
 
         if (!(error instanceof ApiError)) {
-          form.setError('root', { message: t('appointments:create.failed') })
+          failed(t('appointments:create.failed'))
           return
         }
 
@@ -149,12 +156,11 @@ export function CreateAppointmentDialog({
         }
 
         if (Object.keys(error.fieldErrors).length === 0) {
-          form.setError('root', {
-            message:
-              error.kind === 'network'
-                ? t('common:error.network')
-                : t('appointments:create.failed'),
-          })
+          failed(
+            error.kind === 'network' ? t('common:error.network') : t('appointments:create.failed'),
+          )
+        } else {
+          toast.error(t('appointments:create.failed'), RESULT_TOAST)
         }
       },
     }),

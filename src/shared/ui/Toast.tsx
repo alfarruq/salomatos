@@ -1,4 +1,19 @@
+import type { CSSProperties } from 'react'
 import { Toaster as SonnerToaster } from 'sonner'
+
+/*
+ * Sonner's own stylesheet is unlayered, so it outranks the Tailwind utilities
+ * in `classNames` on colour. Its `richColors` palette reads these variables
+ * instead, which points a toast that opts into `richColors` at our tokens.
+ */
+const RICH_COLOR_TOKENS = {
+  '--success-bg': 'var(--color-elevated)',
+  '--success-border': 'var(--color-border)',
+  '--success-text': 'var(--color-success)',
+  '--error-bg': 'var(--color-elevated)',
+  '--error-border': 'var(--color-border)',
+  '--error-text': 'var(--color-danger)',
+} as CSSProperties
 
 /**
  * Mounted once, near the root.
@@ -17,6 +32,7 @@ export function Toaster() {
       // Long enough to read a sentence, short enough not to cover a table row.
       duration={5000}
       gap={8}
+      style={RICH_COLOR_TOKENS}
       toastOptions={{
         classNames: {
           toast: [
