@@ -10,7 +10,7 @@ import {
   doctorFormSchema,
   emptyDoctorForm,
 } from '@/entities/doctor'
-import { doctorTypeQueries } from '@/entities/doctor-type'
+import { doctorTypeQueries, isDentalDoctorType } from '@/entities/doctor-type'
 import { ApiError } from '@/shared/api/errors'
 import { Alert, Button, Dialog } from '@/shared/ui'
 import { useCreateDoctor } from '../model/useCreateDoctor'
@@ -23,16 +23,6 @@ export interface CreateDoctorDialogProps {
 }
 
 const FORM_ID = 'create-doctor-form'
-
-/**
- * The type a new doctor's select opens on, if the clinic has one by this
- * name — most clinics on this product are dental (§1), and it is also the
- * server's own fallback when `DoctorTypeCreateUpdateSerializer.name` is left
- * empty. Purely a starting point: nothing enforces it, and a clinic that
- * never created a "Stomatolog" type simply gets an unassigned select, same as
- * today.
- */
-const DEFAULT_DOCTOR_TYPE_NAME = 'Stomatolog'
 
 export function CreateDoctorDialog({
   clinicId,
@@ -59,7 +49,10 @@ export function CreateDoctorDialog({
   }))
 
   const defaultDoctorTypeId = (doctorTypesQuery.data ?? []).find(
-    (doctorType) => doctorType.name === DEFAULT_DOCTOR_TYPE_NAME,
+    // Clinics type this name themselves ("Stamatolog" on the live one), so
+    // match the dental type, not one exact spelling. A clinic without one
+    // simply gets an unassigned select.
+    (doctorType) => isDentalDoctorType(doctorType.name),
   )?.id
 
   const { setValue } = form
