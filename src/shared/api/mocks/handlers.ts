@@ -421,6 +421,16 @@ export const handlers = [
     return HttpResponse.json(updated)
   }),
 
+  http.delete('/api/v1/clinic/doctors/:doctorId/', ({ request, params }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const id = Number(params['doctorId'])
+    const existing = MOCK_DOCTORS.find((doctor) => doctor.id === id)
+    if (existing === undefined) return new HttpResponse(null, { status: 404 })
+
+    return new HttpResponse(null, { status: 204 })
+  }),
+
   http.get('/api/v1/clinic/patients/:patientId/', ({ request, params }) => {
     if (authenticate(request) === null) return unauthorized()
 

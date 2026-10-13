@@ -21,7 +21,12 @@
     "empty": "Hozircha shifokor yo'q",
     "emptyDescription": "Bemor va qabullarga biriktirish uchun shifokor qo'shing.",
     "type": "Turi",
-    "typePlaceholder": "Tayinlanmagan"
+    "typePlaceholder": "Tayinlanmagan",
+    "deleteTitle": "Shifokorni o'chirish",
+    "deleteDescription": "\"{{name}}\" shifokori o'chirilsinmi?",
+    "deleteWarning": "Bu amalni ortga qaytarib bo'lmaydi. Shifokor o'chirilsa, unga doir barcha ma'lumotlar ham o'chib ketadi: uchrashuvlar, davolashlar va boshqa yozuvlar.",
+    "deleteWait": "O'chirish ({{seconds}})",
+    "deleteFailed": "Shifokorni o'chirib bo'lmadi. Qayta urinib ko'ring."
   },
   "service": {
     "name": "Xizmat",

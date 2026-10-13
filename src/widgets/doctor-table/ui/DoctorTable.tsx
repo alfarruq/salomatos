@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Pencil } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Doctor } from '@/entities/doctor'
 import { doctorQueries } from '@/entities/doctor'
 import { CreateDoctorDialog } from '@/features/doctor-create'
+import { DeleteDoctorDialog } from '@/features/doctor-delete'
 import { EditDoctorDialog } from '@/features/doctor-edit'
 import {
   Button,
@@ -40,6 +41,7 @@ export function DoctorTable({ clinicId }: DoctorTableProps) {
   const { t } = useTranslation(['admin', 'common'])
   const [isCreateOpen, setCreateOpen] = useState(false)
   const [editing, setEditing] = useState<Doctor | null>(null)
+  const [deleting, setDeleting] = useState<Doctor | null>(null)
 
   const query = useQuery(doctorQueries.list(clinicId))
 
@@ -103,14 +105,24 @@ export function DoctorTable({ clinicId }: DoctorTableProps) {
                   </TableCell>
                   <TableCell>{doctor.email ?? EMPTY}</TableCell>
                   <TableCell align="right">
-                    <Button
-                      aria-label={`${t('common:action.edit')} — ${doctor.fullName}`}
-                      onClick={() => setEditing(doctor)}
-                      size="sm"
-                      variant="ghost"
-                    >
-                      <Pencil aria-hidden="true" className="size-4" />
-                    </Button>
+                    <div className="flex justify-end gap-1">
+                      <Button
+                        aria-label={`${t('common:action.edit')} — ${doctor.fullName}`}
+                        onClick={() => setEditing(doctor)}
+                        size="sm"
+                        variant="ghost"
+                      >
+                        <Pencil aria-hidden="true" className="size-4" />
+                      </Button>
+                      <Button
+                        aria-label={`${t('common:action.delete')} — ${doctor.fullName}`}
+                        onClick={() => setDeleting(doctor)}
+                        size="sm"
+                        variant="ghost"
+                      >
+                        <Trash2 aria-hidden="true" className="size-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -127,6 +139,17 @@ export function DoctorTable({ clinicId }: DoctorTableProps) {
           doctor={editing}
           onOpenChange={(open) => {
             if (!open) setEditing(null)
+          }}
+          open
+        />
+      )}
+
+      {deleting === null ? null : (
+        <DeleteDoctorDialog
+          clinicId={clinicId}
+          doctor={deleting}
+          onOpenChange={(open) => {
+            if (!open) setDeleting(null)
           }}
           open
         />
