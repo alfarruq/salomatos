@@ -118,10 +118,28 @@ export function AppointmentCalendar({
     if (parseCalendarDate(value) !== null) onFiltersChange({ view: 'day', date: value })
   }
 
+  const searchInput = (
+    <Input
+      className="max-w-sm"
+      onChange={(event) => setSearchTerm(event.target.value)}
+      placeholder={t('appointments:search.placeholder')}
+      size="sm"
+      type="search"
+      value={searchTerm}
+    />
+  )
+
   return (
     <div className="flex flex-col gap-4">
-      {/* pb-2 on top of the column's gap keeps the page's 24px heading spacing. */}
-      {isPhone ? null : <div className="pb-2">{title}</div>}
+      {/* pb-2 on top of the column's gap keeps the page's 24px heading spacing.
+          Equal outer columns keep the search centred on the page, not in the gap
+          the heading leaves. */}
+      {isPhone ? null : (
+        <div className="grid grid-cols-[1fr_minmax(0,24rem)_1fr] items-center gap-4 pb-2">
+          {title}
+          {searchInput}
+        </div>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         {isPhone ? title : null}
         <div
@@ -250,14 +268,7 @@ export function AppointmentCalendar({
         />
       ) : null}
 
-      <Input
-        className="max-w-sm"
-        onChange={(event) => setSearchTerm(event.target.value)}
-        placeholder={t('appointments:search.placeholder')}
-        size="sm"
-        type="search"
-        value={searchTerm}
-      />
+      {isPhone ? searchInput : null}
 
       <QueryBoundary
         empty={
