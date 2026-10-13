@@ -1,8 +1,9 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { doctorTypeQueries } from '@/entities/doctor-type'
+import { doctorTypeQueries, isDentalDoctorType } from '@/entities/doctor-type'
 import {
   emptyTreatmentTypeForm,
   TreatmentTypeFormFields,
@@ -43,10 +44,32 @@ export function CreateTreatmentTypeDialog({
     label: doctorType.name,
   }))
 
+  const defaultDoctorTypeId = (doctorTypesQuery.data ?? []).find(
+    // Clinics type this name themselves ("Stamatolog" on the live one), so
+    // match the dental type, not one exact spelling. A clinic without one
+    // simply gets an unassigned select.
+    (doctorType) => isDentalDoctorType(doctorType.name),
+  )?.id
+
+  const { setValue } = form
+  // Only while the field is untouched, and without `shouldDirty` — see the
+  // same effect in `CreateDoctorDialog` for why.
+  useEffect(() => {
+    if (defaultDoctorTypeId === undefined) return
+    if (form.formState.dirtyFields.doctorTypeId) return
+
+    setValue('doctorTypeId', String(defaultDoctorTypeId))
+  }, [defaultDoctorTypeId, form.formState.dirtyFields.doctorTypeId, setValue])
+
   const handleSubmit = form.handleSubmit((values) =>
     mutate(values, {
       onSuccess: () => {
-        form.reset(emptyTreatmentTypeForm)
+        // Back to the default type, not unassigned: `reset` clears
+        // `dirtyFields`, so the effect above would not run again.
+        form.reset({
+          ...emptyTreatmentTypeForm,
+          doctorTypeId: defaultDoctorTypeId === undefined ? '' : String(defaultDoctorTypeId),
+        })
         onOpenChange(false)
       },
       onError: (error) => {
