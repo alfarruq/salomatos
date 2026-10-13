@@ -26,6 +26,7 @@
     "description": "Pick an existing patient, or enter a walk-in's name and phone number.",
     "submit": "Add appointment",
     "failed": "Could not add the appointment. Please try again.",
+    "added": "Appointment added",
     "doctorBusy": "The doctor already has a patient booked at this time. Choose another time."
   },
   "edit": {
