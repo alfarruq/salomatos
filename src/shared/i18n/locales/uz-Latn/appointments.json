@@ -74,5 +74,11 @@
   },
   "pagination": {
     "summary": "{{count}} tadan {{from}}–{{to}}"
+  },
+  "unregistered": {
+    "title": "Bemor bazada yo'q",
+    "description": "{{name}} bemorlar ro'yxatida mavjud emas. Bemor sifatida qo'shishni xohlaysizmi?",
+    "confirm": "Ha, qo'shish",
+    "cancel": "Yo'q"
   }
 }

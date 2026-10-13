@@ -10,6 +10,7 @@ export interface AppointmentWeekBoardProps {
   appointments: Appointment[]
   /** The week shown is Monday–Sunday of the week containing this date. */
   referenceDate: CalendarDate
+  onOpen: (appointment: Appointment) => void
   onEdit: (appointment: Appointment) => void
   onDelete: (appointment: Appointment) => void
 }
@@ -31,6 +32,7 @@ const EMPTY = '—'
 export function AppointmentWeekBoard({
   appointments,
   referenceDate,
+  onOpen,
   onEdit,
   onDelete,
 }: AppointmentWeekBoardProps) {
@@ -94,14 +96,20 @@ export function AppointmentWeekBoard({
                       </DropdownMenuItem>
                     </DropdownMenu>
                   </div>
-                  <span className="truncate text-body font-medium text-text">
-                    {appointment.fullName}
-                  </span>
-                  <span className="truncate text-caption text-text-secondary">
-                    {[appointment.treatmentTypeName, appointment.doctorName]
-                      .filter((value): value is string => value !== null)
-                      .join(' · ') || EMPTY}
-                  </span>
+                  <button
+                    className="flex min-w-0 flex-col gap-1 rounded-control text-left hover:underline focus-visible:ring-2 focus-visible:ring-accent"
+                    onClick={() => onOpen(appointment)}
+                    type="button"
+                  >
+                    <span className="truncate text-body font-medium text-text">
+                      {appointment.fullName}
+                    </span>
+                    <span className="truncate text-caption text-text-secondary">
+                      {[appointment.treatmentTypeName, appointment.doctorName]
+                        .filter((value): value is string => value !== null)
+                        .join(' · ') || EMPTY}
+                    </span>
+                  </button>
                 </div>
               ))}
             </div>

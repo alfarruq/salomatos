@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import * as v from 'valibot'
-import type { AppointmentFilters } from '@/entities/appointment'
+import type { AppointmentFilters, AppointmentView } from '@/entities/appointment'
 import { todayCalendarDate } from '@/shared/lib/calendarDate'
 import { AppointmentCalendar } from '@/widgets/appointment-calendar'
 
@@ -18,8 +18,11 @@ const appointmentsSearchSchema = v.object({
 
 type AppointmentsSearch = v.InferOutput<typeof appointmentsSearchSchema>
 
+/** The clinic plans by the week, so that is what the section opens on. */
+const DEFAULT_VIEW: AppointmentView = 'week'
+
 export const Route = createFileRoute('/_auth/appointments/')({
-  // A hand-edited or stale URL falls back to today's day view rather than
+  // A hand-edited or stale URL falls back to this week's view rather than
   // taking the screen down with it.
   validateSearch: (search): AppointmentsSearch => {
     const result = v.safeParse(appointmentsSearchSchema, search)
@@ -37,7 +40,7 @@ function AppointmentsPage() {
   const { clinicId } = Route.useRouteContext()
 
   const filters: AppointmentFilters = {
-    view: search.view ?? 'day',
+    view: search.view ?? DEFAULT_VIEW,
     date: search.date ?? todayCalendarDate(),
   }
 
@@ -46,6 +49,9 @@ function AppointmentsPage() {
       <AppointmentCalendar
         clinicId={clinicId}
         filters={filters}
+        onOpenPatient={(patientId) => {
+          void navigate({ params: { patientId: String(patientId) }, to: '/patients/$patientId' })
+        }}
         onPageChange={(page) => {
           void navigate({
             search: (previous): AppointmentsSearch => {
@@ -64,7 +70,7 @@ function AppointmentsPage() {
           // too: another view or date is a different list, starting at page 1.
           void navigate({
             search: (): AppointmentsSearch => ({
-              ...(next.view === 'day' ? {} : { view: next.view }),
+              ...(next.view === DEFAULT_VIEW ? {} : { view: next.view }),
               ...(next.date === todayCalendarDate() ? {} : { date: next.date }),
             }),
             to: '/appointments',

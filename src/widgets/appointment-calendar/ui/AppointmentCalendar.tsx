@@ -11,6 +11,7 @@ import {
 import { CreateAppointmentDialog } from '@/features/appointment-create'
 import { DeleteAppointmentDialog } from '@/features/appointment-delete'
 import { EditAppointmentDialog } from '@/features/appointment-edit'
+import { CreatePatientDialog } from '@/features/patient-create'
 import { PAGE_SIZE, type Page } from '@/shared/api/pagination'
 import { formatCalendarDate, parseCalendarDate, todayCalendarDate } from '@/shared/lib/calendarDate'
 import { cn } from '@/shared/lib/cn'
@@ -18,11 +19,13 @@ import { useDebounce } from '@/shared/lib/useDebounce'
 import { PHONE_QUERY, useMediaQuery } from '@/shared/lib/useMediaQuery'
 import {
   Button,
+  Dialog,
   EmptyState,
   ErrorState,
   Input,
   Pagination,
   QueryBoundary,
+  subscriberDigitsOf,
   Table,
   TableBody,
   TableCell,
@@ -45,6 +48,8 @@ export interface AppointmentCalendarProps {
   /** Server page for the all view; day and week always read every page. */
   page: number
   onPageChange: (page: number) => void
+  /** A registered patient's card; walk-ins are offered registration instead. */
+  onOpenPatient: (patientId: number) => void
   /** The page heading — shares the date picker's row on a phone, sits above the toolbar otherwise. */
   title: ReactNode
 }
@@ -65,12 +70,20 @@ export function AppointmentCalendar({
   onFiltersChange,
   page,
   onPageChange,
+  onOpenPatient,
   title,
 }: AppointmentCalendarProps) {
   const { t, i18n } = useTranslation(['appointments', 'common'])
   const [isCreateOpen, setCreateOpen] = useState(false)
   const [editing, setEditing] = useState<Appointment | null>(null)
   const [deleting, setDeleting] = useState<Appointment | null>(null)
+  const [unregistered, setUnregistered] = useState<Appointment | null>(null)
+  const [patientDraft, setPatientDraft] = useState<PatientDraft | null>(null)
+
+  const openAppointment = (appointment: Appointment) => {
+    if (appointment.patientId === null) setUnregistered(appointment)
+    else onOpenPatient(appointment.patientId)
+  }
 
   // PHI (§3): a name/phone search term never reaches the URL, unlike `filters`.
   const [searchTerm, setSearchTerm] = useState('')
@@ -298,6 +311,7 @@ export function AppointmentCalendar({
                 appointments={matched}
                 onDelete={setDeleting}
                 onEdit={setEditing}
+                onOpen={openAppointment}
                 referenceDate={filters.date}
               />
             )
@@ -316,6 +330,7 @@ export function AppointmentCalendar({
                 appointments={sorted}
                 onDelete={setDeleting}
                 onEdit={setEditing}
+                onOpen={openAppointment}
                 showDate={filters.view !== 'day'}
               />
             )
@@ -338,7 +353,11 @@ export function AppointmentCalendar({
 
               <TableBody>
                 {sorted.map((appointment) => (
-                  <TableRow key={appointment.id}>
+                  <TableRow
+                    isInteractive
+                    key={appointment.id}
+                    onClick={() => openAppointment(appointment)}
+                  >
                     {filters.view === 'day' ? null : (
                       <TableCell>
                         {formatCalendarDate(appointment.date, i18n.language) ?? EMPTY}
@@ -363,7 +382,11 @@ export function AppointmentCalendar({
                       <div className="flex justify-end gap-1">
                         <Button
                           aria-label={`${t('common:action.edit')} — ${appointment.fullName}`}
-                          onClick={() => setEditing(appointment)}
+                          onClick={(event) => {
+                            // The row itself opens the patient.
+                            event.stopPropagation()
+                            setEditing(appointment)
+                          }}
                           size="sm"
                           variant="ghost"
                         >
@@ -371,7 +394,10 @@ export function AppointmentCalendar({
                         </Button>
                         <Button
                           aria-label={`${t('common:action.delete')} — ${appointment.fullName}`}
-                          onClick={() => setDeleting(appointment)}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            setDeleting(appointment)
+                          }}
                           size="sm"
                           variant="ghost"
                         >
@@ -422,6 +448,44 @@ export function AppointmentCalendar({
         />
       )}
 
+      {unregistered === null ? null : (
+        <Dialog
+          description={t('appointments:unregistered.description', {
+            name: unregistered.fullName,
+          })}
+          footer={
+            <>
+              <Button onClick={() => setUnregistered(null)} variant="secondary">
+                {t('appointments:unregistered.cancel')}
+              </Button>
+              <Button
+                onClick={() => {
+                  setPatientDraft(patientDraftOf(unregistered))
+                  setUnregistered(null)
+                }}
+                variant="primary"
+              >
+                {t('appointments:unregistered.confirm')}
+              </Button>
+            </>
+          }
+          onOpenChange={(open) => {
+            if (!open) setUnregistered(null)
+          }}
+          open
+          title={t('appointments:unregistered.title')}
+        />
+      )}
+
+      <CreatePatientDialog
+        clinicId={clinicId}
+        onOpenChange={(open) => {
+          if (!open) setPatientDraft(null)
+        }}
+        open={patientDraft !== null}
+        {...(patientDraft === null ? {} : { initialValues: patientDraft })}
+      />
+
       {deleting === null ? null : (
         <DeleteAppointmentDialog
           appointment={deleting}
@@ -434,6 +498,20 @@ export function AppointmentCalendar({
       )}
     </div>
   )
+}
+
+interface PatientDraft {
+  fullName: string
+  phoneNumber: string
+}
+
+/** The appointment's own name and phone, in the shape the patient form expects. */
+function patientDraftOf(appointment: Appointment): PatientDraft {
+  const digits = appointment.phoneNumber === null ? '' : subscriberDigitsOf(appointment.phoneNumber)
+  return {
+    fullName: appointment.fullName,
+    phoneNumber: digits === '' ? '' : `+998${digits}`,
+  }
 }
 
 /** Monday – Sunday of the week shown, in the viewer's locale. */
@@ -453,9 +531,11 @@ function AppointmentList({
   showDate,
   onEdit,
   onDelete,
+  onOpen,
 }: {
   appointments: Appointment[]
   showDate: boolean
+  onOpen: (appointment: Appointment) => void
   onEdit: (appointment: Appointment) => void
   onDelete: (appointment: Appointment) => void
 }) {
@@ -464,27 +544,38 @@ function AppointmentList({
   return (
     <ul className="flex flex-col divide-y divide-border rounded-card border border-border bg-surface">
       {appointments.map((appointment) => (
-        <li className="flex min-h-16 items-center gap-3 py-2 pr-1 pl-4" key={appointment.id}>
-          <div className="flex w-14 shrink-0 flex-col">
-            {showDate ? (
-              <span className="text-caption text-text-tertiary">
-                {formatCalendarDate(appointment.date, i18n.language) ?? EMPTY}
+        <li className="flex min-h-16 items-center gap-1 pr-1" key={appointment.id}>
+          <button
+            className={cn(
+              'flex min-w-0 flex-1 items-center gap-3 self-stretch py-2 pl-4 text-left',
+              'transition-colors duration-150 ease-out-apple active:bg-sunken',
+            )}
+            onClick={() => onOpen(appointment)}
+            type="button"
+          >
+            <span className="flex w-14 shrink-0 flex-col">
+              {showDate ? (
+                <span className="text-caption text-text-tertiary">
+                  {formatCalendarDate(appointment.date, i18n.language) ?? EMPTY}
+                </span>
+              ) : null}
+              <span className="text-body font-semibold tabular-nums text-text">
+                {appointment.time}
               </span>
-            ) : null}
-            <span className="text-body font-semibold tabular-nums text-text">
-              {appointment.time}
             </span>
-          </div>
 
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className="truncate text-body font-medium text-text">{appointment.fullName}</span>
-            <div className="flex min-w-0 items-center gap-2">
-              <AppointmentStatusBadge status={appointment.status} />
-              <span className="truncate text-caption text-text-secondary">
-                {appointment.doctorName ?? appointment.phoneNumber ?? EMPTY}
+            <span className="flex min-w-0 flex-1 flex-col gap-1">
+              <span className="truncate text-body font-medium text-text">
+                {appointment.fullName}
               </span>
-            </div>
-          </div>
+              <span className="flex min-w-0 items-center gap-2">
+                <AppointmentStatusBadge status={appointment.status} />
+                <span className="truncate text-caption text-text-secondary">
+                  {appointment.doctorName ?? appointment.phoneNumber ?? EMPTY}
+                </span>
+              </span>
+            </span>
+          </button>
 
           <div className="flex shrink-0">
             <Button

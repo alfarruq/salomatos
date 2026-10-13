@@ -21,6 +21,8 @@ export interface CreatePatientDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onCreated?: () => void
+  /** Pre-filled on every opening, e.g. from a walk-in appointment being registered. */
+  initialValues?: Partial<Pick<PatientFormInput, 'fullName' | 'phoneNumber'>>
 }
 
 export function CreatePatientDialog({
@@ -28,6 +30,7 @@ export function CreatePatientDialog({
   open,
   onOpenChange,
   onCreated,
+  initialValues,
 }: CreatePatientDialogProps) {
   const { t } = useTranslation(['patients', 'common'])
 
@@ -50,6 +53,14 @@ export function CreatePatientDialog({
       form.setValue('birthDate', clinicNow().date)
     }
   }, [open, form])
+
+  // Reset rather than setValue: a previous walk-in's leftovers must not
+  // survive into the next one's form.
+  useEffect(() => {
+    if (open && initialValues !== undefined) {
+      form.reset({ ...emptyPatientForm, ...initialValues, birthDate: clinicNow().date })
+    }
+  }, [open, initialValues, form])
 
   const { mutate, isPending } = useCreatePatient(clinicId)
 

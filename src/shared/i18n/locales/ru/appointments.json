@@ -74,5 +74,11 @@
   },
   "pagination": {
     "summary": "{{from}}–{{to}} из {{count}}"
+  },
+  "unregistered": {
+    "title": "Пациента нет в базе",
+    "description": "{{name}} нет в списке пациентов. Добавить как пациента?",
+    "confirm": "Да, добавить",
+    "cancel": "Нет"
   }
 }

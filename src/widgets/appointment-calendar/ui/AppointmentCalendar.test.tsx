@@ -19,7 +19,11 @@ afterEach(() => {
 })
 afterAll(() => server.close())
 
-function renderCalendar(filters: AppointmentFilters, onFiltersChange = vi.fn()) {
+function renderCalendar(
+  filters: AppointmentFilters,
+  onFiltersChange = vi.fn(),
+  onOpenPatient = vi.fn(),
+) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
     <QueryClientProvider client={queryClient}>
@@ -29,6 +33,7 @@ function renderCalendar(filters: AppointmentFilters, onFiltersChange = vi.fn()) 
             clinicId={1}
             filters={filters}
             onFiltersChange={onFiltersChange}
+            onOpenPatient={onOpenPatient}
             onPageChange={vi.fn()}
             page={1}
             title={null}
@@ -37,7 +42,7 @@ function renderCalendar(filters: AppointmentFilters, onFiltersChange = vi.fn()) 
       </I18nextProvider>
     </QueryClientProvider>,
   )
-  return { onFiltersChange }
+  return { onFiltersChange, onOpenPatient }
 }
 
 describe('AppointmentCalendar', () => {
@@ -50,6 +55,28 @@ describe('AppointmentCalendar', () => {
     expect(screen.getByText('Yangi Mijoz')).toBeInTheDocument()
     // A different day's appointment must not leak into this one's table.
     expect(screen.queryByText('Nodira Karimova')).not.toBeInTheDocument()
+  })
+
+  it("opens a registered patient's card from their appointment", async () => {
+    const onOpenPatient = vi.fn()
+    renderCalendar({ view: 'day', date: '2026-09-27' }, vi.fn(), onOpenPatient)
+
+    await userEvent.click(await screen.findByText('Vali Aliyev'))
+
+    expect(onOpenPatient).toHaveBeenCalledWith(101)
+  })
+
+  it('offers to register a walk-in, pre-filled from the appointment', async () => {
+    const onOpenPatient = vi.fn()
+    renderCalendar({ view: 'day', date: '2026-09-27' }, vi.fn(), onOpenPatient)
+
+    await userEvent.click(await screen.findByText('Yangi Mijoz'))
+    expect(await screen.findByText("Bemor bazada yo'q")).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: "Ha, qo'shish" }))
+
+    expect(await screen.findByLabelText('F. I. Sh.')).toHaveValue('Yangi Mijoz')
+    expect(screen.getByLabelText('Telefon raqami')).toHaveValue('90-765-43-21')
+    expect(onOpenPatient).not.toHaveBeenCalled()
   })
 
   it('opens the picked date as a day view from the week view', async () => {

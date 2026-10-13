@@ -74,5 +74,11 @@
   },
   "pagination": {
     "summary": "{{from}}–{{to}} of {{count}}"
+  },
+  "unregistered": {
+    "title": "Patient not registered",
+    "description": "{{name}} is not in the patient list. Add them as a patient?",
+    "confirm": "Yes, add",
+    "cancel": "No"
   }
 }
