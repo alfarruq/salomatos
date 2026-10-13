@@ -17,6 +17,7 @@ import { ApiError } from '@/shared/api/errors'
 import type { CalendarDate } from '@/shared/lib/calendarDate'
 import { useDebounce } from '@/shared/lib/useDebounce'
 import { Alert, Button, Dialog } from '@/shared/ui'
+import { isDoctorBusyError } from '../model/isDoctorBusyError'
 import { useCreateAppointment } from '../model/useCreateAppointment'
 
 export interface CreateAppointmentDialogProps {
@@ -131,6 +132,11 @@ export function CreateAppointmentDialog({
         onOpenChange(false)
       },
       onError: (error) => {
+        if (isDoctorBusyError(error)) {
+          form.setError('root', { message: t('appointments:create.doctorBusy') })
+          return
+        }
+
         if (!(error instanceof ApiError)) {
           form.setError('root', { message: t('appointments:create.failed') })
           return
