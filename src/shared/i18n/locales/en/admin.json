@@ -21,7 +21,12 @@
     "empty": "No doctors yet",
     "emptyDescription": "Add a doctor so they can be assigned to patients and appointments.",
     "type": "Type",
-    "typePlaceholder": "Not assigned"
+    "typePlaceholder": "Not assigned",
+    "deleteTitle": "Delete doctor",
+    "deleteDescription": "Delete doctor “{{name}}”?",
+    "deleteWarning": "This cannot be undone. Deleting the doctor will also delete all data related to them: appointments, treatments and other records.",
+    "deleteWait": "Delete ({{seconds}})",
+    "deleteFailed": "Could not delete the doctor. Please try again."
   },
   "service": {
     "name": "Service",
