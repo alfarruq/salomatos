@@ -25,7 +25,8 @@
     "title": "Yangi uchrashuv",
     "description": "Mavjud bemorni tanlang yoki yangi kishining ismi va telefonini kiriting.",
     "submit": "Uchrashuv qo'shish",
-    "failed": "Uchrashuvni qo'shib bo'lmadi. Qayta urinib ko'ring."
+    "failed": "Uchrashuvni qo'shib bo'lmadi. Qayta urinib ko'ring.",
+    "doctorBusy": "Shifokorda bu vaqtga bemor yozilgan. Boshqa vaqtni tanlang."
   },
   "edit": {
     "title": "Uchrashuvni tahrirlash",
