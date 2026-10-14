@@ -44,6 +44,8 @@ const statusSchema = v.optional(
 
 export const treatmentSchema = v.object({
   id: v.pipe(v.number(), v.integer()),
+  patient_id: optionalNumber,
+  patient: optionalString,
   doctor: optionalString,
   treatment_type: optionalString,
   total_treatment_cost: optionalNumber,
@@ -74,6 +76,8 @@ function toCalendarDateOrNull(value: string | null) {
 export function toTreatment(response: TreatmentResponse): Treatment {
   return {
     id: response.id,
+    patientId: response.patient_id,
+    patientName: response.patient,
     doctorName: response.doctor,
     treatmentTypeName: response.treatment_type,
     totalTreatmentCost: response.total_treatment_cost,

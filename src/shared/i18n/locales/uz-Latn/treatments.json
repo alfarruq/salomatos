@@ -72,5 +72,15 @@
   "chart": {
     "completed": "Tugallangan",
     "inProgress": "Jarayonda"
+  },
+  "list": {
+    "title": "Muolajalar",
+    "columnPatient": "Bemor",
+    "columnDoctor": "Shifokor",
+    "columnVisit": "Tashrif",
+    "columnPaid": "To'langan",
+    "empty": "Hozircha muolaja yo'q",
+    "emptyDescription": "Muolajalar bemor sahifasida qo'shiladi.",
+    "summary": "{{count}} tadan {{from}}–{{to}}"
   }
 }

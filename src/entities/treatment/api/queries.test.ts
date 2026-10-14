@@ -30,6 +30,8 @@ describe('fetchTreatments', () => {
     expect(treatments).toHaveLength(2)
     expect(treatments[0]).toEqual({
       id: 1,
+      patientId: 101,
+      patientName: 'Vali Aliyev',
       doctorName: 'Sardor Usmonov',
       treatmentTypeName: 'Implantatsiya',
       totalTreatmentCost: 4_000_000,
@@ -100,6 +102,8 @@ describe('fetchTreatments', () => {
     expect(treatments).toEqual([
       {
         id: 9,
+        patientId: null,
+        patientName: null,
         doctorName: null,
         treatmentTypeName: null,
         totalTreatmentCost: null,

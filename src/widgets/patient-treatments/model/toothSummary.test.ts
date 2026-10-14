@@ -5,6 +5,8 @@ import { summarizeTeeth } from './toothSummary'
 function treatment(overrides: Partial<Treatment>): Treatment {
   return {
     id: 1,
+    patientId: null,
+    patientName: null,
     doctorName: null,
     treatmentTypeName: 'Plomba',
     totalTreatmentCost: null,
