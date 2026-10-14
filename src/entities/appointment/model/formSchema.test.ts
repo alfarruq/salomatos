@@ -11,10 +11,14 @@ const BASE = {
 }
 
 describe('toAppointmentPayload', () => {
-  it('sends the treatment type and tooth as integers when picked', () => {
-    const payload = toAppointmentPayload({ ...BASE, treatmentTypeId: '7', toothNumber: '16' })
+  it('sends the treatment type by name and the tooth as an integer', () => {
+    const payload = toAppointmentPayload({
+      ...BASE,
+      treatmentTypeName: 'Implantatsiya',
+      toothNumber: '16',
+    })
 
-    expect(payload).toMatchObject({ treatment_type: 7, tooth_number: 16 })
+    expect(payload).toMatchObject({ treatment_type: 'Implantatsiya', tooth_number: 16 })
   })
 
   it('leaves both out when nothing was picked, so an edit cannot clear them', () => {

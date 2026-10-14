@@ -37,10 +37,12 @@ export const appointmentFormSchema = v.object({
   ),
   time: v.pipe(v.string(), v.regex(TIME, 'validation.invalid')),
   /**
-   * An `entities/treatment-type` id as a string; `''` means none picked.
-   * Optional — existing appointments come back with `treatment_type: null`.
+   * An `entities/treatment-type` **name**, not its id — the published write
+   * schema declares `treatment_type` a string here, unlike
+   * `/clinic/treatments/`. `''` means none picked; optional, since existing
+   * appointments come back with `treatment_type: null`.
    */
-  treatmentTypeId: v.string(),
+  treatmentTypeName: v.string(),
   /** An FDI tooth number as a string; `''` unless the doctor is a dentist. */
   toothNumber: v.string(),
   notes: v.string(),
@@ -56,7 +58,7 @@ export const emptyAppointmentForm: AppointmentFormInput = {
   doctorId: '',
   date: '',
   time: '',
-  treatmentTypeId: '',
+  treatmentTypeName: '',
   toothNumber: '',
   notes: '',
   status: 'in_progress',
@@ -71,8 +73,7 @@ export function toAppointmentForm(appointment: Appointment): AppointmentFormInpu
     doctorId: appointment.doctorId === null ? '' : String(appointment.doctorId),
     date: appointment.date,
     time: appointment.time,
-    // The read side gives a name (if anything), not the id the select needs.
-    treatmentTypeId: '',
+    treatmentTypeName: '',
     toothNumber: '',
     notes: appointment.notes ?? '',
     status: appointment.status,
@@ -93,7 +94,7 @@ export function toAppointmentPayload(
     status: input.status,
     // Omitted rather than `null` when empty, so an edit that never showed
     // these fields cannot clear what is already stored.
-    ...(input.treatmentTypeId === '' ? {} : { treatment_type: Number(input.treatmentTypeId) }),
+    ...(input.treatmentTypeName === '' ? {} : { treatment_type: input.treatmentTypeName }),
     ...(input.toothNumber === '' ? {} : { tooth_number: Number(input.toothNumber) }),
   }
 }
@@ -105,7 +106,7 @@ const SERVER_FIELD_NAMES: Record<string, keyof AppointmentFormInput> = {
   doctor: 'doctorId',
   date: 'date',
   time: 'time',
-  treatment_type: 'treatmentTypeId',
+  treatment_type: 'treatmentTypeName',
   tooth_number: 'toothNumber',
   notes: 'notes',
   status: 'status',

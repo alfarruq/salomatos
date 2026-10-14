@@ -108,7 +108,8 @@ export function CreateAppointmentDialog({
       ? []
       : (treatmentTypesQuery.data ?? [])
           .filter((type) => type.doctorTypeName === specialty)
-          .map((type) => ({ value: String(type.id), label: type.name }))
+          // The write field takes the name, not the id — see `formSchema.ts`.
+          .map((type) => ({ value: type.name, label: type.name }))
   const treatmentType: AppointmentTreatmentTypeProps = {
     options: specialtyTypeOptions,
     emptyHint:

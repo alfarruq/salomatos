@@ -207,7 +207,7 @@ export function AppointmentFormFields({
                 // A type picked for the previous doctor is not one the new
                 // doctor performs, and a tooth means nothing to a non-dentist.
                 if (treatmentType !== undefined && value !== field.value) {
-                  form.setValue('treatmentTypeId', '')
+                  form.setValue('treatmentTypeName', '')
                   form.setValue('toothNumber', '')
                 }
               }}
@@ -223,12 +223,12 @@ export function AppointmentFormFields({
         <div className={treatmentType.showToothNumber ? 'grid grid-cols-2 gap-4' : undefined}>
           <Field
             description={treatmentType.emptyHint ?? undefined}
-            error={message(errors.treatmentTypeId?.message)}
+            error={message(errors.treatmentTypeName?.message)}
             label={t('appointments:form.treatmentType')}
           >
             <Controller
               control={form.control}
-              name="treatmentTypeId"
+              name="treatmentTypeName"
               render={({ field }) => (
                 <Select
                   disabled={isDisabled || treatmentType.options.length === 0}
