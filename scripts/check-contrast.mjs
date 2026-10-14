@@ -43,7 +43,7 @@ const TEXT_PAIRS = [
  */
 const UI_PAIRS = [
   ['accent', ['canvas', 'surface', 'elevated']],
-  // Week-board stripe and dot: on a card (surface) or a completed one (sunken).
+  // Week-board doctor dot: on a card (surface) or a completed one (sunken).
   ...Array.from({ length: 8 }, (_, index) => [
     `doctor-${index + 1}`,
     ['canvas', 'surface', 'elevated', 'sunken'],

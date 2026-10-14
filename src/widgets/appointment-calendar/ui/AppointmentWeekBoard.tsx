@@ -72,10 +72,8 @@ export function AppointmentWeekBoard({
                 return (
                   <div
                     className={cn(
-                      // The stripe says who; the fill only says whether it is done.
-                      'flex flex-col gap-1 rounded-card border border-l-4 border-border p-3',
-                      color.stripe,
-                      isCompleted ? 'bg-sunken' : 'bg-surface',
+                      'flex flex-col gap-1 rounded-card border border-border p-3',
+                      isCompleted ? 'bg-sunken' : 'bg-success/10',
                     )}
                     key={appointment.id}
                   >
