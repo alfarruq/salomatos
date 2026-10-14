@@ -1,10 +1,10 @@
-import { CircleCheck, MoreVertical } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CircleCheck, MoreVertical } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { Appointment } from '@/entities/appointment'
 import { doctorColorOf } from '@/entities/doctor'
 import { type CalendarDate, todayCalendarDate } from '@/shared/lib/calendarDate'
 import { cn } from '@/shared/lib/cn'
-import { DropdownMenu, DropdownMenuItem, Skeleton } from '@/shared/ui'
+import { Button, DropdownMenu, DropdownMenuItem, Skeleton } from '@/shared/ui'
 import { weekDatesOf } from '../model/dateNav'
 
 export interface AppointmentWeekBoardProps {
@@ -27,8 +27,8 @@ const EMPTY = '—'
  * grouping by `appointment.date`: whatever the week endpoint sends, only rows
  * that actually land in this Monday–Sunday range get a column to sit in.
  *
- * Below `md` the columns become stacked rows: seven columns on a phone leave
- * each card about forty pixels wide.
+ * Only rendered from `md` up — a phone is always shown one day — and always
+ * under `AppointmentWeekHeader`, whose arrow gutters `px-16` leaves room for.
  */
 export function AppointmentWeekBoard({
   appointments,
@@ -39,32 +39,16 @@ export function AppointmentWeekBoard({
 }: AppointmentWeekBoardProps) {
   const { t } = useTranslation(['appointments', 'common'])
   const dates = weekDatesOf(referenceDate)
-  const today = todayCalendarDate()
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-7 md:gap-3">
-      {dates.map((date, index) => {
-        const dayNumber = Number(date.slice(-2))
+    <div className="grid grid-cols-7 gap-3 px-16">
+      {dates.map((date) => {
         const dayAppointments = appointments
           .filter((appointment) => appointment.date === date)
           .sort((a, b) => a.time.localeCompare(b.time))
 
         return (
           <div className="flex flex-col gap-2" key={date}>
-            <div className="flex items-center gap-2 pb-1 md:flex-col md:gap-1">
-              <span className="text-caption text-text-secondary">
-                {t(`appointments:weekday.${WEEKDAY_KEYS[index]}`)}
-              </span>
-              <span
-                className={cn(
-                  'flex size-8 items-center justify-center rounded-full text-callout font-semibold',
-                  date === today ? 'bg-accent text-on-accent' : 'text-text',
-                )}
-              >
-                {dayNumber}
-              </span>
-            </div>
-
             <div className="flex flex-col gap-2">
               {dayAppointments.map((appointment) => {
                 const color = doctorColorOf(appointment.doctorId)
@@ -140,14 +124,79 @@ export function AppointmentWeekBoard({
   )
 }
 
+export interface AppointmentWeekHeaderProps {
+  /** The week shown is Monday–Sunday of the week containing this date. */
+  referenceDate: CalendarDate
+  onPreviousWeek: () => void
+  onNextWeek: () => void
+}
+
+/**
+ * The weekday row with the week's previous/next arrows at either end. Kept
+ * apart from the board so the arrows stay on screen while a week is loading,
+ * empty or filtered down to nothing — otherwise there would be no way out of
+ * an empty week.
+ */
+export function AppointmentWeekHeader({
+  referenceDate,
+  onPreviousWeek,
+  onNextWeek,
+}: AppointmentWeekHeaderProps) {
+  const { t } = useTranslation('appointments')
+  const dates = weekDatesOf(referenceDate)
+  const today = todayCalendarDate()
+
+  return (
+    // size-12 arrows + gap-4 = the board's px-16, so day columns line up.
+    <div className="flex items-center gap-4">
+      <Button
+        aria-label={t('view.previousWeek')}
+        className="size-12 shrink-0 px-0"
+        onClick={onPreviousWeek}
+        size="sm"
+        variant="ghost"
+      >
+        <ChevronLeft aria-hidden="true" className="size-5" />
+      </Button>
+
+      <div className="grid flex-1 grid-cols-7 gap-3">
+        {dates.map((date, index) => (
+          <div className="flex flex-col items-center gap-1 pb-1" key={date}>
+            <span className="text-caption text-text-secondary">
+              {t(`weekday.${WEEKDAY_KEYS[index]}`)}
+            </span>
+            <span
+              className={cn(
+                'flex size-8 items-center justify-center rounded-full text-callout font-semibold',
+                date === today ? 'bg-accent text-on-accent' : 'text-text',
+              )}
+            >
+              {Number(date.slice(-2))}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <Button
+        aria-label={t('view.nextWeek')}
+        className="size-12 shrink-0 px-0"
+        onClick={onNextWeek}
+        size="sm"
+        variant="ghost"
+      >
+        <ChevronRight aria-hidden="true" className="size-5" />
+      </Button>
+    </div>
+  )
+}
+
 /** Matches `AppointmentWeekBoard`'s column layout, not a generic table skeleton. */
 export function AppointmentWeekBoardSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-7 md:gap-3">
+    <div className="grid grid-cols-7 gap-3 px-16">
       {Array.from({ length: 7 }, (_, index) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: placeholders have no identity and never reorder
         <div className="flex flex-col gap-2" key={`weekday-skeleton-${index}`}>
-          <Skeleton className="h-12 w-full" />
           <Skeleton className="h-20 w-full" />
           <Skeleton className="h-20 w-full" />
         </div>

@@ -11,7 +11,7 @@ import { AppointmentCalendar } from '@/widgets/appointment-calendar'
  * Tuesday's day view" is the point of putting it in the URL at all.
  */
 const appointmentsSearchSchema = v.object({
-  view: v.optional(v.picklist(['day', 'week', 'all'])),
+  view: v.optional(v.picklist(['day', 'week'])),
   date: v.optional(v.string()),
   page: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
   // A staff id, not PHI — the same kind of id `/patients/$patientId` carries.
@@ -73,7 +73,8 @@ function AppointmentsPage() {
           // too: another view or date is a different list, starting at page 1.
           void navigate({
             search: (): AppointmentsSearch => ({
-              ...(next.view === DEFAULT_VIEW ? {} : { view: next.view }),
+              // The widget still types `all`, but no longer offers it.
+              ...(next.view === DEFAULT_VIEW || next.view === 'all' ? {} : { view: next.view }),
               ...(next.date === todayCalendarDate() ? {} : { date: next.date }),
               ...(next.doctorId === undefined ? {} : { doctorId: next.doctorId }),
             }),

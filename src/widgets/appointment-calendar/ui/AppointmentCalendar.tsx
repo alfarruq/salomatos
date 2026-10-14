@@ -36,9 +36,13 @@ import {
   TableRow,
   TableSkeleton,
 } from '@/shared/ui'
-import { shiftCalendarDate, weekDatesOf } from '../model/dateNav'
+import { shiftCalendarDate } from '../model/dateNav'
 import { AppointmentDayStrip } from './AppointmentDayStrip'
-import { AppointmentWeekBoard, AppointmentWeekBoardSkeleton } from './AppointmentWeekBoard'
+import {
+  AppointmentWeekBoard,
+  AppointmentWeekBoardSkeleton,
+  AppointmentWeekHeader,
+} from './AppointmentWeekBoard'
 
 const SEARCH_DEBOUNCE_MS = 300
 
@@ -196,12 +200,11 @@ export function AppointmentCalendar({
               aria-label={t('appointments:view.label')}
               className="m-0 flex gap-1 border-0 p-0"
             >
-              {(['day', 'week', 'all'] as const).map((view) => (
+              {(['day', 'week'] as const).map((view) => (
                 <Button
                   key={view}
-                  // A week/all-time view has no navigable "current date" (§
-                  // widget doc) — switching always lands on today rather than
-                  // keeping whatever day was mid-navigation in day view.
+                  // Switching always lands on today rather than keeping
+                  // whatever day was mid-navigation in the other view.
                   onClick={() =>
                     onFiltersChange({ view, date: todayCalendarDate(), ...doctorFilter })
                   }
@@ -255,33 +258,6 @@ export function AppointmentCalendar({
                 type="date"
                 value=""
               />
-              {filters.view === 'week' ? (
-                <div className="flex items-center gap-1">
-                  <Button
-                    aria-label={t('appointments:view.previousWeek')}
-                    onClick={() =>
-                      onFiltersChange({ ...filters, date: shiftCalendarDate(filters.date, -7) })
-                    }
-                    size="sm"
-                    variant="ghost"
-                  >
-                    <ChevronLeft aria-hidden="true" className="size-4" />
-                  </Button>
-                  <span className="text-callout text-text-secondary tabular-nums">
-                    {weekRangeLabel(filters.date, i18n.language)}
-                  </span>
-                  <Button
-                    aria-label={t('appointments:view.nextWeek')}
-                    onClick={() =>
-                      onFiltersChange({ ...filters, date: shiftCalendarDate(filters.date, 7) })
-                    }
-                    size="sm"
-                    variant="ghost"
-                  >
-                    <ChevronRight aria-hidden="true" className="size-4" />
-                  </Button>
-                </div>
-              ) : null}
             </>
           )}
 
@@ -298,6 +274,18 @@ export function AppointmentCalendar({
           {t('appointments:create.submit')}
         </Button>
       </div>
+
+      {!isPhone && filters.view === 'week' ? (
+        <AppointmentWeekHeader
+          onNextWeek={() =>
+            onFiltersChange({ ...filters, date: shiftCalendarDate(filters.date, 7) })
+          }
+          onPreviousWeek={() =>
+            onFiltersChange({ ...filters, date: shiftCalendarDate(filters.date, -7) })
+          }
+          referenceDate={filters.date}
+        />
+      ) : null}
 
       {isPhone ? (
         <AppointmentDayStrip
@@ -566,14 +554,6 @@ function patientDraftOf(appointment: Appointment): PatientDraft {
     fullName: appointment.fullName,
     phoneNumber: digits === '' ? '' : `+998${digits}`,
   }
-}
-
-/** Monday – Sunday of the week shown, in the viewer's locale. */
-function weekRangeLabel(reference: string, locale: string): string {
-  const dates = weekDatesOf(reference)
-  const first = formatCalendarDate(dates[0] ?? reference, locale) ?? EMPTY
-  const last = formatCalendarDate(dates[6] ?? reference, locale) ?? EMPTY
-  return `${first} – ${last}`
 }
 
 /**
