@@ -7,10 +7,10 @@ describe('doctorColorOf', () => {
   })
 
   it('tells neighbouring doctors apart', () => {
-    expect(doctorColorOf(2).stripe).not.toBe(doctorColorOf(3).stripe)
+    expect(doctorColorOf(2).dot).not.toBe(doctorColorOf(3).dot)
   })
 
-  it('falls back to a neutral stripe when no doctor is assigned', () => {
-    expect(doctorColorOf(null).stripe).toBe('border-l-border-strong')
+  it('falls back to a neutral dot when no doctor is assigned', () => {
+    expect(doctorColorOf(null).dot).toBe('bg-border-strong')
   })
 })
