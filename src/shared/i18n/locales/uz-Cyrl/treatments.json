@@ -72,5 +72,15 @@
   "chart": {
     "completed": "Тугалланган",
     "inProgress": "Жараёнда"
+  },
+  "list": {
+    "title": "Муолажалар",
+    "columnPatient": "Бемор",
+    "columnDoctor": "Шифокор",
+    "columnVisit": "Ташриф",
+    "columnPaid": "Тўланган",
+    "empty": "Ҳозирча муолажа йўқ",
+    "emptyDescription": "Муолажалар бемор саҳифасида қўшилади.",
+    "summary": "{{count}} тадан {{from}}–{{to}}"
   }
 }

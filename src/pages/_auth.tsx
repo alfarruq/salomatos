@@ -192,6 +192,17 @@ function AuthenticatedLayout() {
               </Link>
             </li>
           </Can>
+          {/* Treatments are medical records — doctors and the desk both read them. */}
+          <Can permission="medical-record:read">
+            <li>
+              <Link
+                className="block rounded-control px-3 py-2 text-body text-text-secondary hover:bg-sunken hover:text-text"
+                to="/treatments"
+              >
+                {t('nav.treatments')}
+              </Link>
+            </li>
+          </Can>
           <Can permission="appointment:read">
             <li>
               <Link

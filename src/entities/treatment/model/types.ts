@@ -17,6 +17,9 @@ export type TreatmentStatus = 'in_progress' | 'completed'
  */
 export interface Treatment {
   id: number
+  /** Sent beside the name on the list endpoint — the clinic-wide table links by it. */
+  patientId: number | null
+  patientName: string | null
   doctorName: string | null
   treatmentTypeName: string | null
   totalTreatmentCost: number | null

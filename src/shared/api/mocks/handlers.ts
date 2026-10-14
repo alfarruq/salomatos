@@ -487,9 +487,25 @@ export const handlers = [
   http.get('/api/v1/clinic/treatments/', ({ request }) => {
     if (authenticate(request) === null) return unauthorized()
 
-    const patientId = Number(new URL(request.url).searchParams.get('patient_id'))
-    const results = MOCK_TREATMENTS[patientId] ?? []
-    return HttpResponse.json({ count: results.length, next: null, previous: null, results })
+    const params = new URL(request.url).searchParams
+    const rawPatientId = params.get('patient_id')
+
+    if (rawPatientId !== null) {
+      const results = MOCK_TREATMENTS[Number(rawPatientId)] ?? []
+      return HttpResponse.json({ count: results.length, next: null, previous: null, results })
+    }
+
+    // No patient: the whole clinic, a page at a time — confirmed live 2026-10-14.
+    const all = Object.values(MOCK_TREATMENTS).flat()
+    const page = Number(params.get('page') ?? '1')
+    const start = (page - 1) * PAGE_SIZE
+    const url = (n: number) => `http://localhost/api/v1/clinic/treatments/?page=${n}`
+    return HttpResponse.json({
+      count: all.length,
+      next: start + PAGE_SIZE < all.length ? url(page + 1) : null,
+      previous: page > 1 ? url(page - 1) : null,
+      results: all.slice(start, start + PAGE_SIZE),
+    })
   }),
 
   /** 204 with no body, confirmed live. Stateless, like every other write here. */

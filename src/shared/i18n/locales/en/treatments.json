@@ -72,5 +72,15 @@
   "chart": {
     "completed": "Completed",
     "inProgress": "In progress"
+  },
+  "list": {
+    "title": "Treatments",
+    "columnPatient": "Patient",
+    "columnDoctor": "Doctor",
+    "columnVisit": "Visit",
+    "columnPaid": "Paid",
+    "empty": "No treatments yet",
+    "emptyDescription": "Treatments are added on a patient's page.",
+    "summary": "{{from}}–{{to}} of {{count}}"
   }
 }

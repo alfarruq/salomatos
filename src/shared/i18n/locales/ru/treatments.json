@@ -72,5 +72,15 @@
   "chart": {
     "completed": "Завершено",
     "inProgress": "В процессе"
+  },
+  "list": {
+    "title": "Лечение",
+    "columnPatient": "Пациент",
+    "columnDoctor": "Врач",
+    "columnVisit": "Визит",
+    "columnPaid": "Оплачено",
+    "empty": "Пока нет лечений",
+    "emptyDescription": "Лечение добавляется на странице пациента.",
+    "summary": "{{from}}–{{to}} из {{count}}"
   }
 }

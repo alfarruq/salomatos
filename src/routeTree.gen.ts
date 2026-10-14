@@ -22,6 +22,7 @@ import { Route as AuthAdminServicesRouteImport } from './pages/_auth/admin/servi
 import { Route as AuthAppointmentsIndexRouteImport } from './pages/_auth/appointments/index'
 import { Route as AuthPatientsIndexRouteImport } from './pages/_auth/patients/index'
 import { Route as AuthPatientsPatientIdRouteImport } from './pages/_auth/patients/$patientId'
+import { Route as AuthTreatmentsIndexRouteImport } from './pages/_auth/treatments/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -87,6 +88,11 @@ const AuthPatientsPatientIdRoute = AuthPatientsPatientIdRouteImport.update({
   path: '/patients/$patientId',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthTreatmentsIndexRoute = AuthTreatmentsIndexRouteImport.update({
+  id: '/treatments/',
+  path: '/treatments/',
+  getParentRoute: () => AuthRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthAdminIndexRoute
   '/appointments/': typeof AuthAppointmentsIndexRoute
   '/patients/': typeof AuthPatientsIndexRoute
+  '/treatments/': typeof AuthTreatmentsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthAdminIndexRoute
   '/appointments': typeof AuthAppointmentsIndexRoute
   '/patients': typeof AuthPatientsIndexRoute
+  '/treatments': typeof AuthTreatmentsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/_auth/admin/': typeof AuthAdminIndexRoute
   '/_auth/appointments/': typeof AuthAppointmentsIndexRoute
   '/_auth/patients/': typeof AuthPatientsIndexRoute
+  '/_auth/treatments/': typeof AuthTreatmentsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/appointments/'
     | '/patients/'
+    | '/treatments/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/appointments'
     | '/patients'
+    | '/treatments'
   id:
     | '__root__'
     | '/'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/_auth/admin/'
     | '/_auth/appointments/'
     | '/_auth/patients/'
+    | '/_auth/treatments/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -275,6 +287,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthPatientsPatientIdRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/treatments/': {
+      id: '/_auth/treatments/'
+      path: '/treatments'
+      fullPath: '/treatments/'
+      preLoaderRoute: typeof AuthTreatmentsIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
   }
 }
 
@@ -304,6 +323,7 @@ interface AuthRouteChildren {
   AuthPatientsPatientIdRoute: typeof AuthPatientsPatientIdRoute
   AuthAppointmentsIndexRoute: typeof AuthAppointmentsIndexRoute
   AuthPatientsIndexRoute: typeof AuthPatientsIndexRoute
+  AuthTreatmentsIndexRoute: typeof AuthTreatmentsIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
@@ -312,6 +332,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthPatientsPatientIdRoute: AuthPatientsPatientIdRoute,
   AuthAppointmentsIndexRoute: AuthAppointmentsIndexRoute,
   AuthPatientsIndexRoute: AuthPatientsIndexRoute,
+  AuthTreatmentsIndexRoute: AuthTreatmentsIndexRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
