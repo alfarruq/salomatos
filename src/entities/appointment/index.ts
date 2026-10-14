@@ -25,6 +25,7 @@ export {
   type AppointmentFormFieldsProps,
   type AppointmentPatientPickerProps,
   type AppointmentPatientResult,
+  type AppointmentTreatmentTypeProps,
 } from './ui/AppointmentFormFields'
 export {
   AppointmentStatusBadge,

@@ -36,6 +36,15 @@ export const appointmentFormSchema = v.object({
     v.check((value) => parseCalendarDate(value) !== null, 'validation.invalid'),
   ),
   time: v.pipe(v.string(), v.regex(TIME, 'validation.invalid')),
+  /**
+   * An `entities/treatment-type` **name**, not its id — the published write
+   * schema declares `treatment_type` a string here, unlike
+   * `/clinic/treatments/`. `''` means none picked; optional, since existing
+   * appointments come back with `treatment_type: null`.
+   */
+  treatmentTypeName: v.string(),
+  /** An FDI tooth number as a string; `''` unless the doctor is a dentist. */
+  toothNumber: v.string(),
   notes: v.string(),
   status: v.picklist(['in_progress', 'completed'] as const satisfies readonly AppointmentStatus[]),
 })
@@ -49,6 +58,8 @@ export const emptyAppointmentForm: AppointmentFormInput = {
   doctorId: '',
   date: '',
   time: '',
+  treatmentTypeName: '',
+  toothNumber: '',
   notes: '',
   status: 'in_progress',
 }
@@ -62,6 +73,8 @@ export function toAppointmentForm(appointment: Appointment): AppointmentFormInpu
     doctorId: appointment.doctorId === null ? '' : String(appointment.doctorId),
     date: appointment.date,
     time: appointment.time,
+    treatmentTypeName: '',
+    toothNumber: '',
     notes: appointment.notes ?? '',
     status: appointment.status,
   }
@@ -79,6 +92,10 @@ export function toAppointmentPayload(
     time: input.time,
     notes: input.notes === '' ? null : input.notes,
     status: input.status,
+    // Omitted rather than `null` when empty, so an edit that never showed
+    // these fields cannot clear what is already stored.
+    ...(input.treatmentTypeName === '' ? {} : { treatment_type: input.treatmentTypeName }),
+    ...(input.toothNumber === '' ? {} : { tooth_number: Number(input.toothNumber) }),
   }
 }
 
@@ -89,6 +106,8 @@ const SERVER_FIELD_NAMES: Record<string, keyof AppointmentFormInput> = {
   doctor: 'doctorId',
   date: 'date',
   time: 'time',
+  treatment_type: 'treatmentTypeName',
+  tooth_number: 'toothNumber',
   notes: 'notes',
   status: 'status',
 }
