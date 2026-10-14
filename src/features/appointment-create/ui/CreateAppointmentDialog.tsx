@@ -1,18 +1,21 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
   AppointmentFormFields,
   type AppointmentFormInput,
   type AppointmentPatientResult,
+  type AppointmentTreatmentTypeProps,
   appointmentFormFieldOf,
   appointmentFormSchema,
   emptyAppointmentForm,
 } from '@/entities/appointment'
 import { doctorQueries } from '@/entities/doctor'
+import { isDentalDoctorType } from '@/entities/doctor-type'
 import { defaultPatientFilters, patientQueries } from '@/entities/patient'
+import { treatmentTypeQueries } from '@/entities/treatment-type'
 import { ApiError } from '@/shared/api/errors'
 import type { CalendarDate } from '@/shared/lib/calendarDate'
 import { useDebounce } from '@/shared/lib/useDebounce'
@@ -89,6 +92,35 @@ export function CreateAppointmentDialog({
     value: String(doctor.id),
     label: doctor.fullName,
   }))
+
+  /*
+   * Same rule as `features/treatment-composer`: the doctor's specialty picks
+   * which treatment types are offered and whether a tooth is asked for.
+   * Matched by name — both list serializers send the doctor type's
+   * `__str__`, never its id.
+   */
+  const treatmentTypesQuery = useQuery(treatmentTypeQueries.list(clinicId))
+  const doctorId = useWatch({ control: form.control, name: 'doctorId' })
+  const specialty =
+    doctorsQuery.data?.find((doctor) => String(doctor.id) === doctorId)?.doctorTypeName ?? null
+  const specialtyTypeOptions =
+    specialty === null
+      ? []
+      : (treatmentTypesQuery.data ?? [])
+          .filter((type) => type.doctorTypeName === specialty)
+          .map((type) => ({ value: String(type.id), label: type.name }))
+  const treatmentType: AppointmentTreatmentTypeProps = {
+    options: specialtyTypeOptions,
+    emptyHint:
+      doctorId === ''
+        ? t('appointments:form.chooseDoctorFirst')
+        : specialty === null
+          ? t('appointments:form.doctorHasNoType')
+          : specialtyTypeOptions.length === 0 && treatmentTypesQuery.isSuccess
+            ? t('appointments:form.noTypesForSpecialty', { specialty })
+            : null,
+    showToothNumber: isDentalDoctorType(specialty),
+  }
 
   /*
    * A search, not a full list — a clinic's patient roster is exactly the
@@ -199,6 +231,7 @@ export function CreateAppointmentDialog({
             onSelect: handleSelectPatient,
             onUnlink: handleUnlinkPatient,
           }}
+          treatmentType={treatmentType}
         />
       </form>
     </Dialog>

@@ -36,6 +36,13 @@ export const appointmentFormSchema = v.object({
     v.check((value) => parseCalendarDate(value) !== null, 'validation.invalid'),
   ),
   time: v.pipe(v.string(), v.regex(TIME, 'validation.invalid')),
+  /**
+   * An `entities/treatment-type` id as a string; `''` means none picked.
+   * Optional — existing appointments come back with `treatment_type: null`.
+   */
+  treatmentTypeId: v.string(),
+  /** An FDI tooth number as a string; `''` unless the doctor is a dentist. */
+  toothNumber: v.string(),
   notes: v.string(),
   status: v.picklist(['in_progress', 'completed'] as const satisfies readonly AppointmentStatus[]),
 })
@@ -49,6 +56,8 @@ export const emptyAppointmentForm: AppointmentFormInput = {
   doctorId: '',
   date: '',
   time: '',
+  treatmentTypeId: '',
+  toothNumber: '',
   notes: '',
   status: 'in_progress',
 }
@@ -62,6 +71,9 @@ export function toAppointmentForm(appointment: Appointment): AppointmentFormInpu
     doctorId: appointment.doctorId === null ? '' : String(appointment.doctorId),
     date: appointment.date,
     time: appointment.time,
+    // The read side gives a name (if anything), not the id the select needs.
+    treatmentTypeId: '',
+    toothNumber: '',
     notes: appointment.notes ?? '',
     status: appointment.status,
   }
@@ -79,6 +91,10 @@ export function toAppointmentPayload(
     time: input.time,
     notes: input.notes === '' ? null : input.notes,
     status: input.status,
+    // Omitted rather than `null` when empty, so an edit that never showed
+    // these fields cannot clear what is already stored.
+    ...(input.treatmentTypeId === '' ? {} : { treatment_type: Number(input.treatmentTypeId) }),
+    ...(input.toothNumber === '' ? {} : { tooth_number: Number(input.toothNumber) }),
   }
 }
 
@@ -89,6 +105,8 @@ const SERVER_FIELD_NAMES: Record<string, keyof AppointmentFormInput> = {
   doctor: 'doctorId',
   date: 'date',
   time: 'time',
+  treatment_type: 'treatmentTypeId',
+  tooth_number: 'toothNumber',
   notes: 'notes',
   status: 'status',
 }
