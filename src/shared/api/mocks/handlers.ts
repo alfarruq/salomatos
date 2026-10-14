@@ -490,13 +490,35 @@ export const handlers = [
     const params = new URL(request.url).searchParams
     const rawPatientId = params.get('patient_id')
 
-    if (rawPatientId !== null) {
+    // The patient's own tab: every row at once, as before.
+    if (rawPatientId !== null && !params.has('page')) {
       const results = MOCK_TREATMENTS[Number(rawPatientId)] ?? []
       return HttpResponse.json({ count: results.length, next: null, previous: null, results })
     }
 
-    // No patient: the whole clinic, a page at a time — confirmed live 2026-10-14.
-    const all = Object.values(MOCK_TREATMENTS).flat()
+    /*
+     * The clinic-wide table: filtered, then paged — confirmed live 2026-10-14.
+     * Fixture rows carry names, so the id filters resolve to a name first.
+     */
+    type Row = {
+      patient_id?: number
+      doctor?: string
+      treatment_type?: string
+      remaining?: unknown
+    }
+    const doctorName = params.has('doctor_id') ? doctorNameFor(params.get('doctor_id')) : undefined
+    const typeName = params.has('treatment_type_id')
+      ? MOCK_TREATMENT_TYPES.find((type) => type.id === Number(params.get('treatment_type_id')))
+          ?.name
+      : undefined
+    const remaining = params.get('remaining')
+    const all = (Object.values(MOCK_TREATMENTS).flat() as Row[]).filter(
+      (row) =>
+        (rawPatientId === null || row.patient_id === Number(rawPatientId)) &&
+        (!params.has('doctor_id') || row.doctor === doctorName) &&
+        (!params.has('treatment_type_id') || row.treatment_type === typeName) &&
+        (remaining === null || Number(row.remaining ?? 0) > 0 === (remaining === 'true')),
+    )
     const page = Number(params.get('page') ?? '1')
     const start = (page - 1) * PAGE_SIZE
     const url = (n: number) => `http://localhost/api/v1/clinic/treatments/?page=${n}`

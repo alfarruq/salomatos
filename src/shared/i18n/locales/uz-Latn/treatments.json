@@ -82,5 +82,24 @@
     "empty": "Hozircha muolaja yo'q",
     "emptyDescription": "Muolajalar bemor sahifasida qo'shiladi.",
     "summary": "{{count}} tadan {{from}}–{{to}}"
+  },
+  "filters": {
+    "patientResults": "Topilgan bemorlar",
+    "patientById": "Bemor #{{id}}",
+    "patientClear": "Bemor filtrini olib tashlash",
+    "searching": "Qidirilmoqda…",
+    "searchFailed": "Qidirib bo'lmadi. Qaytadan urinib ko'ring.",
+    "noPatients": "Bemor topilmadi",
+    "doctorLabel": "Shifokor bo'yicha filtr",
+    "doctorAll": "Barcha shifokorlar",
+    "typeLabel": "Davolash turi bo'yicha filtr",
+    "typeAll": "Barcha davolash turlari",
+    "debtLabel": "Qarzdorlik bo'yicha filtr",
+    "debtAll": "Qarzdorlik: hammasi",
+    "debtWith": "Qarzi bor",
+    "debtWithout": "Qarzi yo'q",
+    "noMatch": "Mos muolaja topilmadi",
+    "noMatchDescription": "Filtrlarni o'zgartirib ko'ring.",
+    "clear": "Filtrlarni tozalash"
   }
 }

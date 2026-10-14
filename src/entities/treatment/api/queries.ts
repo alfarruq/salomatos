@@ -4,7 +4,7 @@ import { httpClient } from '@/shared/api/httpClient'
 import { type Page, pathFromNext } from '@/shared/api/pagination'
 import { cachePolicy } from '@/shared/config/cache'
 import { type TreatmentResponse, toTreatment, treatmentListResponseSchema } from '../model/schema'
-import type { Treatment } from '../model/types'
+import type { Treatment, TreatmentListFilters } from '../model/types'
 
 /**
  * §6.2: `clinicId` is inside every key even though the request itself is
@@ -20,8 +20,8 @@ export const treatmentKeys = {
     [...treatmentKeys.scope(clinicId), 'list', patientId] as const,
 
   /** The clinic-wide table, one server page at a time. Under `scope`, so every mutation's invalidation reaches it. */
-  page: (clinicId: number, page: number) =>
-    [...treatmentKeys.scope(clinicId), 'page', page] as const,
+  page: (clinicId: number, filters: TreatmentListFilters) =>
+    [...treatmentKeys.scope(clinicId), 'page', filters] as const,
 }
 
 /**
@@ -51,18 +51,28 @@ export async function fetchTreatments(
   return rows.map(toTreatment)
 }
 
+function toPageQuery(filters: TreatmentListFilters): string {
+  const params = new URLSearchParams({ page: String(filters.page) })
+  if (filters.patientId !== null) params.set('patient_id', String(filters.patientId))
+  if (filters.doctorId !== null) params.set('doctor_id', String(filters.doctorId))
+  if (filters.treatmentTypeId !== null) {
+    params.set('treatment_type_id', String(filters.treatmentTypeId))
+  }
+  if (filters.debt !== null) params.set('remaining', filters.debt === 'with' ? 'true' : 'false')
+  return params.toString()
+}
+
 /**
- * One page of every treatment in the clinic — the same endpoint without
- * `patient_id`. Confirmed live 2026-10-14: only `page`/`page_size` are
- * honoured; `search`, `status`, `doctor` and the rest are silently ignored,
- * which is why the table has no filters yet.
+ * One page of the clinic's treatments — the same endpoint, filtered server
+ * side by `patient_id`, `doctor_id`, `treatment_type_id` and `remaining`
+ * (all confirmed live on 2026-10-14, and combinable).
  */
 export async function fetchTreatmentPage(
-  page: number,
+  filters: TreatmentListFilters,
   signal?: AbortSignal,
 ): Promise<Page<Treatment>> {
   const raw: unknown = await httpClient(
-    `v1/clinic/treatments/?page=${page}`,
+    `v1/clinic/treatments/?${toPageQuery(filters)}`,
     signal === undefined ? {} : { signal },
   )
   const parsed = v.parse(treatmentListResponseSchema, raw)
@@ -82,10 +92,10 @@ export const treatmentQueries = {
       ...cachePolicy.standard,
     }),
 
-  page: (clinicId: number, page: number) =>
+  page: (clinicId: number, filters: TreatmentListFilters) =>
     queryOptions({
-      queryKey: treatmentKeys.page(clinicId, page),
-      queryFn: ({ signal }) => fetchTreatmentPage(page, signal),
+      queryKey: treatmentKeys.page(clinicId, filters),
+      queryFn: ({ signal }) => fetchTreatmentPage(filters, signal),
       ...cachePolicy.standard,
       // Keeps the current rows on screen while the next page loads.
       placeholderData: keepPreviousData,

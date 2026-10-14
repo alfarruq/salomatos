@@ -15,6 +15,27 @@ export type TreatmentStatus = 'in_progress' | 'completed'
  * short tooth-chart summary embedded in the patient detail response; this is
  * the full record, with cost, dates and clinical notes.
  */
+/**
+ * The clinic-wide list's filters — all four confirmed live on 2026-10-14,
+ * and combinable. Ids only: a patient's name never goes in a URL (§3).
+ */
+export interface TreatmentListFilters {
+  page: number
+  patientId: number | null
+  doctorId: number | null
+  treatmentTypeId: number | null
+  /** `with` → `remaining=true`, `without` → `remaining=false`, null → both. */
+  debt: 'with' | 'without' | null
+}
+
+export const defaultTreatmentListFilters: TreatmentListFilters = {
+  page: 1,
+  patientId: null,
+  doctorId: null,
+  treatmentTypeId: null,
+  debt: null,
+}
+
 export interface Treatment {
   id: number
   /** Sent beside the name on the list endpoint — the clinic-wide table links by it. */
