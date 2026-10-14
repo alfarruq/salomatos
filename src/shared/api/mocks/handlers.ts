@@ -552,13 +552,16 @@ export const handlers = [
   http.get('/api/v1/calendars/appointments/', ({ request }) => {
     if (authenticate(request) === null) return unauthorized()
 
-    const raw = new URL(request.url).searchParams.get('date')
+    const params = new URL(request.url).searchParams
+    const raw = params.get('date')
     // `day` is the server's own "today", confirmed live.
     const date = raw === 'day' ? clinicNow().date : raw
-    const matched =
+    const doctorId = params.get('doctor_id')
+    const matched = (
       date === 'week' || date === null
         ? MOCK_APPOINTMENTS
         : MOCK_APPOINTMENTS.filter((appointment) => appointment.date === date)
+    ).filter((appointment) => doctorId === null || String(appointment.doctor_id) === doctorId)
 
     return HttpResponse.json(matched)
   }),
