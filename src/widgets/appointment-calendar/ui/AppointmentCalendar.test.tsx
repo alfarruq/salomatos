@@ -157,16 +157,19 @@ describe('AppointmentCalendar', () => {
     expect(await screen.findByText("Hozircha uchrashuv yo'q")).toBeInTheDocument()
   })
 
-  it('switches to the all view through onFiltersChange, resetting to today', async () => {
-    const { onFiltersChange } = renderCalendar({ view: 'day', date: '2026-09-27' })
+  it('no longer offers an all-appointments view', async () => {
+    renderCalendar({ view: 'day', date: '2026-09-27' })
     await screen.findByText('Vali Aliyev')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Hammasi' }))
+    expect(screen.queryByRole('button', { name: 'Hammasi' })).not.toBeInTheDocument()
+  })
 
-    expect(onFiltersChange).toHaveBeenLastCalledWith({
-      view: 'all',
-      date: expect.any(String),
-    })
+  it('moves a week forward from the arrow beside the weekday row', async () => {
+    const { onFiltersChange } = renderCalendar({ view: 'week', date: '2026-09-28' })
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Keyingi hafta' }))
+
+    expect(onFiltersChange).toHaveBeenLastCalledWith({ view: 'week', date: '2026-10-05' })
   })
 
   it('narrows the list to one doctor through doctor_id', async () => {
@@ -194,10 +197,10 @@ describe('AppointmentCalendar', () => {
     const { onFiltersChange } = renderCalendar({ view: 'day', date: '2026-09-27', doctorId: 2 })
     await screen.findByText('Vali Aliyev')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Hammasi' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Haftalik' }))
 
     expect(onFiltersChange).toHaveBeenLastCalledWith({
-      view: 'all',
+      view: 'week',
       date: expect.any(String),
       doctorId: 2,
     })
