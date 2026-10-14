@@ -38,6 +38,10 @@
     "description": "\"{{name}}\" uchrashuvi o'chirilsinmi?",
     "failed": "Uchrashuvni o'chirib bo'lmadi. Qayta urinib ko'ring."
   },
+  "filter": {
+    "doctor": "Shifokor",
+    "allDoctors": "Barcha shifokorlar"
+  },
   "view": {
     "label": "Ko'rinish",
     "day": "Kunlik",

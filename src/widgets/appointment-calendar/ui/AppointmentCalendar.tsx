@@ -8,6 +8,7 @@ import {
   AppointmentStatusBadge,
   appointmentQueries,
 } from '@/entities/appointment'
+import { doctorQueries } from '@/entities/doctor'
 import { CreateAppointmentDialog } from '@/features/appointment-create'
 import { DeleteAppointmentDialog } from '@/features/appointment-delete'
 import { EditAppointmentDialog } from '@/features/appointment-edit'
@@ -25,6 +26,7 @@ import {
   Input,
   Pagination,
   QueryBoundary,
+  Select,
   subscriberDigitsOf,
   Table,
   TableBody,
@@ -39,6 +41,9 @@ import { AppointmentDayStrip } from './AppointmentDayStrip'
 import { AppointmentWeekBoard, AppointmentWeekBoardSkeleton } from './AppointmentWeekBoard'
 
 const SEARCH_DEBOUNCE_MS = 300
+
+/** The select's "no doctor filter" option; real options are numeric ids. */
+const ALL_DOCTORS = 'all'
 
 export interface AppointmentCalendarProps {
   clinicId: number
@@ -112,11 +117,40 @@ export function AppointmentCalendar({
   })
   const query = isPaged ? pageQuery : dayQuery
 
+  // Carried over whenever the view or date is replaced wholesale, so changing
+  // the period never silently drops the doctor being looked at.
+  const doctorFilter =
+    routeFilters.doctorId === undefined ? {} : { doctorId: routeFilters.doctorId }
+
   const selectDate = (value: string) => {
     // An emptied or half-typed date input reports '' — keep the current day.
     // Picking a date always means "show me that day", whichever view was open.
-    if (parseCalendarDate(value) !== null) onFiltersChange({ view: 'day', date: value })
+    if (parseCalendarDate(value) !== null) {
+      onFiltersChange({ view: 'day', date: value, ...doctorFilter })
+    }
   }
+
+  // A failed doctor list leaves only "all doctors": the schedule itself still works.
+  const doctorsQuery = useQuery(doctorQueries.list(clinicId))
+  const doctorSelect = (
+    <Select
+      aria-label={t('appointments:filter.doctor')}
+      className={cn(!isPhone && 'w-48')}
+      onValueChange={(value) => {
+        const { doctorId: _current, ...rest } = routeFilters
+        onFiltersChange(value === ALL_DOCTORS ? rest : { ...rest, doctorId: Number(value) })
+      }}
+      options={[
+        { value: ALL_DOCTORS, label: t('appointments:filter.allDoctors') },
+        ...(doctorsQuery.data ?? []).map((doctor) => ({
+          value: String(doctor.id),
+          label: doctor.fullName,
+        })),
+      ]}
+      size="sm"
+      value={routeFilters.doctorId === undefined ? ALL_DOCTORS : String(routeFilters.doctorId)}
+    />
+  )
 
   const searchInput = (
     <Input
@@ -168,7 +202,9 @@ export function AppointmentCalendar({
                   // A week/all-time view has no navigable "current date" (§
                   // widget doc) — switching always lands on today rather than
                   // keeping whatever day was mid-navigation in day view.
-                  onClick={() => onFiltersChange({ view, date: todayCalendarDate() })}
+                  onClick={() =>
+                    onFiltersChange({ view, date: todayCalendarDate(), ...doctorFilter })
+                  }
                   size="sm"
                   variant={filters.view === view ? 'primary' : 'secondary'}
                 >
@@ -248,6 +284,8 @@ export function AppointmentCalendar({
               ) : null}
             </>
           )}
+
+          {isPhone ? null : doctorSelect}
         </div>
 
         <Button
@@ -268,7 +306,12 @@ export function AppointmentCalendar({
         />
       ) : null}
 
-      {isPhone ? searchInput : null}
+      {isPhone ? (
+        <div className="grid grid-cols-2 gap-2">
+          {searchInput}
+          {doctorSelect}
+        </div>
+      ) : null}
 
       <QueryBoundary
         empty={

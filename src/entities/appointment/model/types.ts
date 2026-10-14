@@ -60,4 +60,6 @@ export interface AppointmentFilters {
    * date and the server's own `day`/`week` shortcuts do not carry one.
    */
   date: CalendarDate
+  /** Sent as `?doctor_id=`; absent means every doctor. Combines with any view. */
+  doctorId?: number
 }

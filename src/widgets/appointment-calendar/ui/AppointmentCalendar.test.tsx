@@ -169,6 +169,40 @@ describe('AppointmentCalendar', () => {
     })
   })
 
+  it('narrows the list to one doctor through doctor_id', async () => {
+    renderCalendar({ view: 'all', date: '2026-09-27', doctorId: 2 })
+
+    await screen.findByText('Vali Aliyev')
+    expect(screen.queryByText('Yangi Mijoz')).not.toBeInTheDocument()
+  })
+
+  it('picks a doctor through onFiltersChange, keeping the view', async () => {
+    const { onFiltersChange } = renderCalendar({ view: 'day', date: '2026-09-27' })
+    await screen.findByText('Vali Aliyev')
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Shifokor' }))
+    await userEvent.click(await screen.findByRole('option', { name: 'Sardor Usmonov' }))
+
+    expect(onFiltersChange).toHaveBeenLastCalledWith({
+      view: 'day',
+      date: '2026-09-27',
+      doctorId: 2,
+    })
+  })
+
+  it('keeps the picked doctor when switching view', async () => {
+    const { onFiltersChange } = renderCalendar({ view: 'day', date: '2026-09-27', doctorId: 2 })
+    await screen.findByText('Vali Aliyev')
+
+    await userEvent.click(screen.getByRole('button', { name: 'Hammasi' }))
+
+    expect(onFiltersChange).toHaveBeenLastCalledWith({
+      view: 'all',
+      date: expect.any(String),
+      doctorId: 2,
+    })
+  })
+
   it('shows the date column and every fixture row in the all view', async () => {
     renderCalendar({ view: 'all', date: '2026-09-27' })
 

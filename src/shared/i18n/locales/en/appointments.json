@@ -38,6 +38,10 @@
     "description": "Delete the appointment for “{{name}}”?",
     "failed": "Could not delete the appointment. Please try again."
   },
+  "filter": {
+    "doctor": "Doctor",
+    "allDoctors": "All doctors"
+  },
   "view": {
     "label": "View",
     "day": "Day",

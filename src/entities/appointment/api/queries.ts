@@ -24,8 +24,11 @@ export const appointmentKeys = {
  * at all.
  */
 function toQueryString(filters: AppointmentFilters): string {
-  if (filters.view === 'all') return ''
-  return `?date=${filters.date}`
+  const params = new URLSearchParams()
+  if (filters.view !== 'all') params.set('date', filters.date)
+  if (filters.doctorId !== undefined) params.set('doctor_id', String(filters.doctorId))
+  const query = params.toString()
+  return query === '' ? '' : `?${query}`
 }
 
 /**
@@ -69,7 +72,9 @@ export async function fetchAppointments(
   // every week through the one filter the backend does support.
   if (filters.view === 'week') {
     const days = await Promise.all(
-      weekDatesOf(filters.date).map((date) => fetchAppointments({ view: 'day', date }, signal)),
+      weekDatesOf(filters.date).map((date) =>
+        fetchAppointments({ ...filters, view: 'day', date }, signal),
+      ),
     )
     return days.flat()
   }

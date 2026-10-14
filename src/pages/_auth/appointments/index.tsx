@@ -14,6 +14,8 @@ const appointmentsSearchSchema = v.object({
   view: v.optional(v.picklist(['day', 'week', 'all'])),
   date: v.optional(v.string()),
   page: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
+  // A staff id, not PHI — the same kind of id `/patients/$patientId` carries.
+  doctorId: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
 })
 
 type AppointmentsSearch = v.InferOutput<typeof appointmentsSearchSchema>
@@ -42,6 +44,7 @@ function AppointmentsPage() {
   const filters: AppointmentFilters = {
     view: search.view ?? DEFAULT_VIEW,
     date: search.date ?? todayCalendarDate(),
+    ...(search.doctorId === undefined ? {} : { doctorId: search.doctorId }),
   }
 
   return (
@@ -72,6 +75,7 @@ function AppointmentsPage() {
             search: (): AppointmentsSearch => ({
               ...(next.view === DEFAULT_VIEW ? {} : { view: next.view }),
               ...(next.date === todayCalendarDate() ? {} : { date: next.date }),
+              ...(next.doctorId === undefined ? {} : { doctorId: next.doctorId }),
             }),
             to: '/appointments',
           })
