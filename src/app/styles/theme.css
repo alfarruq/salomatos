@@ -61,6 +61,21 @@
    */
   --color-control-knob: #ffffff;
 
+  /*
+   * ── Doctor identity — the one sanctioned exception to "one accent" ──
+   * Tells doctors apart on the week board (a stripe and a dot, never a fill,
+   * and always next to the doctor's name so colour is not the only cue).
+   * No red: §13 keeps red for deletion. Each clears 3:1 as UI on surfaces.
+   */
+  --color-doctor-1: #0f8a7e;
+  --color-doctor-2: #8e44c9;
+  --color-doctor-3: #c25e00;
+  --color-doctor-4: #c2387a;
+  --color-doctor-5: #5856d6;
+  --color-doctor-6: #3a8a1e;
+  --color-doctor-7: #9a6b2f;
+  --color-doctor-8: #0b7fa8;
+
   /* Scrim behind modals — dims the page without tinting it. */
   --color-scrim: oklch(0% 0 0 / 0.4);
 
@@ -278,6 +293,14 @@
       --color-on-danger: #ffffff;
       --color-control-knob: #ffffff;
       --color-scrim: oklch(0% 0 0 / 0.6);
+      --color-doctor-1: #40c8b4;
+      --color-doctor-2: #bf8cf0;
+      --color-doctor-3: #ff9f40;
+      --color-doctor-4: #ff7ab6;
+      --color-doctor-5: #8e8cff;
+      --color-doctor-6: #7ed957;
+      --color-doctor-7: #d4a373;
+      --color-doctor-8: #5ac8fa;
 
       --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.5), 0 1px 2px oklch(0% 0 0 / 0.4);
       --shadow-popover: 0 8px 28px oklch(0% 0 0 / 0.6);
@@ -311,6 +334,14 @@
     --color-on-danger: #ffffff;
     --color-control-knob: #ffffff;
     --color-scrim: oklch(0% 0 0 / 0.6);
+    --color-doctor-1: #40c8b4;
+    --color-doctor-2: #bf8cf0;
+    --color-doctor-3: #ff9f40;
+    --color-doctor-4: #ff7ab6;
+    --color-doctor-5: #8e8cff;
+    --color-doctor-6: #7ed957;
+    --color-doctor-7: #d4a373;
+    --color-doctor-8: #5ac8fa;
 
     --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.5), 0 1px 2px oklch(0% 0 0 / 0.4);
     --shadow-popover: 0 8px 28px oklch(0% 0 0 / 0.6);
