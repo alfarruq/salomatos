@@ -82,5 +82,24 @@
     "empty": "No treatments yet",
     "emptyDescription": "Treatments are added on a patient's page.",
     "summary": "{{from}}–{{to}} of {{count}}"
+  },
+  "filters": {
+    "patientResults": "Matching patients",
+    "patientById": "Patient #{{id}}",
+    "patientClear": "Remove the patient filter",
+    "searching": "Searching…",
+    "searchFailed": "Search failed. Please try again.",
+    "noPatients": "No patient found",
+    "doctorLabel": "Filter by doctor",
+    "doctorAll": "All doctors",
+    "typeLabel": "Filter by treatment type",
+    "typeAll": "All treatment types",
+    "debtLabel": "Filter by debt",
+    "debtAll": "Debt: all",
+    "debtWith": "With debt",
+    "debtWithout": "No debt",
+    "noMatch": "No matching treatments",
+    "noMatchDescription": "Try changing the filters.",
+    "clear": "Clear filters"
   }
 }

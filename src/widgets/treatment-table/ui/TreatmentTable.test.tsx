@@ -13,6 +13,7 @@ import { Suspense } from 'react'
 import { I18nextProvider } from 'react-i18next'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { permissionsForRole, type Role, useSessionStore } from '@/entities/session'
+import { defaultTreatmentListFilters, type TreatmentListFilters } from '@/entities/treatment'
 import { accessTokenFor, MOCK_USERS } from '@/shared/api/mocks/fixtures'
 import { server } from '@/shared/api/mocks/server'
 import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
@@ -56,8 +57,9 @@ function signIn(role: Role) {
   })
 }
 
-function renderTable(page = 1) {
-  const onPageChange = vi.fn()
+function renderTable(overrides: Partial<TreatmentListFilters> = {}) {
+  const onFiltersChange = vi.fn()
+  const filters = { ...defaultTreatmentListFilters, ...overrides }
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
 
   const rootRoute = createRootRoute()
@@ -65,7 +67,11 @@ function renderTable(page = 1) {
     getParentRoute: () => rootRoute,
     path: '/',
     component: () => (
-      <TreatmentTable clinicId={MOCK_USERS.clinic.id} onPageChange={onPageChange} page={page} />
+      <TreatmentTable
+        clinicId={MOCK_USERS.clinic.id}
+        filters={filters}
+        onFiltersChange={onFiltersChange}
+      />
     ),
   })
   const patientRoute = createRoute({
@@ -88,7 +94,7 @@ function renderTable(page = 1) {
     </QueryClientProvider>,
   )
 
-  return { onPageChange, router }
+  return { onFiltersChange, router }
 }
 
 describe('TreatmentTable', () => {
@@ -130,7 +136,7 @@ describe('TreatmentTable', () => {
     server.events.on('request:start', ({ request }) => {
       if (request.url.includes('/clinic/treatments/')) seen.url = new URL(request.url)
     })
-    renderTable(3)
+    renderTable({ page: 3 })
 
     await vi.waitFor(() => expect(seen.url).not.toBeNull())
     expect(seen.url?.searchParams.get('page')).toBe('3')
@@ -166,12 +172,12 @@ describe('TreatmentTable', () => {
         }),
       ),
     )
-    const { onPageChange } = renderTable()
+    const { onFiltersChange } = renderTable()
 
     await screen.findByText('11 tadan 1–10')
     await userEvent.click(screen.getByRole('button', { name: 'Keyingi' }))
 
-    expect(onPageChange).toHaveBeenCalledWith(2)
+    expect(onFiltersChange).toHaveBeenCalledWith(expect.objectContaining({ page: 2 }))
   })
 
   it('shows a skeleton while loading', async () => {
@@ -211,5 +217,87 @@ describe('TreatmentTable', () => {
     expect(
       await screen.findByRole('heading', { name: 'Bu sahifa ochilmadi' }, { timeout: 8000 }),
     ).toBeInTheDocument()
+  })
+
+  it('sends every active filter to the server as ids', async () => {
+    const seen: { url: URL | null } = { url: null }
+    server.events.on('request:start', ({ request }) => {
+      if (request.url.includes('/clinic/treatments/')) seen.url = new URL(request.url)
+    })
+    renderTable({ patientId: 101, doctorId: 2, treatmentTypeId: 7, debt: 'with' })
+
+    await vi.waitFor(() => expect(seen.url).not.toBeNull())
+    const params = seen.url?.searchParams
+    expect(params?.get('patient_id')).toBe('101')
+    expect(params?.get('doctor_id')).toBe('2')
+    expect(params?.get('treatment_type_id')).toBe('7')
+    expect(params?.get('remaining')).toBe('true')
+  })
+
+  it('maps "no debt" to remaining=false', async () => {
+    const seen: { url: URL | null } = { url: null }
+    server.events.on('request:start', ({ request }) => {
+      if (request.url.includes('/clinic/treatments/')) seen.url = new URL(request.url)
+    })
+    renderTable({ debt: 'without' })
+
+    await vi.waitFor(() => expect(seen.url).not.toBeNull())
+    expect(seen.url?.searchParams.get('remaining')).toBe('false')
+  })
+
+  it('goes back to page 1 when a filter changes', async () => {
+    const { onFiltersChange } = renderTable({ page: 3 })
+
+    await userEvent.click(
+      await screen.findByRole('combobox', { name: "Qarzdorlik bo'yicha filtr" }),
+    )
+    await userEvent.click(await screen.findByRole('option', { name: 'Qarzi bor' }))
+
+    expect(onFiltersChange).toHaveBeenCalledWith(expect.objectContaining({ debt: 'with', page: 1 }))
+  })
+
+  it('filters by a doctor picked from the list, by id', async () => {
+    const { onFiltersChange } = renderTable()
+
+    await userEvent.click(await screen.findByRole('combobox', { name: "Shifokor bo'yicha filtr" }))
+    await userEvent.click(await screen.findByRole('option', { name: 'Sardor Usmonov' }))
+
+    expect(onFiltersChange).toHaveBeenCalledWith(expect.objectContaining({ doctorId: 2 }))
+  })
+
+  it('finds a patient by name and filters by their id', async () => {
+    const { onFiltersChange } = renderTable()
+
+    await userEvent.type(await screen.findByRole('searchbox'), 'Vali')
+    await userEvent.click(await screen.findByRole('button', { name: /Vali Aliyev/ }))
+
+    expect(onFiltersChange).toHaveBeenCalledWith(expect.objectContaining({ patientId: 101 }))
+  })
+
+  it('shows the picked patient by name, and clears them', async () => {
+    const { onFiltersChange } = renderTable({ patientId: 101 })
+
+    // findByRole, not findByText: text matches even while Suspense still hides the tree.
+    const clear = await screen.findByRole('button', { name: 'Bemor filtrini olib tashlash' })
+    expect(await screen.findByText('Vali Aliyev', { selector: 'span' })).toBeInTheDocument()
+    await userEvent.click(clear)
+
+    expect(onFiltersChange).toHaveBeenCalledWith(expect.objectContaining({ patientId: null }))
+  })
+
+  it('offers to clear the filters when nothing matches them', async () => {
+    server.use(
+      http.get('/api/v1/clinic/treatments/', () =>
+        HttpResponse.json({ count: 0, next: null, previous: null, results: [] }),
+      ),
+    )
+    const { onFiltersChange } = renderTable({ debt: 'with' })
+
+    expect(
+      await screen.findByRole('heading', { name: 'Mos muolaja topilmadi' }),
+    ).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Filtrlarni tozalash' }))
+
+    expect(onFiltersChange).toHaveBeenCalledWith(defaultTreatmentListFilters)
   })
 })
