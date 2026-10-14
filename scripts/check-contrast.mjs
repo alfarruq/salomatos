@@ -41,7 +41,14 @@ const TEXT_PAIRS = [
  * Non-text UI that still has to be distinguishable from its background:
  * 3:1 is enough. This is the accent used as a fill, border or icon.
  */
-const UI_PAIRS = [['accent', ['canvas', 'surface', 'elevated']]]
+const UI_PAIRS = [
+  ['accent', ['canvas', 'surface', 'elevated']],
+  // Week-board stripe and dot: on a card (surface) or a completed one (sunken).
+  ...Array.from({ length: 8 }, (_, index) => [
+    `doctor-${index + 1}`,
+    ['canvas', 'surface', 'elevated', 'sunken'],
+  ]),
+]
 
 function parseHex(hex) {
   const value = hex.trim().replace('#', '')
@@ -81,7 +88,7 @@ function contrast(foreground, background) {
  */
 function readTokens(block) {
   const tokens = new Map()
-  for (const match of block.matchAll(/--color-([a-z-]+):\s*([^;]+);/g)) {
+  for (const match of block.matchAll(/--color-([a-z0-9-]+):\s*([^;]+);/g)) {
     tokens.set(match[1], match[2].trim())
   }
   return tokens

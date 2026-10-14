@@ -1,6 +1,7 @@
-import { MoreVertical } from 'lucide-react'
+import { CircleCheck, MoreVertical } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { Appointment } from '@/entities/appointment'
+import { doctorColorOf } from '@/entities/doctor'
 import { type CalendarDate, todayCalendarDate } from '@/shared/lib/calendarDate'
 import { cn } from '@/shared/lib/cn'
 import { DropdownMenu, DropdownMenuItem, Skeleton } from '@/shared/ui'
@@ -65,53 +66,74 @@ export function AppointmentWeekBoard({
             </div>
 
             <div className="flex flex-col gap-2">
-              {dayAppointments.map((appointment) => (
-                <div
-                  className={cn(
-                    'flex flex-col gap-1 rounded-card border border-border p-3',
-                    appointment.status === 'completed' ? 'bg-sunken' : 'bg-success/10',
-                  )}
-                  key={appointment.id}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-callout font-semibold text-accent-text">
-                      {appointment.time}
-                    </span>
-                    <DropdownMenu
-                      trigger={
-                        <button
-                          aria-label={`${t('common:action.edit')} — ${appointment.fullName}`}
-                          className="rounded-control p-1 text-text-secondary hover:bg-sunken hover:text-text"
-                          type="button"
-                        >
-                          <MoreVertical aria-hidden="true" className="size-4" />
-                        </button>
-                      }
-                    >
-                      <DropdownMenuItem onSelect={() => onEdit(appointment)}>
-                        {t('common:action.edit')}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem isDestructive onSelect={() => onDelete(appointment)}>
-                        {t('common:action.delete')}
-                      </DropdownMenuItem>
-                    </DropdownMenu>
-                  </div>
-                  <button
-                    className="flex min-w-0 flex-col gap-1 rounded-control text-left hover:underline focus-visible:ring-2 focus-visible:ring-accent"
-                    onClick={() => onOpen(appointment)}
-                    type="button"
+              {dayAppointments.map((appointment) => {
+                const color = doctorColorOf(appointment.doctorId)
+                const isCompleted = appointment.status === 'completed'
+                return (
+                  <div
+                    className={cn(
+                      // The stripe says who; the fill only says whether it is done.
+                      'flex flex-col gap-1 rounded-card border border-l-4 border-border p-3',
+                      color.stripe,
+                      isCompleted ? 'bg-sunken' : 'bg-surface',
+                    )}
+                    key={appointment.id}
                   >
-                    <span className="truncate text-body font-medium text-text">
-                      {appointment.fullName}
-                    </span>
-                    <span className="truncate text-caption text-text-secondary">
-                      {[appointment.treatmentTypeName, appointment.doctorName]
-                        .filter((value): value is string => value !== null)
-                        .join(' · ') || EMPTY}
-                    </span>
-                  </button>
-                </div>
-              ))}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-1 text-callout font-semibold text-accent-text">
+                        {appointment.time}
+                        {isCompleted ? (
+                          <CircleCheck
+                            aria-label={t('appointments:status.completed')}
+                            className="size-4 text-text-secondary"
+                            role="img"
+                          />
+                        ) : null}
+                      </span>
+                      <DropdownMenu
+                        trigger={
+                          <button
+                            aria-label={`${t('common:action.edit')} — ${appointment.fullName}`}
+                            className="rounded-control p-1 text-text-secondary hover:bg-sunken hover:text-text"
+                            type="button"
+                          >
+                            <MoreVertical aria-hidden="true" className="size-4" />
+                          </button>
+                        }
+                      >
+                        <DropdownMenuItem onSelect={() => onEdit(appointment)}>
+                          {t('common:action.edit')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem isDestructive onSelect={() => onDelete(appointment)}>
+                          {t('common:action.delete')}
+                        </DropdownMenuItem>
+                      </DropdownMenu>
+                    </div>
+                    <button
+                      className="flex min-w-0 flex-col gap-1 rounded-control text-left hover:underline focus-visible:ring-2 focus-visible:ring-accent"
+                      onClick={() => onOpen(appointment)}
+                      type="button"
+                    >
+                      <span className="truncate text-body font-medium text-text">
+                        {appointment.fullName}
+                      </span>
+                      <span className="flex min-w-0 items-center gap-1 text-caption text-text-secondary">
+                        {appointment.doctorName === null ? null : (
+                          <span
+                            aria-hidden="true"
+                            className={cn('size-2 shrink-0 rounded-full', color.dot)}
+                          />
+                        )}
+                        <span className="truncate">
+                          {[appointment.doctorName, appointment.treatmentTypeName]
+                            .filter((value): value is string => value !== null)
+                            .join(' · ') || EMPTY}
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                )
+              })}
             </div>
           </div>
         )
