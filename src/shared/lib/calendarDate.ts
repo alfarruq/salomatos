@@ -50,6 +50,25 @@ export function todayCalendarDate(): CalendarDate {
 }
 
 /**
+ * Whole years between `birthDate` and `today`, or null for a date that is not
+ * real or lies in the future.
+ *
+ * Compared as calendar parts, not as milliseconds: a birthday that has not yet
+ * come round this year does not count, which is exactly what the server's
+ * `now.year - birth_date.year` gets wrong.
+ */
+export function ageOn(birthDate: CalendarDate, today: CalendarDate): number | null {
+  const born = parseCalendarDate(birthDate)
+  const now = parseCalendarDate(today)
+  if (born === null || now === null || born > now) return null
+
+  const hadBirthday =
+    now.getMonth() > born.getMonth() ||
+    (now.getMonth() === born.getMonth() && now.getDate() >= born.getDate())
+  return now.getFullYear() - born.getFullYear() - (hadBirthday ? 0 : 1)
+}
+
+/**
  * `2026-08-24` → `24 avg 2026`, in the active language.
  *
  * No `timeZone` option, deliberately: the `Date` built by `parseCalendarDate`

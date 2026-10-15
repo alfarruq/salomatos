@@ -53,10 +53,12 @@
   "title": "Пациенты",
   "column": {
     "fullName": "Имя",
+    "age": "Возраст",
     "phoneNumber": "Телефон",
     "status": "Статус",
+    "treatmentType": "Лечение",
     "doctor": "Врач",
-    "lastAppointment": "Последний приём",
+    "lastAppointment": "Приём",
     "remaining": "Остаток"
   },
   "empty": {

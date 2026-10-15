@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isSameCalendarDay, parseCalendarDate, toCalendarDate } from './calendarDate'
+import { ageOn, isSameCalendarDay, parseCalendarDate, toCalendarDate } from './calendarDate'
 
 describe('calendarDate', () => {
   it('round-trips a date without shifting the day', () => {
@@ -38,5 +38,17 @@ describe('calendarDate', () => {
   it('compares days regardless of time of day', () => {
     expect(isSameCalendarDay(new Date(2026, 7, 21, 9), new Date(2026, 7, 21, 23))).toBe(true)
     expect(isSameCalendarDay(new Date(2026, 7, 21), new Date(2026, 7, 22))).toBe(false)
+  })
+})
+
+describe('ageOn', () => {
+  it('does not count a birthday that has not come round yet', () => {
+    expect(ageOn('1988-10-16', '2026-10-15')).toBe(37)
+    expect(ageOn('1988-10-15', '2026-10-15')).toBe(38)
+  })
+
+  it('returns null for a date that is not real or is in the future', () => {
+    expect(ageOn('1988-02-31', '2026-10-15')).toBeNull()
+    expect(ageOn('2027-01-01', '2026-10-15')).toBeNull()
   })
 })
