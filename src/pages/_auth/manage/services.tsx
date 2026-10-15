@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { TreatmentTypeTable } from '@/widgets/treatment-type-table'
 
-export const Route = createFileRoute('/_auth/admin/services')({
+export const Route = createFileRoute('/_auth/manage/services')({
   component: ServicesSection,
 })
 

@@ -225,7 +225,7 @@ function AuthenticatedLayout() {
             <li>
               <Link
                 className="block rounded-control px-3 py-2 text-body text-text-secondary hover:bg-sunken hover:text-text"
-                to="/admin"
+                to="/manage"
               >
                 {t('nav.admin')}
               </Link>

@@ -12,14 +12,14 @@ import { Route as rootRouteImport } from './pages/__root'
 import { Route as IndexRouteImport } from './pages/index'
 import { Route as AuthRouteImport } from './pages/_auth'
 import { Route as LoginRouteImport } from './pages/login'
-import { Route as AuthAdminRouteImport } from './pages/_auth/admin'
 import { Route as AuthDashboardRouteImport } from './pages/_auth/dashboard'
-import { Route as AuthAdminIndexRouteImport } from './pages/_auth/admin/index'
-import { Route as AuthAdminClinicRouteImport } from './pages/_auth/admin/clinic'
-import { Route as AuthAdminDoctorTypesRouteImport } from './pages/_auth/admin/doctor-types'
-import { Route as AuthAdminDoctorsRouteImport } from './pages/_auth/admin/doctors'
-import { Route as AuthAdminServicesRouteImport } from './pages/_auth/admin/services'
+import { Route as AuthManageRouteImport } from './pages/_auth/manage'
 import { Route as AuthAppointmentsIndexRouteImport } from './pages/_auth/appointments/index'
+import { Route as AuthManageIndexRouteImport } from './pages/_auth/manage/index'
+import { Route as AuthManageClinicRouteImport } from './pages/_auth/manage/clinic'
+import { Route as AuthManageDoctorTypesRouteImport } from './pages/_auth/manage/doctor-types'
+import { Route as AuthManageDoctorsRouteImport } from './pages/_auth/manage/doctors'
+import { Route as AuthManageServicesRouteImport } from './pages/_auth/manage/services'
 import { Route as AuthPatientsIndexRouteImport } from './pages/_auth/patients/index'
 import { Route as AuthPatientsPatientIdRouteImport } from './pages/_auth/patients/$patientId'
 import { Route as AuthTreatmentsIndexRouteImport } from './pages/_auth/treatments/index'
@@ -38,45 +38,45 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthAdminRoute = AuthAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthRoute,
-} as any)
 const AuthDashboardRoute = AuthDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthRoute,
 } as any)
-const AuthAdminIndexRoute = AuthAdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthAdminRoute,
-} as any)
-const AuthAdminClinicRoute = AuthAdminClinicRouteImport.update({
-  id: '/clinic',
-  path: '/clinic',
-  getParentRoute: () => AuthAdminRoute,
-} as any)
-const AuthAdminDoctorTypesRoute = AuthAdminDoctorTypesRouteImport.update({
-  id: '/doctor-types',
-  path: '/doctor-types',
-  getParentRoute: () => AuthAdminRoute,
-} as any)
-const AuthAdminDoctorsRoute = AuthAdminDoctorsRouteImport.update({
-  id: '/doctors',
-  path: '/doctors',
-  getParentRoute: () => AuthAdminRoute,
-} as any)
-const AuthAdminServicesRoute = AuthAdminServicesRouteImport.update({
-  id: '/services',
-  path: '/services',
-  getParentRoute: () => AuthAdminRoute,
+const AuthManageRoute = AuthManageRouteImport.update({
+  id: '/manage',
+  path: '/manage',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthAppointmentsIndexRoute = AuthAppointmentsIndexRouteImport.update({
   id: '/appointments/',
   path: '/appointments/',
   getParentRoute: () => AuthRoute,
+} as any)
+const AuthManageIndexRoute = AuthManageIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthManageRoute,
+} as any)
+const AuthManageClinicRoute = AuthManageClinicRouteImport.update({
+  id: '/clinic',
+  path: '/clinic',
+  getParentRoute: () => AuthManageRoute,
+} as any)
+const AuthManageDoctorTypesRoute = AuthManageDoctorTypesRouteImport.update({
+  id: '/doctor-types',
+  path: '/doctor-types',
+  getParentRoute: () => AuthManageRoute,
+} as any)
+const AuthManageDoctorsRoute = AuthManageDoctorsRouteImport.update({
+  id: '/doctors',
+  path: '/doctors',
+  getParentRoute: () => AuthManageRoute,
+} as any)
+const AuthManageServicesRoute = AuthManageServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => AuthManageRoute,
 } as any)
 const AuthPatientsIndexRoute = AuthPatientsIndexRouteImport.update({
   id: '/patients/',
@@ -97,15 +97,15 @@ const AuthTreatmentsIndexRoute = AuthTreatmentsIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/admin': typeof AuthAdminRouteWithChildren
   '/dashboard': typeof AuthDashboardRoute
-  '/admin/clinic': typeof AuthAdminClinicRoute
-  '/admin/doctor-types': typeof AuthAdminDoctorTypesRoute
-  '/admin/doctors': typeof AuthAdminDoctorsRoute
-  '/admin/services': typeof AuthAdminServicesRoute
+  '/manage': typeof AuthManageRouteWithChildren
+  '/manage/clinic': typeof AuthManageClinicRoute
+  '/manage/doctor-types': typeof AuthManageDoctorTypesRoute
+  '/manage/doctors': typeof AuthManageDoctorsRoute
+  '/manage/services': typeof AuthManageServicesRoute
   '/patients/$patientId': typeof AuthPatientsPatientIdRoute
-  '/admin/': typeof AuthAdminIndexRoute
   '/appointments/': typeof AuthAppointmentsIndexRoute
+  '/manage/': typeof AuthManageIndexRoute
   '/patients/': typeof AuthPatientsIndexRoute
   '/treatments/': typeof AuthTreatmentsIndexRoute
 }
@@ -113,13 +113,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthDashboardRoute
-  '/admin/clinic': typeof AuthAdminClinicRoute
-  '/admin/doctor-types': typeof AuthAdminDoctorTypesRoute
-  '/admin/doctors': typeof AuthAdminDoctorsRoute
-  '/admin/services': typeof AuthAdminServicesRoute
+  '/manage/clinic': typeof AuthManageClinicRoute
+  '/manage/doctor-types': typeof AuthManageDoctorTypesRoute
+  '/manage/doctors': typeof AuthManageDoctorsRoute
+  '/manage/services': typeof AuthManageServicesRoute
   '/patients/$patientId': typeof AuthPatientsPatientIdRoute
-  '/admin': typeof AuthAdminIndexRoute
   '/appointments': typeof AuthAppointmentsIndexRoute
+  '/manage': typeof AuthManageIndexRoute
   '/patients': typeof AuthPatientsIndexRoute
   '/treatments': typeof AuthTreatmentsIndexRoute
 }
@@ -128,15 +128,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_auth': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
-  '/_auth/admin': typeof AuthAdminRouteWithChildren
   '/_auth/dashboard': typeof AuthDashboardRoute
-  '/_auth/admin/clinic': typeof AuthAdminClinicRoute
-  '/_auth/admin/doctor-types': typeof AuthAdminDoctorTypesRoute
-  '/_auth/admin/doctors': typeof AuthAdminDoctorsRoute
-  '/_auth/admin/services': typeof AuthAdminServicesRoute
+  '/_auth/manage': typeof AuthManageRouteWithChildren
+  '/_auth/manage/clinic': typeof AuthManageClinicRoute
+  '/_auth/manage/doctor-types': typeof AuthManageDoctorTypesRoute
+  '/_auth/manage/doctors': typeof AuthManageDoctorsRoute
+  '/_auth/manage/services': typeof AuthManageServicesRoute
   '/_auth/patients/$patientId': typeof AuthPatientsPatientIdRoute
-  '/_auth/admin/': typeof AuthAdminIndexRoute
   '/_auth/appointments/': typeof AuthAppointmentsIndexRoute
+  '/_auth/manage/': typeof AuthManageIndexRoute
   '/_auth/patients/': typeof AuthPatientsIndexRoute
   '/_auth/treatments/': typeof AuthTreatmentsIndexRoute
 }
@@ -145,15 +145,15 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
-    | '/admin'
     | '/dashboard'
-    | '/admin/clinic'
-    | '/admin/doctor-types'
-    | '/admin/doctors'
-    | '/admin/services'
+    | '/manage'
+    | '/manage/clinic'
+    | '/manage/doctor-types'
+    | '/manage/doctors'
+    | '/manage/services'
     | '/patients/$patientId'
-    | '/admin/'
     | '/appointments/'
+    | '/manage/'
     | '/patients/'
     | '/treatments/'
   fileRoutesByTo: FileRoutesByTo
@@ -161,13 +161,13 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/dashboard'
-    | '/admin/clinic'
-    | '/admin/doctor-types'
-    | '/admin/doctors'
-    | '/admin/services'
+    | '/manage/clinic'
+    | '/manage/doctor-types'
+    | '/manage/doctors'
+    | '/manage/services'
     | '/patients/$patientId'
-    | '/admin'
     | '/appointments'
+    | '/manage'
     | '/patients'
     | '/treatments'
   id:
@@ -175,15 +175,15 @@ export interface FileRouteTypes {
     | '/'
     | '/_auth'
     | '/login'
-    | '/_auth/admin'
     | '/_auth/dashboard'
-    | '/_auth/admin/clinic'
-    | '/_auth/admin/doctor-types'
-    | '/_auth/admin/doctors'
-    | '/_auth/admin/services'
+    | '/_auth/manage'
+    | '/_auth/manage/clinic'
+    | '/_auth/manage/doctor-types'
+    | '/_auth/manage/doctors'
+    | '/_auth/manage/services'
     | '/_auth/patients/$patientId'
-    | '/_auth/admin/'
     | '/_auth/appointments/'
+    | '/_auth/manage/'
     | '/_auth/patients/'
     | '/_auth/treatments/'
   fileRoutesById: FileRoutesById
@@ -217,13 +217,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_auth/admin': {
-      id: '/_auth/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthAdminRouteImport
-      parentRoute: typeof AuthRoute
-    }
     '/_auth/dashboard': {
       id: '/_auth/dashboard'
       path: '/dashboard'
@@ -231,40 +224,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthDashboardRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_auth/admin/': {
-      id: '/_auth/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AuthAdminIndexRouteImport
-      parentRoute: typeof AuthAdminRoute
-    }
-    '/_auth/admin/clinic': {
-      id: '/_auth/admin/clinic'
-      path: '/clinic'
-      fullPath: '/admin/clinic'
-      preLoaderRoute: typeof AuthAdminClinicRouteImport
-      parentRoute: typeof AuthAdminRoute
-    }
-    '/_auth/admin/doctor-types': {
-      id: '/_auth/admin/doctor-types'
-      path: '/doctor-types'
-      fullPath: '/admin/doctor-types'
-      preLoaderRoute: typeof AuthAdminDoctorTypesRouteImport
-      parentRoute: typeof AuthAdminRoute
-    }
-    '/_auth/admin/doctors': {
-      id: '/_auth/admin/doctors'
-      path: '/doctors'
-      fullPath: '/admin/doctors'
-      preLoaderRoute: typeof AuthAdminDoctorsRouteImport
-      parentRoute: typeof AuthAdminRoute
-    }
-    '/_auth/admin/services': {
-      id: '/_auth/admin/services'
-      path: '/services'
-      fullPath: '/admin/services'
-      preLoaderRoute: typeof AuthAdminServicesRouteImport
-      parentRoute: typeof AuthAdminRoute
+    '/_auth/manage': {
+      id: '/_auth/manage'
+      path: '/manage'
+      fullPath: '/manage'
+      preLoaderRoute: typeof AuthManageRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/_auth/appointments/': {
       id: '/_auth/appointments/'
@@ -272,6 +237,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/appointments/'
       preLoaderRoute: typeof AuthAppointmentsIndexRouteImport
       parentRoute: typeof AuthRoute
+    }
+    '/_auth/manage/': {
+      id: '/_auth/manage/'
+      path: '/'
+      fullPath: '/manage/'
+      preLoaderRoute: typeof AuthManageIndexRouteImport
+      parentRoute: typeof AuthManageRoute
+    }
+    '/_auth/manage/clinic': {
+      id: '/_auth/manage/clinic'
+      path: '/clinic'
+      fullPath: '/manage/clinic'
+      preLoaderRoute: typeof AuthManageClinicRouteImport
+      parentRoute: typeof AuthManageRoute
+    }
+    '/_auth/manage/doctor-types': {
+      id: '/_auth/manage/doctor-types'
+      path: '/doctor-types'
+      fullPath: '/manage/doctor-types'
+      preLoaderRoute: typeof AuthManageDoctorTypesRouteImport
+      parentRoute: typeof AuthManageRoute
+    }
+    '/_auth/manage/doctors': {
+      id: '/_auth/manage/doctors'
+      path: '/doctors'
+      fullPath: '/manage/doctors'
+      preLoaderRoute: typeof AuthManageDoctorsRouteImport
+      parentRoute: typeof AuthManageRoute
+    }
+    '/_auth/manage/services': {
+      id: '/_auth/manage/services'
+      path: '/services'
+      fullPath: '/manage/services'
+      preLoaderRoute: typeof AuthManageServicesRouteImport
+      parentRoute: typeof AuthManageRoute
     }
     '/_auth/patients/': {
       id: '/_auth/patients/'
@@ -297,29 +297,29 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthAdminRouteChildren {
-  AuthAdminClinicRoute: typeof AuthAdminClinicRoute
-  AuthAdminDoctorTypesRoute: typeof AuthAdminDoctorTypesRoute
-  AuthAdminDoctorsRoute: typeof AuthAdminDoctorsRoute
-  AuthAdminServicesRoute: typeof AuthAdminServicesRoute
-  AuthAdminIndexRoute: typeof AuthAdminIndexRoute
+interface AuthManageRouteChildren {
+  AuthManageClinicRoute: typeof AuthManageClinicRoute
+  AuthManageDoctorTypesRoute: typeof AuthManageDoctorTypesRoute
+  AuthManageDoctorsRoute: typeof AuthManageDoctorsRoute
+  AuthManageServicesRoute: typeof AuthManageServicesRoute
+  AuthManageIndexRoute: typeof AuthManageIndexRoute
 }
 
-const AuthAdminRouteChildren: AuthAdminRouteChildren = {
-  AuthAdminClinicRoute: AuthAdminClinicRoute,
-  AuthAdminDoctorTypesRoute: AuthAdminDoctorTypesRoute,
-  AuthAdminDoctorsRoute: AuthAdminDoctorsRoute,
-  AuthAdminServicesRoute: AuthAdminServicesRoute,
-  AuthAdminIndexRoute: AuthAdminIndexRoute,
+const AuthManageRouteChildren: AuthManageRouteChildren = {
+  AuthManageClinicRoute: AuthManageClinicRoute,
+  AuthManageDoctorTypesRoute: AuthManageDoctorTypesRoute,
+  AuthManageDoctorsRoute: AuthManageDoctorsRoute,
+  AuthManageServicesRoute: AuthManageServicesRoute,
+  AuthManageIndexRoute: AuthManageIndexRoute,
 }
 
-const AuthAdminRouteWithChildren = AuthAdminRoute._addFileChildren(
-  AuthAdminRouteChildren,
+const AuthManageRouteWithChildren = AuthManageRoute._addFileChildren(
+  AuthManageRouteChildren,
 )
 
 interface AuthRouteChildren {
-  AuthAdminRoute: typeof AuthAdminRouteWithChildren
   AuthDashboardRoute: typeof AuthDashboardRoute
+  AuthManageRoute: typeof AuthManageRouteWithChildren
   AuthPatientsPatientIdRoute: typeof AuthPatientsPatientIdRoute
   AuthAppointmentsIndexRoute: typeof AuthAppointmentsIndexRoute
   AuthPatientsIndexRoute: typeof AuthPatientsIndexRoute
@@ -327,8 +327,8 @@ interface AuthRouteChildren {
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
-  AuthAdminRoute: AuthAdminRouteWithChildren,
   AuthDashboardRoute: AuthDashboardRoute,
+  AuthManageRoute: AuthManageRouteWithChildren,
   AuthPatientsPatientIdRoute: AuthPatientsPatientIdRoute,
   AuthAppointmentsIndexRoute: AuthAppointmentsIndexRoute,
   AuthPatientsIndexRoute: AuthPatientsIndexRoute,

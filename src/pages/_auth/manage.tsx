@@ -10,10 +10,10 @@ import { cn } from '@/shared/lib/cn'
  * that it stays the only place a section is declared.
  */
 const SECTIONS = [
-  { to: '/admin/doctors', labelKey: 'admin:nav.doctors' },
-  { to: '/admin/doctor-types', labelKey: 'admin:nav.doctorTypes' },
-  { to: '/admin/services', labelKey: 'admin:nav.services' },
-  { to: '/admin/clinic', labelKey: 'admin:nav.clinic' },
+  { to: '/manage/doctors', labelKey: 'admin:nav.doctors' },
+  { to: '/manage/doctor-types', labelKey: 'admin:nav.doctorTypes' },
+  { to: '/manage/services', labelKey: 'admin:nav.services' },
+  { to: '/manage/clinic', labelKey: 'admin:nav.clinic' },
 ] as const
 
 /**
@@ -25,7 +25,7 @@ const SECTIONS = [
  * damage is that every list is filtered by `clinic=request.user`, which for a
  * doctor's own token returns nothing. Closing it properly is server-side.
  */
-export const Route = createFileRoute('/_auth/admin')({
+export const Route = createFileRoute('/_auth/manage')({
   beforeLoad: ({ context }) => {
     /*
      * `clinic:manage` belongs to `superadmin` alone (ADR-012). A doctor or a
