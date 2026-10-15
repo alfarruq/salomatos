@@ -21,7 +21,7 @@ export interface CreateClinicFormProps {
  *
  * A plain form on the page rather than a dialog: there is nothing to compare
  * it against yet, and once it exists this screen is replaced by
- * `ClinicSummaryCard` — see `pages/_auth/admin/clinic.tsx`.
+ * `ClinicSummaryCard` — see `pages/_auth/manage/clinic.tsx`.
  */
 export function CreateClinicForm({ clinicId }: CreateClinicFormProps) {
   const { t } = useTranslation(['admin', 'common'])

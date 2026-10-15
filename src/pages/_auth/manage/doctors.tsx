@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { DoctorTable } from '@/widgets/doctor-table'
 
-export const Route = createFileRoute('/_auth/admin/doctors')({
+export const Route = createFileRoute('/_auth/manage/doctors')({
   component: DoctorsSection,
 })
 

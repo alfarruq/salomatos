@@ -5,7 +5,7 @@ import { ClinicSummaryCard, clinicQueries } from '@/entities/clinic'
 import { CreateClinicForm } from '@/features/clinic-create'
 import { Card, ErrorState, QueryBoundary, Skeleton } from '@/shared/ui'
 
-export const Route = createFileRoute('/_auth/admin/clinic')({
+export const Route = createFileRoute('/_auth/manage/clinic')({
   component: ClinicSection,
 })
 

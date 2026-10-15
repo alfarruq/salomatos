@@ -148,14 +148,14 @@ describe('authentication flow', () => {
   it('keeps a doctor out of clinic administration', async () => {
     /*
      * ADR-012 gives `clinic:manage` to the clinic account alone. A doctor
-     * reaching /admin is returned to the dashboard rather than shown a section
+     * reaching /manage is returned to the dashboard rather than shown a section
      * whose every request the server would answer with an empty list.
      *
      * ⚠️ UX, not security: `DEFAULT_PERMISSION_CLASSES` is `IsAuthenticated`,
      * so the endpoints themselves stay open to any signed-in account.
      */
     signedIn('doctor')
-    renderApp('/admin/doctors')
+    renderApp('/manage/doctors')
 
     expect(await screen.findByRole('heading', { name: 'Boshqaruv paneli' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Boshqaruv' })).not.toBeInTheDocument()
@@ -163,7 +163,7 @@ describe('authentication flow', () => {
 
   it('lets the clinic account into administration', async () => {
     signedIn('clinic')
-    renderApp('/admin/doctors')
+    renderApp('/manage/doctors')
 
     expect(await screen.findByRole('heading', { name: 'Boshqaruv' })).toBeInTheDocument()
     expect(await screen.findByText('Sardor Usmonov')).toBeInTheDocument()
