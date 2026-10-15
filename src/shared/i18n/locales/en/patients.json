@@ -53,10 +53,12 @@
   "title": "Patients",
   "column": {
     "fullName": "Name",
+    "age": "Age",
     "phoneNumber": "Phone",
     "status": "Status",
+    "treatmentType": "Treatment",
     "doctor": "Doctor",
-    "lastAppointment": "Last visit",
+    "lastAppointment": "Appointment",
     "remaining": "Outstanding"
   },
   "empty": {

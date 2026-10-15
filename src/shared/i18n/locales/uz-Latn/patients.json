@@ -53,10 +53,12 @@
   "title": "Bemorlar",
   "column": {
     "fullName": "Ism",
+    "age": "Yosh",
     "phoneNumber": "Telefon",
     "status": "Holat",
+    "treatmentType": "Muolaja",
     "doctor": "Shifokor",
-    "lastAppointment": "Oxirgi qabul",
+    "lastAppointment": "Qabul",
     "remaining": "Qoldiq"
   },
   "empty": {

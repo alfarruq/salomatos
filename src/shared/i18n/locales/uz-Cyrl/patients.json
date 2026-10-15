@@ -53,10 +53,12 @@
   "title": "Беморлар",
   "column": {
     "fullName": "Исм",
+    "age": "Ёш",
     "phoneNumber": "Телефон",
     "status": "Ҳолат",
+    "treatmentType": "Муолажа",
     "doctor": "Шифокор",
-    "lastAppointment": "Охирги қабул",
+    "lastAppointment": "Қабул",
     "remaining": "Қолдиқ"
   },
   "empty": {
