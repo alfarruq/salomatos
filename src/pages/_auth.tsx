@@ -174,20 +174,14 @@ function AuthenticatedLayout() {
       sidebar={
         <ul className="flex flex-col gap-1">
           <li>
-            <Link
-              className="block rounded-control px-3 py-2 text-body text-text-secondary hover:bg-sunken hover:text-text"
-              to="/dashboard"
-            >
+            <Link {...sidebarLinkProps} to="/dashboard">
               {t('nav.dashboard')}
             </Link>
           </li>
           {/* Nothing here is a permission check that matters — Django's is. */}
           <Can permission="patient:read">
             <li>
-              <Link
-                className="block rounded-control px-3 py-2 text-body text-text-secondary hover:bg-sunken hover:text-text"
-                to="/patients"
-              >
+              <Link {...sidebarLinkProps} to="/patients">
                 {t('nav.patients')}
               </Link>
             </li>
@@ -195,20 +189,14 @@ function AuthenticatedLayout() {
           {/* Treatments are medical records — doctors and the desk both read them. */}
           <Can permission="medical-record:read">
             <li>
-              <Link
-                className="block rounded-control px-3 py-2 text-body text-text-secondary hover:bg-sunken hover:text-text"
-                to="/treatments"
-              >
+              <Link {...sidebarLinkProps} to="/treatments">
                 {t('nav.treatments')}
               </Link>
             </li>
           </Can>
           <Can permission="appointment:read">
             <li>
-              <Link
-                className="block rounded-control px-3 py-2 text-body text-text-secondary hover:bg-sunken hover:text-text"
-                to="/appointments"
-              >
+              <Link {...sidebarLinkProps} to="/appointments">
                 {t('nav.appointments')}
               </Link>
             </li>
@@ -223,10 +211,7 @@ function AuthenticatedLayout() {
           {/* `clinic:manage` is the clinic account alone (ADR-012). */}
           <Can permission="clinic:manage">
             <li>
-              <Link
-                className="block rounded-control px-3 py-2 text-body text-text-secondary hover:bg-sunken hover:text-text"
-                to="/manage"
-              >
+              <Link {...sidebarLinkProps} to="/manage">
                 {t('nav.admin')}
               </Link>
             </li>
@@ -238,3 +223,14 @@ function AuthenticatedLayout() {
     </AppShell>
   )
 }
+
+/**
+ * Fuzzy matching (the router's default) keeps a section lit on its nested
+ * pages too, e.g. `/manage/doctors` under `/manage`.
+ */
+const sidebarLinkProps = {
+  className:
+    'block rounded-control px-3 py-2 text-body transition-colors duration-150 ease-out-apple',
+  activeProps: { className: 'bg-accent-soft font-medium text-accent-text' },
+  inactiveProps: { className: 'text-text-secondary hover:bg-sunken hover:text-text' },
+} as const
