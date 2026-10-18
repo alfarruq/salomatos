@@ -5,6 +5,7 @@ import { Can, sessionQueries, useSession } from '@/entities/session'
 import { useLogout } from '@/features/auth-logout'
 import { LanguageSwitcher } from '@/features/language-switch'
 import { LockScreen, useIdleLock, useLockStore } from '@/features/session-lock'
+import { ThemeSwitcher } from '@/features/theme-switch'
 import { clearSession } from '@/shared/api/authSession'
 import { ApiError } from '@/shared/api/errors'
 import {
@@ -113,6 +114,7 @@ function AuthenticatedLayout() {
       headerActions={
         session ? (
           <>
+            <ThemeSwitcher />
             <LanguageSwitcher />
             <DropdownMenu
               trigger={

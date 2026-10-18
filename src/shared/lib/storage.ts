@@ -4,11 +4,12 @@
  * The allowlist is the security boundary: a key that is not in `KEYS` cannot
  * be persisted, because `set`/`get`/`remove` have no way to address it. Never
  * call `localStorage` directly elsewhere. PHI and the user's profile stay
- * RAM-only regardless — only the locale and the two auth tokens are safe to
- * survive a reload (ADR `auth-session-storage`, revises ADR-003).
+ * RAM-only regardless — only the locale, the theme and the two auth tokens are
+ * safe to survive a reload (ADR `auth-session-storage`, revises ADR-003).
  */
 const KEYS = {
   locale: 'salomat:locale',
+  theme: 'salomat:theme',
   accessToken: 'salomat:access_token',
   refreshToken: 'salomat:refresh_token',
 } as const
