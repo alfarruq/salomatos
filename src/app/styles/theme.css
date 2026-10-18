@@ -44,6 +44,15 @@
   --color-on-accent: #ffffff;
 
   /*
+   * ── Brand — the logo only ──
+   * The tooth and the "OS" of the wordmark. Kept apart from the accent so the
+   * logo stays the logo's blue while the interface accent can move on its own.
+   * Never used for controls: the interface still has exactly one accent.
+   */
+  --color-brand: #1d6fe8;
+  --color-brand-ink: #0f2a4a;
+
+  /*
    * ── Semantic — state only, never decoration ──
    * `danger` is the text/icon role; `danger-fill` is the destructive button
    * background. §13: red is reserved for deletion, nothing else.
@@ -284,6 +293,8 @@
       --color-accent-text: #2b95ff;
       --color-accent-soft: oklch(50% 0.19 258 / 0.22);
       --color-on-accent: #ffffff;
+      --color-brand: #4a8ff0;
+      --color-brand-ink: #f5f5f7;
 
       --color-success: #30d158;
       --color-warning: #ffb340;
@@ -325,6 +336,8 @@
     --color-accent-text: #2b95ff;
     --color-accent-soft: oklch(50% 0.19 258 / 0.22);
     --color-on-accent: #ffffff;
+    --color-brand: #4a8ff0;
+    --color-brand-ink: #f5f5f7;
 
     --color-success: #30d158;
     --color-warning: #ffb340;

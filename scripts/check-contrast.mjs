@@ -30,6 +30,9 @@ const TEXT_PAIRS = [
   ['text-secondary', ['canvas', 'surface', 'elevated', 'sunken']],
   ['text-tertiary', ['canvas', 'surface', 'elevated']],
   ['accent-text', ['canvas', 'surface', 'elevated', 'sunken', 'accent-soft']],
+  // The wordmark sits on the sidebar, the top bar and the login card.
+  ['brand-ink', ['surface', 'elevated']],
+  ['brand', ['surface', 'elevated']],
   ['success', ['canvas', 'surface']],
   ['warning', ['canvas', 'surface']],
   ['danger', ['canvas', 'surface']],
