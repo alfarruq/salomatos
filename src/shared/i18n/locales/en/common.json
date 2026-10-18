@@ -33,6 +33,14 @@
     "label": "Language",
     "change": "Change language"
   },
+  "theme": {
+    "label": "Appearance",
+    "change": "Change appearance",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "current": "Current"
+  },
   "error": {
     "pageTitle": "This page did not open",
     "pageBody": "Reload the page or go to another section.",

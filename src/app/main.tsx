@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { restoreSession } from '@/shared/api/authSession'
+import { restoreTheme } from '@/shared/lib/theme'
 import { App } from './App'
 import { AppProviders } from './providers/AppProviders'
 import './styles/theme.css'
@@ -19,6 +20,7 @@ if (!container) {
  * so this has to land before that render happens at all, not in an effect.
  */
 restoreSession()
+restoreTheme()
 
 /*
  * ⛔ There is no mock backend here any more, and there must not be one again.
