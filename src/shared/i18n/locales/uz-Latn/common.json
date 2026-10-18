@@ -35,6 +35,14 @@
     "label": "Til",
     "change": "Tilni o'zgartirish"
   },
+  "theme": {
+    "label": "Ko'rinish",
+    "change": "Ko'rinishni o'zgartirish",
+    "system": "Tizim",
+    "light": "Yorug'",
+    "dark": "Qorong'i",
+    "current": "Tanlangan"
+  },
   "error": {
     "pageTitle": "Bu sahifa ochilmadi",
     "pageBody": "Sahifani qayta yuklang yoki boshqa bo'limga o'ting.",

@@ -51,6 +51,7 @@ Har doim, har faylda, har vazifada amal qiladi.
 | Kalit | Qiymat | Nega ruxsat |
 |---|---|---|
 | `salomat:locale` | qo'llab-quvvatlanadigan til kodi | Sir emas, PHI emas. Refreshdan keyin til saqlanishi kerak. |
+| `salomat:theme` | `system` \| `light` \| `dark` | Sir emas, PHI emas. Refreshdan keyin tanlangan tema saqlanishi kerak. |
 | `salomat:access_token` | JWT access token | Refreshdan keyin sessiya saqlanishi uchun. Backend'da refresh endpoint yo'q (ADR: `auth-session-storage`, ADR-003 ni almashtiradi). |
 | `salomat:refresh_token` | JWT refresh token | Backend refresh endpoint qo'shganda ishlatiladi. Hozircha faqat saqlanadi. |
 | `salomat:sidebar_collapsed` | `"true"` yoki yo'q | Layout sozlamasi, PHI emas, sir emas. Refreshdan keyin sidebar holati saqlanishi kerak. |
@@ -208,6 +209,7 @@ export const patientQueries = {
 // Allowlist is the security boundary: anything not listed here cannot be persisted.
 const KEYS = {
   locale: 'salomat:locale',
+  theme: 'salomat:theme',
   accessToken: 'salomat:access_token',
   refreshToken: 'salomat:refresh_token',
 } as const
