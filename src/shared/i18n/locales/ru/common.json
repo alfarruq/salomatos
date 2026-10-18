@@ -21,6 +21,8 @@
     "openNavigation": "Открыть меню",
     "navigation": "Главное меню",
     "more": "Ещё",
+    "collapseNavigation": "Свернуть меню",
+    "expandNavigation": "Развернуть меню",
     "breadcrumb": "Хлебные крошки",
     "dashboard": "Панель управления",
     "patients": "Пациенты",

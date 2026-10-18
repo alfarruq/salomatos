@@ -10,6 +10,8 @@ export interface LogoProps {
    * name stays in the accessibility tree, so the landmark is still announced.
    */
   compactBelowLg?: boolean
+  /** Show only the tooth at every width, e.g. in the collapsed rail. */
+  compact?: boolean
   className?: string
 }
 
@@ -46,7 +48,12 @@ export function LogoMark({ className }: { className?: string }) {
 }
 
 /** The tooth and the product name, set as live text so it stays sharp and follows the theme. */
-export function Logo({ size = 'md', compactBelowLg = false, className }: LogoProps) {
+export function Logo({
+  size = 'md',
+  compactBelowLg = false,
+  compact = false,
+  className,
+}: LogoProps) {
   return (
     <span className={cn('inline-flex items-center gap-2', className)}>
       <LogoMark className={sizes[size].mark} />
@@ -55,6 +62,7 @@ export function Logo({ size = 'md', compactBelowLg = false, className }: LogoPro
           sizes[size].text,
           'font-bold tracking-tight text-brand-ink',
           compactBelowLg && 'max-lg:sr-only',
+          compact && 'sr-only',
         )}
       >
         Salomat<span className="text-brand">OS</span>

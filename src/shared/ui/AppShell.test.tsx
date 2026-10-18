@@ -2,11 +2,14 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { AppShell } from './AppShell'
+import { TooltipProvider } from './Tooltip'
 
 const labels = {
   skipToContent: "Asosiy qismga o'tish",
   openNavigation: 'Menyuni ochish',
   navigation: 'Asosiy menyu',
+  collapseNavigation: "Menyuni yig'ish",
+  expandNavigation: 'Menyuni yoyish',
 }
 
 function shell() {
@@ -38,6 +41,18 @@ describe('AppShell', () => {
     render(shell())
 
     expect(screen.getByRole('navigation', { name: 'Asosiy menyu' })).toBeInTheDocument()
+  })
+
+  it('collapses the rail and expands it again', async () => {
+    // The collapsed rail labels its toggle with a tooltip, which needs the app's provider.
+    render(<TooltipProvider>{shell()}</TooltipProvider>)
+    const rail = screen.getByRole('navigation', { name: 'Asosiy menyu' })
+
+    await userEvent.click(within(rail).getByRole('button', { name: "Menyuni yig'ish" }))
+    expect(rail).toHaveAttribute('data-collapsed', 'true')
+
+    await userEvent.click(within(rail).getByRole('button', { name: 'Menyuni yoyish' }))
+    expect(rail).toHaveAttribute('data-collapsed', 'false')
   })
 
   it('opens the navigation sheet on small screens', async () => {
