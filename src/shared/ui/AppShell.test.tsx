@@ -1,6 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
+import { storage } from '@/shared/lib/storage'
 import { AppShell } from './AppShell'
 
 const labels = {
@@ -18,6 +19,10 @@ function shell() {
     </AppShell>
   )
 }
+
+afterEach(() => {
+  storage.remove('sidebarCollapsed')
+})
 
 describe('AppShell', () => {
   it('puts a skip link first in the tab order', async () => {
@@ -51,6 +56,19 @@ describe('AppShell', () => {
 
     await userEvent.click(within(rail).getByRole('button', { name: 'Menyuni yoyish' }))
     expect(rail).toHaveAttribute('data-collapsed', 'false')
+  })
+
+  it('remembers the collapsed rail across reloads', async () => {
+    const { unmount } = render(shell())
+    await userEvent.click(screen.getByRole('button', { name: "Menyuni yig'ish" }))
+    unmount()
+
+    render(shell())
+
+    expect(screen.getByRole('navigation', { name: 'Asosiy menyu' })).toHaveAttribute(
+      'data-collapsed',
+      'true',
+    )
   })
 
   it('opens the navigation sheet on small screens', async () => {

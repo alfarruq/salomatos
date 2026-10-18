@@ -3,6 +3,7 @@ import { motion } from 'motion/react'
 import { createContext, type ReactNode, useContext, useState } from 'react'
 import { cn } from '@/shared/lib/cn'
 import { springs, useTransition } from '@/shared/lib/motion'
+import { storage } from '@/shared/lib/storage'
 import { Sheet } from './Sheet'
 import { Tooltip, TooltipProvider } from './Tooltip'
 
@@ -65,9 +66,8 @@ export function AppShell({
   className,
 }: AppShellProps) {
   const [isNavOpen, setIsNavOpen] = useState(false)
-  // Kept in memory only: persisting it would mean a new storage key, which the
-  // allowlist (CLAUDE.md §3) does not have.
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  // Stored value is untrusted input: anything but "true" means expanded.
+  const [isCollapsed, setIsCollapsed] = useState(() => storage.get('sidebarCollapsed') === 'true')
   const railTransition = useTransition(springs.surface)
   const toggleLabel = isCollapsed ? labels.expandNavigation : labels.collapseNavigation
   const ToggleIcon = isCollapsed ? PanelLeftOpen : PanelLeftClose
@@ -80,7 +80,12 @@ export function AppShell({
         'text-text-secondary transition-colors duration-150 ease-out-apple',
         'hover:bg-sunken hover:text-text',
       )}
-      onClick={() => setIsCollapsed((value) => !value)}
+      onClick={() => {
+        const next = !isCollapsed
+        setIsCollapsed(next)
+        if (next) storage.set('sidebarCollapsed', 'true')
+        else storage.remove('sidebarCollapsed')
+      }}
       type="button"
     >
       <ToggleIcon aria-hidden="true" className="size-5 shrink-0" />

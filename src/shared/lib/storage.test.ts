@@ -5,6 +5,7 @@ afterEach(() => {
   storage.remove('locale')
   storage.remove('accessToken')
   storage.remove('refreshToken')
+  storage.remove('sidebarCollapsed')
 })
 
 describe('storage', () => {
