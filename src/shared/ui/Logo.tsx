@@ -30,12 +30,10 @@ export function LogoMark({ className }: { className?: string }) {
       <mask id={maskId}>
         <rect fill="white" height="100" width="100" />
         <path
-          d="M64.5 28C61 24.5 56.5 22.5 50 22.5C41.5 22.5 35.5 26 35.5 32C35.5 38 41.5 40 50 42C58.5 44 64.5 46 64.5 52C64.5 58 58.5 61.5 50 61.5C43.5 61.5 39 59.5 35.5 56"
+          d="M61.42 27.64A12.5 9.5 0 1 0 50 41A14 10.5 0 1 1 37.21 55.77"
           fill="none"
           stroke="black"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="11"
+          strokeWidth="11.5"
         />
       </mask>
       <path
