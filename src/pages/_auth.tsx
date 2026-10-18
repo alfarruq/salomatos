@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  Logo,
   tabBarItemClassName,
 } from '@/shared/ui'
 
@@ -108,7 +109,7 @@ function AuthenticatedLayout() {
 
   return (
     <AppShell
-      brand={<span className="text-title2 text-text">SalomatOS</span>}
+      brand={<Logo compactBelowLg />}
       headerActions={
         session ? (
           <>

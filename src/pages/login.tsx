@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import * as v from 'valibot'
 import { sessionQueries } from '@/entities/session'
 import { LoginForm } from '@/features/auth-login'
-import { Alert, Card } from '@/shared/ui'
+import { Alert, Card, Logo } from '@/shared/ui'
 
 const searchSchema = v.object({
   /**
@@ -57,7 +57,10 @@ function LoginPage() {
     <main className="flex min-h-dvh items-center justify-center bg-canvas p-4">
       <Card className="w-full max-w-sm p-8">
         <div className="mb-8 flex flex-col gap-2">
-          <h1 className="text-title1 text-text">{t('login.title')}</h1>
+          {/* The wordmark is the product name, so it is the heading rather than sitting above a copy of it. */}
+          <h1 className="mb-2">
+            <Logo size="lg" />
+          </h1>
           <p className="text-callout text-text-secondary">{t('login.subtitle')}</p>
         </div>
 
