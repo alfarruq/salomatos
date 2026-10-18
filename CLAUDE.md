@@ -54,6 +54,7 @@ Har doim, har faylda, har vazifada amal qiladi.
 | `salomat:theme` | `system` \| `light` \| `dark` | Sir emas, PHI emas. Refreshdan keyin tanlangan tema saqlanishi kerak. |
 | `salomat:access_token` | JWT access token | Refreshdan keyin sessiya saqlanishi uchun. Backend'da refresh endpoint yo'q (ADR: `auth-session-storage`, ADR-003 ni almashtiradi). |
 | `salomat:refresh_token` | JWT refresh token | Backend refresh endpoint qo'shganda ishlatiladi. Hozircha faqat saqlanadi. |
+| `salomat:sidebar_collapsed` | `"true"` yoki yo'q | Layout sozlamasi, PHI emas, sir emas. Refreshdan keyin sidebar holati saqlanishi kerak. |
 
 → Web Storage'ga to'g'ridan-to'g'ri murojaat **taqiqlangan** — faqat `shared/lib/storage` orqali (§10). Yangi kalit qo'shish = allowlist'ni kengaytirish = **to'xta va so'ra** (§9).
 → Qat'iy taqiqlangan: foydalanuvchi profili, PHI, query kesh (`persistQueryClient` ishlatilmaydi), `sessionStorage`/`IndexedDB` da har qanday sir.

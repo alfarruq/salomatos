@@ -1,5 +1,22 @@
-import { createFileRoute, Link, Outlet, redirect, useNavigate } from '@tanstack/react-router'
-import { CalendarDays, House, LogOut, Users } from 'lucide-react'
+import {
+  createFileRoute,
+  Link,
+  type LinkProps,
+  Outlet,
+  redirect,
+  useNavigate,
+} from '@tanstack/react-router'
+import {
+  CalendarDays,
+  House,
+  LogOut,
+  type LucideIcon,
+  Settings,
+  Stethoscope,
+  Users,
+  Wallet,
+} from 'lucide-react'
+import type { ReactElement, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Can, sessionQueries, useSession } from '@/entities/session'
 import { useLogout } from '@/features/auth-logout'
@@ -8,6 +25,7 @@ import { LockScreen, useIdleLock, useLockStore } from '@/features/session-lock'
 import { ThemeSwitcher } from '@/features/theme-switch'
 import { clearSession } from '@/shared/api/authSession'
 import { ApiError } from '@/shared/api/errors'
+import { cn } from '@/shared/lib/cn'
 import {
   AppShell,
   Avatar,
@@ -16,7 +34,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   Logo,
+  Tooltip,
   tabBarItemClassName,
+  useSidebarCollapsed,
 } from '@/shared/ui'
 
 /**
@@ -110,7 +130,7 @@ function AuthenticatedLayout() {
 
   return (
     <AppShell
-      brand={<Logo compactBelowLg />}
+      brand={<SidebarBrand />}
       headerActions={
         session ? (
           <>
@@ -140,6 +160,8 @@ function AuthenticatedLayout() {
         skipToContent: t('nav.skipToContent'),
         openNavigation: t('nav.openNavigation'),
         navigation: t('nav.navigation'),
+        collapseNavigation: t('nav.collapseNavigation'),
+        expandNavigation: t('nav.expandNavigation'),
         more: t('nav.more'),
       }}
       tabBar={
@@ -177,46 +199,38 @@ function AuthenticatedLayout() {
       sidebar={
         <ul className="flex flex-col gap-1">
           <li>
-            <Link {...sidebarLinkProps} to="/dashboard">
-              {t('nav.dashboard')}
-            </Link>
+            <SidebarLink icon={House} label={t('nav.dashboard')} to="/dashboard" />
           </li>
           {/* Nothing here is a permission check that matters — Django's is. */}
           <Can permission="patient:read">
             <li>
-              <Link {...sidebarLinkProps} to="/patients">
-                {t('nav.patients')}
-              </Link>
+              <SidebarLink icon={Users} label={t('nav.patients')} to="/patients" />
             </li>
           </Can>
           {/* Treatments are medical records — doctors and the desk both read them. */}
           <Can permission="medical-record:read">
             <li>
-              <Link {...sidebarLinkProps} to="/treatments">
-                {t('nav.treatments')}
-              </Link>
+              <SidebarLink icon={Stethoscope} label={t('nav.treatments')} to="/treatments" />
             </li>
           </Can>
           <Can permission="appointment:read">
             <li>
-              <Link {...sidebarLinkProps} to="/appointments">
-                {t('nav.appointments')}
-              </Link>
+              <SidebarLink icon={CalendarDays} label={t('nav.appointments')} to="/appointments" />
             </li>
           </Can>
           <Can permission="billing:read">
             <li>
-              <span className="block px-3 py-2 text-body text-text-tertiary">
-                {t('nav.billing')}
-              </span>
+              <SidebarItem icon={Wallet} label={t('nav.billing')}>
+                {(content) => (
+                  <span className={cn(sidebarItemClassName, 'text-text-tertiary')}>{content}</span>
+                )}
+              </SidebarItem>
             </li>
           </Can>
           {/* `clinic:manage` is the clinic account alone (ADR-012). */}
           <Can permission="clinic:manage">
             <li>
-              <Link {...sidebarLinkProps} to="/manage">
-                {t('nav.admin')}
-              </Link>
+              <SidebarLink icon={Settings} label={t('nav.admin')} to="/manage" />
             </li>
           </Can>
         </ul>
@@ -227,13 +241,69 @@ function AuthenticatedLayout() {
   )
 }
 
+function SidebarBrand() {
+  return <Logo compact={useSidebarCollapsed()} compactBelowLg />
+}
+
+const sidebarItemClassName = cn(
+  'flex items-center gap-3 rounded-control px-3 py-2 text-body whitespace-nowrap',
+  'transition-colors duration-150 ease-out-apple',
+)
+
+/**
+ * Icon and label. In the collapsed rail the label is hidden visually but kept
+ * for screen readers, and a tooltip takes its place for sighted users.
+ */
+function SidebarItem({
+  icon: Icon,
+  label,
+  children,
+}: {
+  icon: LucideIcon
+  label: string
+  children: (content: ReactNode) => ReactElement
+}) {
+  const isCollapsed = useSidebarCollapsed()
+  const item = children(
+    <>
+      <Icon aria-hidden="true" className="size-5 shrink-0" />
+      <span className={cn(isCollapsed && 'sr-only')}>{label}</span>
+    </>,
+  )
+
+  return isCollapsed ? (
+    <Tooltip content={label} side="right">
+      {item}
+    </Tooltip>
+  ) : (
+    item
+  )
+}
+
 /**
  * Fuzzy matching (the router's default) keeps a section lit on its nested
  * pages too, e.g. `/manage/doctors` under `/manage`.
  */
-const sidebarLinkProps = {
-  className:
-    'block rounded-control px-3 py-2 text-body transition-colors duration-150 ease-out-apple',
-  activeProps: { className: 'bg-accent-soft font-medium text-accent-text' },
-  inactiveProps: { className: 'text-text-secondary hover:bg-sunken hover:text-text' },
-} as const
+function SidebarLink({
+  to,
+  ...item
+}: {
+  to: NonNullable<LinkProps['to']>
+  icon: LucideIcon
+  label: string
+}) {
+  return (
+    <SidebarItem {...item}>
+      {(content) => (
+        <Link
+          activeProps={{ className: 'bg-accent-soft font-medium text-accent-text' }}
+          className={sidebarItemClassName}
+          inactiveProps={{ className: 'text-text-secondary hover:bg-sunken hover:text-text' }}
+          to={to}
+        >
+          {content}
+        </Link>
+      )}
+    </SidebarItem>
+  )
+}

@@ -21,6 +21,8 @@
     "openNavigation": "Open menu",
     "navigation": "Main menu",
     "more": "More",
+    "collapseNavigation": "Collapse menu",
+    "expandNavigation": "Expand menu",
     "breadcrumb": "Breadcrumb",
     "dashboard": "Dashboard",
     "patients": "Patients",

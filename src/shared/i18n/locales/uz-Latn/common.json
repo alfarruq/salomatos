@@ -21,6 +21,8 @@
     "openNavigation": "Menyuni ochish",
     "navigation": "Asosiy menyu",
     "more": "Yana",
+    "collapseNavigation": "Menyuni yig'ish",
+    "expandNavigation": "Menyuni yoyish",
     "breadcrumb": "Sahifalar zanjiri",
     "dashboard": "Boshqaruv paneli",
     "patients": "Bemorlar",

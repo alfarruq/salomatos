@@ -5,7 +5,7 @@ import { type Session, sessionKeys, useSessionStore } from '@/entities/session'
 import { clearSession } from '@/shared/api/authSession'
 import { configureApi } from '@/shared/api/httpContext'
 import { createI18n } from '@/shared/i18n'
-import { Toaster, TooltipProvider } from '@/shared/ui'
+import { Toaster } from '@/shared/ui'
 import { createQueryClient } from './queryClient'
 
 /**
@@ -66,16 +66,14 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <I18nextProvider i18n={i18n}>
-        <TooltipProvider delayDuration={300}>
-          {/*
-           * Namespaces load on demand (§12.1), so the first render of a screen
-           * may suspend. `null` rather than a spinner: it resolves in a frame
-           * from a local chunk, and a flash of loader would be worse than
-           * nothing.
-           */}
-          <Suspense fallback={null}>{children}</Suspense>
-          <Toaster />
-        </TooltipProvider>
+        {/*
+         * Namespaces load on demand (§12.1), so the first render of a screen
+         * may suspend. `null` rather than a spinner: it resolves in a frame
+         * from a local chunk, and a flash of loader would be worse than
+         * nothing.
+         */}
+        <Suspense fallback={null}>{children}</Suspense>
+        <Toaster />
       </I18nextProvider>
     </QueryClientProvider>
   )

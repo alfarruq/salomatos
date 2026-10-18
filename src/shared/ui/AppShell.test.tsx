@@ -1,12 +1,15 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
+import { storage } from '@/shared/lib/storage'
 import { AppShell } from './AppShell'
 
 const labels = {
   skipToContent: "Asosiy qismga o'tish",
   openNavigation: 'Menyuni ochish',
   navigation: 'Asosiy menyu',
+  collapseNavigation: "Menyuni yig'ish",
+  expandNavigation: 'Menyuni yoyish',
 }
 
 function shell() {
@@ -16,6 +19,10 @@ function shell() {
     </AppShell>
   )
 }
+
+afterEach(() => {
+  storage.remove('sidebarCollapsed')
+})
 
 describe('AppShell', () => {
   it('puts a skip link first in the tab order', async () => {
@@ -38,6 +45,30 @@ describe('AppShell', () => {
     render(shell())
 
     expect(screen.getByRole('navigation', { name: 'Asosiy menyu' })).toBeInTheDocument()
+  })
+
+  it('collapses the rail and expands it again', async () => {
+    render(shell())
+    const rail = screen.getByRole('navigation', { name: 'Asosiy menyu' })
+
+    await userEvent.click(within(rail).getByRole('button', { name: "Menyuni yig'ish" }))
+    expect(rail).toHaveAttribute('data-collapsed', 'true')
+
+    await userEvent.click(within(rail).getByRole('button', { name: 'Menyuni yoyish' }))
+    expect(rail).toHaveAttribute('data-collapsed', 'false')
+  })
+
+  it('remembers the collapsed rail across reloads', async () => {
+    const { unmount } = render(shell())
+    await userEvent.click(screen.getByRole('button', { name: "Menyuni yig'ish" }))
+    unmount()
+
+    render(shell())
+
+    expect(screen.getByRole('navigation', { name: 'Asosiy menyu' })).toHaveAttribute(
+      'data-collapsed',
+      'true',
+    )
   })
 
   it('opens the navigation sheet on small screens', async () => {
