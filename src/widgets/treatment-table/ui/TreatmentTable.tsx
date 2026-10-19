@@ -42,7 +42,7 @@ const EMPTY = '—'
 
 /**
  * Every treatment in the clinic, filtered on the server — by patient, doctor,
- * treatment type and debt — and a page at a time.
+ * treatment type, debt and status — and a page at a time.
  */
 export function TreatmentTable({ clinicId, filters, onFiltersChange }: TreatmentTableProps) {
   const { t, i18n } = useTranslation(['treatments', 'common'])
@@ -52,7 +52,8 @@ export function TreatmentTable({ clinicId, filters, onFiltersChange }: Treatment
     filters.patientId !== null ||
     filters.doctorId !== null ||
     filters.treatmentTypeId !== null ||
-    filters.debt !== null
+    filters.debt !== null ||
+    filters.status !== null
   // A doctor has no `billing:read` (ADR-012): the money columns are not theirs.
   const canSeeMoney = useCan('billing:read')
   const navigate = useNavigate()

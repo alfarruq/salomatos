@@ -98,6 +98,10 @@
     "debtAll": "Debt: all",
     "debtWith": "With debt",
     "debtWithout": "No debt",
+    "statusLabel": "Filter by status",
+    "statusAll": "Status: all",
+    "statusInProgress": "In progress",
+    "statusCompleted": "Completed",
     "noMatch": "No matching treatments",
     "noMatchDescription": "Try changing the filters.",
     "clear": "Clear filters"

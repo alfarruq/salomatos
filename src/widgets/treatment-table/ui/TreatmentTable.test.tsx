@@ -245,6 +245,28 @@ describe('TreatmentTable', () => {
     expect(seen.url?.searchParams.get('remaining')).toBe('false')
   })
 
+  it('sends the status filter as status=', async () => {
+    const seen: { url: URL | null } = { url: null }
+    server.events.on('request:start', ({ request }) => {
+      if (request.url.includes('/clinic/treatments/')) seen.url = new URL(request.url)
+    })
+    renderTable({ status: 'in_progress' })
+
+    await vi.waitFor(() => expect(seen.url).not.toBeNull())
+    expect(seen.url?.searchParams.get('status')).toBe('in_progress')
+  })
+
+  it('filters by a status picked from the list', async () => {
+    const { onFiltersChange } = renderTable({ page: 2 })
+
+    await userEvent.click(await screen.findByRole('combobox', { name: "Holat bo'yicha filtr" }))
+    await userEvent.click(await screen.findByRole('option', { name: 'Tugallangan' }))
+
+    expect(onFiltersChange).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'completed', page: 1 }),
+    )
+  })
+
   it('goes back to page 1 when a filter changes', async () => {
     const { onFiltersChange } = renderTable({ page: 3 })
 

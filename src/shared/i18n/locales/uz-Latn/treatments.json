@@ -98,6 +98,10 @@
     "debtAll": "Qarzdorlik: hammasi",
     "debtWith": "Qarzi bor",
     "debtWithout": "Qarzi yo'q",
+    "statusLabel": "Holat bo'yicha filtr",
+    "statusAll": "Holat: hammasi",
+    "statusInProgress": "Jarayonda",
+    "statusCompleted": "Tugallangan",
     "noMatch": "Mos muolaja topilmadi",
     "noMatchDescription": "Filtrlarni o'zgartirib ko'ring.",
     "clear": "Filtrlarni tozalash"

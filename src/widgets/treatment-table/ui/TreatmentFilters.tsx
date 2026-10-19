@@ -3,7 +3,7 @@ import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { doctorQueries } from '@/entities/doctor'
 import { defaultPatientFilters, patientQueries } from '@/entities/patient'
-import type { TreatmentListFilters } from '@/entities/treatment'
+import type { TreatmentListFilters, TreatmentStatus } from '@/entities/treatment'
 import { treatmentTypeQueries } from '@/entities/treatment-type'
 import { PatientSearchInput, usePatientSearch } from '@/features/patient-search'
 import { cn } from '@/shared/lib/cn'
@@ -79,6 +79,21 @@ export function TreatmentFilters({ clinicId, filters, onFiltersChange }: Treatme
         ]}
         size="sm"
         value={filters.debt ?? FILTER_ALL}
+      />
+
+      <Select
+        aria-label={t('filters.statusLabel')}
+        className="w-auto shrink-0"
+        onValueChange={(value) =>
+          change({ status: value === FILTER_ALL ? null : (value as TreatmentStatus) })
+        }
+        options={[
+          { value: FILTER_ALL, label: t('filters.statusAll') },
+          { value: 'in_progress', label: t('filters.statusInProgress') },
+          { value: 'completed', label: t('filters.statusCompleted') },
+        ]}
+        size="sm"
+        value={filters.status ?? FILTER_ALL}
       />
     </div>
   )

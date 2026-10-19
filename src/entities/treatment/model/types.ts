@@ -16,8 +16,8 @@ export type TreatmentStatus = 'in_progress' | 'completed'
  * the full record, with cost, dates and clinical notes.
  */
 /**
- * The clinic-wide list's filters — all four confirmed live on 2026-10-14,
- * and combinable. Ids only: a patient's name never goes in a URL (§3).
+ * The clinic-wide list's filters — combinable; `status` added server-side on
+ * 2026-10-19, the rest confirmed live on 2026-10-14. Ids only: a patient's name never goes in a URL (§3).
  */
 export interface TreatmentListFilters {
   page: number
@@ -26,6 +26,8 @@ export interface TreatmentListFilters {
   treatmentTypeId: number | null
   /** `with` → `remaining=true`, `without` → `remaining=false`, null → both. */
   debt: 'with' | 'without' | null
+  /** Sent as `status=`; null → both. */
+  status: TreatmentStatus | null
 }
 
 export const defaultTreatmentListFilters: TreatmentListFilters = {
@@ -34,6 +36,7 @@ export const defaultTreatmentListFilters: TreatmentListFilters = {
   doctorId: null,
   treatmentTypeId: null,
   debt: null,
+  status: null,
 }
 
 export interface Treatment {
