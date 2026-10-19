@@ -30,6 +30,12 @@ describe('fetchStatsOverview (mock)', () => {
     expect(overview.totals.appointments).toBe(seriesTotal)
     expect(overview.doctors.reduce((acc, row) => acc + row.appointments, 0)).toBe(seriesTotal)
     expect(overview.busySlots.reduce((acc, slot) => acc + slot.appointments, 0)).toBe(seriesTotal)
+
+    const treated = overview.totals.treatmentsCompleted
+    expect(overview.treatmentsSeries.reduce((acc, point) => acc + point.completed, 0)).toBe(treated)
+    expect(overview.doctors.reduce((acc, row) => acc + row.treatmentsCompleted, 0)).toBe(treated)
+    expect(overview.teeth).toHaveLength(32)
+    expect(overview.teeth.reduce((acc, row) => acc + row.count, 0)).toBe(treated)
   })
 
   it('buckets a year by month', async () => {

@@ -30,6 +30,12 @@ const TREATMENT_TYPES = [
   { id: 7, name: 'Breket tizimi', weight: 0.05 },
 ]
 
+/**
+ * How often each tooth type ends up treated: molars far more than incisors.
+ * Keyed by the FDI position digit (1 = central incisor … 8 = wisdom tooth).
+ */
+const TOOTH_POSITION_WEIGHTS = [1, 0.8, 0.6, 1.1, 1.4, 3, 2.4, 0.9]
+
 /** Relative load by clinic hour: a late-morning peak and an after-work one. */
 const HOUR_WEIGHTS: Record<number, number> = {
   9: 0.6,
@@ -119,6 +125,8 @@ export function buildMockStatsOverview(range: StatsRange): StatsOverviewResponse
     new_patients: Math.round(appointments * 0.22),
     returning_patients: Math.round(appointments * 0.41),
     treatments_completed: Math.round(completed * 0.74),
+    treatments_started: Math.round(completed * 0.81),
+    treatments_in_progress: Math.round(completed * 0.29),
   }
   const drift = 0.82 + random() * 0.3
   const previousTotals = {
@@ -127,6 +135,8 @@ export function buildMockStatsOverview(range: StatsRange): StatsOverviewResponse
     new_patients: Math.round(totals.new_patients * (drift + 0.08)),
     returning_patients: Math.round(totals.returning_patients * (drift - 0.04)),
     treatments_completed: Math.round(totals.treatments_completed * drift),
+    treatments_started: Math.round(totals.treatments_started * drift),
+    treatments_in_progress: Math.round(totals.treatments_in_progress * (drift + 0.05)),
   }
 
   const doctorAppointments = split(
@@ -140,6 +150,23 @@ export function buildMockStatsOverview(range: StatsRange): StatsOverviewResponse
   const typeCounts = split(
     totals.treatments_completed,
     TREATMENT_TYPES.map((type) => type.weight),
+  )
+
+  const treatmentsByBucket = split(
+    totals.treatments_completed,
+    series.map((point) => point.completed * (0.85 + random() * 0.3)),
+  )
+
+  const teeth = [1, 2, 3, 4].flatMap((quadrant) =>
+    TOOTH_POSITION_WEIGHTS.map((weight, index) => ({
+      tooth: `${quadrant}${index + 1}`,
+      // Lower molars wear out faster than upper ones.
+      weight: weight * (quadrant >= 3 && index >= 5 ? 1.2 : 1) * (0.7 + random() * 0.6),
+    })),
+  )
+  const toothCounts = split(
+    totals.treatments_completed,
+    teeth.map((tooth) => tooth.weight),
   )
 
   const slots = [1, 2, 3, 4, 5, 6, 7].flatMap((weekday) =>
@@ -160,6 +187,10 @@ export function buildMockStatsOverview(range: StatsRange): StatsOverviewResponse
     totals,
     previous_totals: previousTotals,
     appointments_series: series,
+    treatments_series: series.map((point, index) => ({
+      start: point.start,
+      completed: treatmentsByBucket[index] ?? 0,
+    })),
     doctors: DOCTORS.map((doctor, index) => ({
       doctor_id: doctor.id,
       doctor: doctor.name,
@@ -172,5 +203,6 @@ export function buildMockStatsOverview(range: StatsRange): StatsOverviewResponse
       count: typeCounts[index] ?? 0,
     })),
     busy_hours: slots.map((slot, index) => ({ ...slot, appointments: slotCounts[index] ?? 0 })),
+    teeth: teeth.map((tooth, index) => ({ tooth: tooth.tooth, count: toothCounts[index] ?? 0 })),
   }
 }

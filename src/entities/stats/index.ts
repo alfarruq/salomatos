@@ -10,6 +10,8 @@ export {
   type StatsPeriod,
   type StatsRange,
   type StatsSeriesPoint,
+  type StatsToothCount,
   type StatsTotals,
+  type StatsTreatmentPoint,
   type StatsTreatmentTypeCount,
 } from './model/types'

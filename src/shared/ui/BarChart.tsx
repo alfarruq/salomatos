@@ -56,7 +56,11 @@ export function BarChart({
         {data.map((datum, index) => (
           <div className="group relative flex h-full min-w-0 flex-1 items-end" key={datum.key}>
             <div
-              className="relative w-full rounded-t bg-accent/35 transition-opacity duration-150 ease-out-apple group-hover:opacity-80"
+              className={cn(
+                'relative w-full rounded-t transition-opacity duration-150 ease-out-apple group-hover:opacity-80',
+                // A single series is the solid accent; the tint only means "the rest" beside a part.
+                partLabel === undefined ? 'bg-accent' : 'bg-accent/35',
+              )}
               style={{ height: `${(datum.value / max) * 100}%` }}
             >
               {datum.part === undefined || datum.value === 0 ? null : (

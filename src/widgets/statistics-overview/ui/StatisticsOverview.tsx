@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import { BarChart3 } from 'lucide-react'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   rangeOf,
@@ -15,7 +14,6 @@ import {
   Alert,
   BarChart,
   BarList,
-  Card,
   EmptyState,
   ErrorState,
   QueryBoundary,
@@ -26,15 +24,14 @@ import { bucketLabel } from '../model/format'
 import { BusyHoursHeatmap } from './BusyHoursHeatmap'
 import { KpiTiles } from './KpiTiles'
 import { PatientMix } from './PatientMix'
+import { Section } from './Section'
+import { TreatmentsSection } from './TreatmentsSection'
 
 export interface StatisticsOverviewProps {
   clinicId: number
   period: StatsPeriod
   onPeriodChange: (period: StatsPeriod) => void
 }
-
-/** How many services the ranking shows before the tail stops being informative. */
-const TOP_SERVICES = 6
 
 export function StatisticsOverview({ clinicId, period, onPeriodChange }: StatisticsOverviewProps) {
   const { t } = useTranslation('statistics')
@@ -90,6 +87,8 @@ function OverviewContent({ data }: { data: StatsOverview }) {
     <div className="flex flex-col gap-6">
       <KpiTiles previous={data.previousTotals} totals={data.totals} />
 
+      <h2 className="text-title2 text-text">{t('appointments.title')}</h2>
+
       <Section title={t('charts.appointments.title')}>
         <BarChart
           data={data.appointmentsSeries.map((point) => ({
@@ -118,61 +117,17 @@ function OverviewContent({ data }: { data: StatsOverview }) {
           />
         </Section>
 
-        <Section description={t('charts.services.description')} title={t('charts.services.title')}>
-          <BarList
-            items={[...data.treatmentTypes]
-              .sort((a, b) => b.count - a.count)
-              .slice(0, TOP_SERVICES)
-              .map((row) => ({
-                key: String(row.treatmentTypeId),
-                label: row.treatmentTypeName,
-                value: row.count,
-              }))}
-            label={t('charts.services.title')}
-          />
-        </Section>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Section
-          className="lg:col-span-2"
-          description={t('charts.busy.description')}
-          title={t('charts.busy.title')}
-        >
-          <BusyHoursHeatmap slots={data.busySlots} />
-        </Section>
-
         <Section title={t('charts.patients.title')}>
           <PatientMix totals={data.totals} />
         </Section>
       </div>
-    </div>
-  )
-}
 
-function Section({
-  title,
-  description,
-  className,
-  children,
-}: {
-  title: string
-  description?: string
-  className?: string
-  children: ReactNode
-}) {
-  return (
-    <Card {...(className === undefined ? {} : { className })}>
-      <section className="flex flex-col gap-4 p-4 sm:p-6">
-        <header className="flex flex-col gap-1">
-          <h2 className="text-body font-medium text-text">{title}</h2>
-          {description === undefined ? null : (
-            <p className="text-caption text-text-secondary">{description}</p>
-          )}
-        </header>
-        {children}
-      </section>
-    </Card>
+      <Section description={t('charts.busy.description')} title={t('charts.busy.title')}>
+        <BusyHoursHeatmap slots={data.busySlots} />
+      </Section>
+
+      <TreatmentsSection data={data} />
+    </div>
   )
 }
 

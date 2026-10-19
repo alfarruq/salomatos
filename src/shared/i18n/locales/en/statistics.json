@@ -43,6 +43,18 @@
       "title": "New and returning patients",
       "new": "New",
       "returning": "Returning"
+    },
+    "treatments": {
+      "title": "Treatments completed over time"
+    },
+    "treatmentDoctors": {
+      "title": "Most treatments by doctor",
+      "description": "Completed treatments in the period"
+    },
+    "teeth": {
+      "title": "Most treated teeth",
+      "description": "Completed treatments per tooth, FDI numbering",
+      "top": "Top teeth"
     }
   },
   "empty": {
@@ -52,5 +64,14 @@
   "error": {
     "title": "Statistics could not be loaded",
     "description": "Check your connection and try again."
+  },
+  "appointments": {
+    "title": "Appointments"
+  },
+  "treatments": {
+    "title": "Treatments",
+    "started": "Started",
+    "completed": "Completed",
+    "inProgress": "In progress"
   }
 }
