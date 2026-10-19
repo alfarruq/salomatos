@@ -98,6 +98,10 @@
     "debtAll": "Задолженность: все",
     "debtWith": "Есть долг",
     "debtWithout": "Без долга",
+    "statusLabel": "Фильтр по статусу",
+    "statusAll": "Статус: все",
+    "statusInProgress": "В процессе",
+    "statusCompleted": "Завершено",
     "noMatch": "Подходящих лечений нет",
     "noMatchDescription": "Попробуйте изменить фильтры.",
     "clear": "Сбросить фильтры"

@@ -505,6 +505,7 @@ export const handlers = [
       doctor?: string
       treatment_type?: string
       remaining?: unknown
+      status?: string
     }
     const doctorName = params.has('doctor_id') ? doctorNameFor(params.get('doctor_id')) : undefined
     const typeName = params.has('treatment_type_id')
@@ -512,12 +513,14 @@ export const handlers = [
           ?.name
       : undefined
     const remaining = params.get('remaining')
+    const status = params.get('status')
     const all = (Object.values(MOCK_TREATMENTS).flat() as Row[]).filter(
       (row) =>
         (rawPatientId === null || row.patient_id === Number(rawPatientId)) &&
         (!params.has('doctor_id') || row.doctor === doctorName) &&
         (!params.has('treatment_type_id') || row.treatment_type === typeName) &&
-        (remaining === null || Number(row.remaining ?? 0) > 0 === (remaining === 'true')),
+        (remaining === null || Number(row.remaining ?? 0) > 0 === (remaining === 'true')) &&
+        (status === null || row.status === status),
     )
     const page = Number(params.get('page') ?? '1')
     const start = (page - 1) * PAGE_SIZE

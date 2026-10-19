@@ -98,6 +98,10 @@
     "debtAll": "Қарздорлик: ҳаммаси",
     "debtWith": "Қарзи бор",
     "debtWithout": "Қарзи йўқ",
+    "statusLabel": "Ҳолат бўйича фильтр",
+    "statusAll": "Ҳолат: ҳаммаси",
+    "statusInProgress": "Жараёнда",
+    "statusCompleted": "Тугалланган",
     "noMatch": "Мос муолажа топилмади",
     "noMatchDescription": "Фильтрларни ўзгартириб кўринг.",
     "clear": "Фильтрларни тозалаш"

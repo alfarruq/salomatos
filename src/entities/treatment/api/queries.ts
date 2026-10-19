@@ -59,13 +59,14 @@ function toPageQuery(filters: TreatmentListFilters): string {
     params.set('treatment_type_id', String(filters.treatmentTypeId))
   }
   if (filters.debt !== null) params.set('remaining', filters.debt === 'with' ? 'true' : 'false')
+  if (filters.status !== null) params.set('status', filters.status)
   return params.toString()
 }
 
 /**
  * One page of the clinic's treatments — the same endpoint, filtered server
- * side by `patient_id`, `doctor_id`, `treatment_type_id` and `remaining`
- * (all confirmed live on 2026-10-14, and combinable).
+ * side by `patient_id`, `doctor_id`, `treatment_type_id`, `remaining` and
+ * `status` (combinable).
  */
 export async function fetchTreatmentPage(
   filters: TreatmentListFilters,

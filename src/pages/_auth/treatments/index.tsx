@@ -7,7 +7,7 @@ import { TreatmentTable } from '@/widgets/treatment-table'
 const positiveId = v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)))
 
 /**
- * Shareable view state (§3): ids, a page and a debt flag — never a name.
+ * Shareable view state (§3): ids, a page, a debt flag and a status — never a name.
  * `?patient=10` identifies a record; `?patient=Aliyev` would disclose one.
  */
 const treatmentsSearchSchema = v.object({
@@ -16,6 +16,7 @@ const treatmentsSearchSchema = v.object({
   doctor: positiveId,
   type: positiveId,
   debt: v.optional(v.picklist(['with', 'without'])),
+  status: v.optional(v.picklist(['in_progress', 'completed'])),
 })
 
 type TreatmentsSearch = v.InferOutput<typeof treatmentsSearchSchema>
@@ -41,6 +42,7 @@ function TreatmentsPage() {
     doctorId: search.doctor ?? null,
     treatmentTypeId: search.type ?? null,
     debt: search.debt ?? null,
+    status: search.status ?? null,
   }
 
   return (
@@ -59,6 +61,7 @@ function TreatmentsPage() {
               ...(next.doctorId === null ? {} : { doctor: next.doctorId }),
               ...(next.treatmentTypeId === null ? {} : { type: next.treatmentTypeId }),
               ...(next.debt === null ? {} : { debt: next.debt }),
+              ...(next.status === null ? {} : { status: next.status }),
             }),
             to: '/treatments',
           })
