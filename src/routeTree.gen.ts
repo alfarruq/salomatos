@@ -18,6 +18,7 @@ import { Route as AuthManageRouteImport } from './pages/_auth/manage'
 import { Route as AuthAppointmentsIndexRouteImport } from './pages/_auth/appointments/index'
 import { Route as AuthFinanceIndexRouteImport } from './pages/_auth/finance/index'
 import { Route as AuthFinanceExpensesRouteImport } from './pages/_auth/finance/expenses'
+import { Route as AuthFinanceRecurringRouteImport } from './pages/_auth/finance/recurring'
 import { Route as AuthManageIndexRouteImport } from './pages/_auth/manage/index'
 import { Route as AuthManageClinicRouteImport } from './pages/_auth/manage/clinic'
 import { Route as AuthManageDoctorTypesRouteImport } from './pages/_auth/manage/doctor-types'
@@ -71,6 +72,11 @@ const AuthFinanceIndexRoute = AuthFinanceIndexRouteImport.update({
 const AuthFinanceExpensesRoute = AuthFinanceExpensesRouteImport.update({
   id: '/expenses',
   path: '/expenses',
+  getParentRoute: () => AuthFinanceRoute,
+} as any)
+const AuthFinanceRecurringRoute = AuthFinanceRecurringRouteImport.update({
+  id: '/recurring',
+  path: '/recurring',
   getParentRoute: () => AuthFinanceRoute,
 } as any)
 const AuthManageIndexRoute = AuthManageIndexRouteImport.update({
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/finance': typeof AuthFinanceRouteWithChildren
   '/manage': typeof AuthManageRouteWithChildren
   '/finance/expenses': typeof AuthFinanceExpensesRoute
+  '/finance/recurring': typeof AuthFinanceRecurringRoute
   '/manage/clinic': typeof AuthManageClinicRoute
   '/manage/doctor-types': typeof AuthManageDoctorTypesRoute
   '/manage/doctors': typeof AuthManageDoctorsRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthDashboardRoute
   '/finance/expenses': typeof AuthFinanceExpensesRoute
+  '/finance/recurring': typeof AuthFinanceRecurringRoute
   '/manage/clinic': typeof AuthManageClinicRoute
   '/manage/doctor-types': typeof AuthManageDoctorTypesRoute
   '/manage/doctors': typeof AuthManageDoctorsRoute
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/_auth/finance': typeof AuthFinanceRouteWithChildren
   '/_auth/manage': typeof AuthManageRouteWithChildren
   '/_auth/finance/expenses': typeof AuthFinanceExpensesRoute
+  '/_auth/finance/recurring': typeof AuthFinanceRecurringRoute
   '/_auth/manage/clinic': typeof AuthManageClinicRoute
   '/_auth/manage/doctor-types': typeof AuthManageDoctorTypesRoute
   '/_auth/manage/doctors': typeof AuthManageDoctorsRoute
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
     | '/finance'
     | '/manage'
     | '/finance/expenses'
+    | '/finance/recurring'
     | '/manage/clinic'
     | '/manage/doctor-types'
     | '/manage/doctors'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard'
     | '/finance/expenses'
+    | '/finance/recurring'
     | '/manage/clinic'
     | '/manage/doctor-types'
     | '/manage/doctors'
@@ -232,6 +243,7 @@ export interface FileRouteTypes {
     | '/_auth/finance'
     | '/_auth/manage'
     | '/_auth/finance/expenses'
+    | '/_auth/finance/recurring'
     | '/_auth/manage/clinic'
     | '/_auth/manage/doctor-types'
     | '/_auth/manage/doctors'
@@ -317,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthFinanceExpensesRouteImport
       parentRoute: typeof AuthFinanceRoute
     }
+    '/_auth/finance/recurring': {
+      id: '/_auth/finance/recurring'
+      path: '/recurring'
+      fullPath: '/finance/recurring'
+      preLoaderRoute: typeof AuthFinanceRecurringRouteImport
+      parentRoute: typeof AuthFinanceRoute
+    }
     '/_auth/manage/': {
       id: '/_auth/manage/'
       path: '/'
@@ -392,11 +411,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthFinanceRouteChildren {
   AuthFinanceExpensesRoute: typeof AuthFinanceExpensesRoute
+  AuthFinanceRecurringRoute: typeof AuthFinanceRecurringRoute
   AuthFinanceIndexRoute: typeof AuthFinanceIndexRoute
 }
 
 const AuthFinanceRouteChildren: AuthFinanceRouteChildren = {
   AuthFinanceExpensesRoute: AuthFinanceExpensesRoute,
+  AuthFinanceRecurringRoute: AuthFinanceRecurringRoute,
   AuthFinanceIndexRoute: AuthFinanceIndexRoute,
 }
 

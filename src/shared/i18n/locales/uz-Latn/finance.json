@@ -2,7 +2,8 @@
   "title": "Moliya",
   "tabs": {
     "overview": "Umumiy",
-    "expenses": "Xarajatlar"
+    "expenses": "Xarajatlar",
+    "recurring": "Doimiy to'lovlar"
   },
   "demo": {
     "title": "Namuna ma'lumotlar",

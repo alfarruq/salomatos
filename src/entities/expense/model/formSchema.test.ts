@@ -2,7 +2,14 @@ import * as v from 'valibot'
 import { describe, expect, it } from 'vitest'
 import { clinicNow } from '@/shared/lib/datetime'
 import { addDays } from '@/shared/lib/report'
-import { emptyExpenseForm, expenseFormSchema, toExpensePayload } from './formSchema'
+import {
+  emptyExpenseForm,
+  emptyRecurringForm,
+  expenseFormSchema,
+  recurringFormSchema,
+  toExpensePayload,
+  toRecurringPayload,
+} from './formSchema'
 
 const valid = { ...emptyExpenseForm(), category: 'rent' as const, amount: '12000000' }
 
@@ -45,5 +52,32 @@ describe('toExpensePayload', () => {
     expect(payload.amount).toBe(12_000_000)
     expect(payload.payee).toBeNull()
     expect(payload.note).toBeNull()
+  })
+})
+
+describe('recurringFormSchema', () => {
+  const template = {
+    ...emptyRecurringForm,
+    name: 'Bino ijarasi',
+    category: 'rent',
+    amount: '12000000',
+  }
+
+  it('accepts a template and sends numbers', () => {
+    const result = v.safeParse(recurringFormSchema, template)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(toRecurringPayload(result.output)).toMatchObject({
+        amount: 12_000_000,
+        day_of_month: 5,
+      })
+    }
+  })
+
+  it('keeps the day inside every month and doctor share out of templates', () => {
+    expect(v.safeParse(recurringFormSchema, { ...template, dayOfMonth: '31' }).success).toBe(false)
+    expect(
+      v.safeParse(recurringFormSchema, { ...template, category: 'doctor_share' }).success,
+    ).toBe(false)
   })
 })

@@ -6,6 +6,7 @@ import { cn } from '@/shared/lib/cn'
 const TABS = [
   { to: '/finance', labelKey: 'finance:tabs.overview', exact: true },
   { to: '/finance/expenses', labelKey: 'finance:tabs.expenses', exact: false },
+  { to: '/finance/recurring', labelKey: 'finance:tabs.recurring', exact: false },
 ] as const
 
 export const Route = createFileRoute('/_auth/finance')({

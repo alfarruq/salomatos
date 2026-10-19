@@ -7,6 +7,9 @@ import {
   type Expense,
   type ExpenseCategory,
   type ExpenseMethod,
+  RECURRING_CATEGORIES,
+  type RecurringCategory,
+  type RecurringExpense,
 } from './types'
 
 /**
@@ -26,30 +29,37 @@ export const EXPENSE_AMOUNT_MAX = 10_000_000_000
 const PAYEE_MAX = 120
 const NOTE_MAX = 500
 
+const paidDateSchema = v.pipe(
+  v.string(),
+  v.minLength(1, 'validation.required'),
+  v.check((value) => parseCalendarDate(value) !== null, 'validation.invalid'),
+  // A payment that has not happened yet is not an expense. The clinic's
+  // day, not the browser's (§14): before 05:00 the UTC day is yesterday.
+  v.check((value) => value <= clinicNow().date, 'validation.futureDate'),
+)
+
+const amountSchema = v.pipe(
+  v.string(),
+  v.trim(),
+  v.minLength(1, 'validation.required'),
+  v.check((value) => DIGITS.test(value) && Number(value) > 0, 'validation.invalid'),
+  v.check((value) => Number(value) <= EXPENSE_AMOUNT_MAX, 'validation.tooLarge'),
+)
+
+const payeeSchema = v.pipe(v.string(), v.trim(), v.maxLength(PAYEE_MAX, 'validation.max_length'))
+const noteSchema = v.pipe(v.string(), v.trim(), v.maxLength(NOTE_MAX, 'validation.max_length'))
+
 export const expenseFormSchema = v.pipe(
   v.object({
-    date: v.pipe(
-      v.string(),
-      v.minLength(1, 'validation.required'),
-      v.check((value) => parseCalendarDate(value) !== null, 'validation.invalid'),
-      // A payment that has not happened yet is not an expense. The clinic's
-      // day, not the browser's (§14): before 05:00 the UTC day is yesterday.
-      v.check((value) => value <= clinicNow().date, 'validation.futureDate'),
-    ),
+    date: paidDateSchema,
     category: v.pipe(
       v.picklist(['', ...EXPENSE_CATEGORIES]),
       v.check((value) => value !== '', 'validation.required'),
     ),
-    amount: v.pipe(
-      v.string(),
-      v.trim(),
-      v.minLength(1, 'validation.required'),
-      v.check((value) => DIGITS.test(value) && Number(value) > 0, 'validation.invalid'),
-      v.check((value) => Number(value) <= EXPENSE_AMOUNT_MAX, 'validation.tooLarge'),
-    ),
+    amount: amountSchema,
     method: v.picklist(EXPENSE_METHODS),
-    payee: v.pipe(v.string(), v.trim(), v.maxLength(PAYEE_MAX, 'validation.max_length')),
-    note: v.pipe(v.string(), v.trim(), v.maxLength(NOTE_MAX, 'validation.max_length')),
+    payee: payeeSchema,
+    note: noteSchema,
     /** An `entities/doctor` id as a string; `''` when the category is not a doctor's share. */
     doctorId: v.string(),
   }),
@@ -140,3 +150,123 @@ export const voidExpenseFormSchema = v.object({
 })
 
 export type VoidExpenseFormInput = v.InferOutput<typeof voidExpenseFormSchema>
+
+/** The writable shape of a recurring template. */
+export const recurringFormSchema = v.object({
+  name: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(2, 'validation.tooShort'),
+    v.maxLength(80, 'validation.max_length'),
+  ),
+  category: v.pipe(
+    v.picklist(['', ...RECURRING_CATEGORIES]),
+    v.check((value) => value !== '', 'validation.required'),
+  ),
+  amount: amountSchema,
+  method: v.picklist(EXPENSE_METHODS),
+  payee: payeeSchema,
+  /** `'1'`–`'28'`: a select's value. Past 28 some months would have no such day. */
+  dayOfMonth: v.pipe(
+    v.string(),
+    v.check(
+      (value) => /^\d{1,2}$/.test(value) && Number(value) >= 1 && Number(value) <= 28,
+      'validation.invalid',
+    ),
+  ),
+})
+
+export type RecurringFormInput = v.InferOutput<typeof recurringFormSchema>
+
+export const emptyRecurringForm: RecurringFormInput = {
+  name: '',
+  category: '',
+  amount: '',
+  method: 'transfer',
+  payee: '',
+  dayOfMonth: '5',
+}
+
+export function toRecurringForm(template: RecurringExpense): RecurringFormInput {
+  return {
+    name: template.name,
+    category: template.category,
+    amount: String(template.amount),
+    method: template.method,
+    payee: template.payee ?? '',
+    dayOfMonth: String(template.dayOfMonth),
+  }
+}
+
+export interface RecurringPayload {
+  name: string
+  category: RecurringCategory
+  amount: number
+  method: ExpenseMethod
+  payee: string | null
+  day_of_month: number
+}
+
+/** Only call with a validated form: `category` is non-empty by then. */
+export function toRecurringPayload(input: RecurringFormInput): RecurringPayload {
+  return {
+    name: input.name,
+    category: input.category === '' ? 'other' : input.category,
+    amount: Number(input.amount),
+    method: input.method,
+    payee: input.payee === '' ? null : input.payee,
+    day_of_month: Number(input.dayOfMonth),
+  }
+}
+
+const RECURRING_SERVER_FIELDS: Record<string, keyof RecurringFormInput> = {
+  name: 'name',
+  category: 'category',
+  amount: 'amount',
+  method: 'method',
+  payee: 'payee',
+  day_of_month: 'dayOfMonth',
+}
+
+export function recurringFormFieldOf(serverField: string): keyof RecurringFormInput | 'root' {
+  return RECURRING_SERVER_FIELDS[serverField] ?? 'root'
+}
+
+/** Paying one month of a template: what really left the clinic, and when. */
+export const payDueFormSchema = v.object({
+  date: paidDateSchema,
+  amount: amountSchema,
+  method: v.picklist(EXPENSE_METHODS),
+  note: noteSchema,
+})
+
+export type PayDueFormInput = v.InferOutput<typeof payDueFormSchema>
+
+export interface PayDuePayload {
+  month: string
+  date: string
+  amount: number
+  method: ExpenseMethod
+  note: string | null
+}
+
+export function toPayDuePayload(month: string, input: PayDueFormInput): PayDuePayload {
+  return {
+    month,
+    date: input.date,
+    amount: Number(input.amount),
+    method: input.method,
+    note: input.note === '' ? null : input.note,
+  }
+}
+
+const PAY_SERVER_FIELDS: Record<string, keyof PayDueFormInput> = {
+  date: 'date',
+  amount: 'amount',
+  method: 'method',
+  note: 'note',
+}
+
+export function payDueFormFieldOf(serverField: string): keyof PayDueFormInput | 'root' {
+  return PAY_SERVER_FIELDS[serverField] ?? 'root'
+}

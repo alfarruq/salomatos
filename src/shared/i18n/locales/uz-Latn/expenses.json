@@ -108,5 +108,86 @@
   "error": {
     "title": "Xarajatlarni yuklab bo'lmadi",
     "description": "Internet aloqasini tekshirib, qayta urinib ko'ring."
+  },
+  "recurring": {
+    "demo": "Shablonlar va to'lovlar namuna uchun o'ylab topilgan. Siz kiritganlar sahifa yangilanguncha saqlanadi.",
+    "month": {
+      "previous": "Oldingi oy",
+      "next": "Keyingi oy",
+      "current": "Joriy oy"
+    },
+    "totals": {
+      "expected": "Oy bo'yicha kutilgan",
+      "paid": "To'langan",
+      "remaining": "Qolgan"
+    },
+    "due": {
+      "title": "Shu oyning to'lovlari",
+      "description": "Har bir to'lov qo'lda tasdiqlanadi va xarajatlar jurnaliga yoziladi",
+      "date": "Muddat",
+      "name": "Nomi",
+      "status": "Holat",
+      "paidOn": "{{date}}, {{method}}",
+      "expected": "Kutilgan: {{amount}}"
+    },
+    "status": {
+      "due": "Kutilmoqda",
+      "overdue": "Muddati o'tgan",
+      "paid": "To'langan",
+      "skipped": "O'tkazib yuborilgan"
+    },
+    "templates": {
+      "title": "Shablonlar",
+      "description": "Har oy takrorlanadigan to'lovlar. Shablon hech narsani avtomatik to'lamaydi.",
+      "day": "Kuni",
+      "everyMonth": "Har oyning {{day}}-kuni",
+      "active": "Faol",
+      "empty": "Hali shablon yo'q. Ijara, kommunal va maoshlarni qo'shing.",
+      "paused": "Shablon to'xtatildi",
+      "resumed": "Shablon qayta yoqildi"
+    },
+    "form": {
+      "name": "Nomi",
+      "nameHint": "Masalan: Bino ijarasi, Elektr energiyasi",
+      "amountHint": "Odatdagi summa. To'lashda o'zgartirish mumkin.",
+      "day": "To'lov kuni",
+      "dayHint": "Oyning 1–28 kunlari"
+    },
+    "create": {
+      "open": "Shablon qo'shish",
+      "title": "Yangi doimiy to'lov",
+      "description": "Har oy qaytariladigan to'lovni kiriting.",
+      "submit": "Qo'shish",
+      "success": "Shablon qo'shildi",
+      "failed": "Shablonni saqlab bo'lmadi. Qayta urinib ko'ring."
+    },
+    "edit": {
+      "title": "Shablonni tahrirlash",
+      "description": "O'zgarish keyingi to'lovlarga ta'sir qiladi. To'langan oylar o'zgarmaydi.",
+      "submit": "Saqlash",
+      "success": "Shablon yangilandi",
+      "failed": "O'zgarishni saqlab bo'lmadi. Qayta urinib ko'ring."
+    },
+    "pay": {
+      "open": "To'landi",
+      "title": "To'lovni tasdiqlash",
+      "description": "{{name}}, muddat {{date}}. Haqiqatda to'langan summani kiriting.",
+      "submit": "Tasdiqlash",
+      "success": "To'lov xarajatlar jurnaliga yozildi",
+      "failed": "To'lovni saqlab bo'lmadi. Qayta urinib ko'ring."
+    },
+    "skip": {
+      "open": "O'tkazish",
+      "title": "Bu oy to'lanmaydimi?",
+      "description": "{{name}}, {{month}}. Hech narsa yozilmaydi. Keyinroq baribir to'lash mumkin.",
+      "submit": "O'tkazib yuborish",
+      "success": "Bu oy o'tkazib yuborildi",
+      "failed": "Saqlab bo'lmadi. Qayta urinib ko'ring."
+    },
+    "empty": {
+      "title": "Bu oyda doimiy to'lov yo'q",
+      "description": "Pastdagi shablonlar bo'limidan ijara, kommunal va maoshlarni qo'shing."
+    },
+    "error": "Doimiy to'lovlarni yuklab bo'lmadi"
   }
 }

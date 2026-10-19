@@ -108,5 +108,86 @@
   "error": {
     "title": "Could not load expenses",
     "description": "Check your internet connection and try again."
+  },
+  "recurring": {
+    "demo": "These templates and payments are made up to show the layout. What you enter is kept until the page reloads.",
+    "month": {
+      "previous": "Previous month",
+      "next": "Next month",
+      "current": "This month"
+    },
+    "totals": {
+      "expected": "Expected this month",
+      "paid": "Paid",
+      "remaining": "Remaining"
+    },
+    "due": {
+      "title": "This month's bills",
+      "description": "Each payment is confirmed by hand and written to the expense journal",
+      "date": "Due",
+      "name": "Name",
+      "status": "Status",
+      "paidOn": "{{date}}, {{method}}",
+      "expected": "Expected: {{amount}}"
+    },
+    "status": {
+      "due": "Due",
+      "overdue": "Overdue",
+      "paid": "Paid",
+      "skipped": "Skipped"
+    },
+    "templates": {
+      "title": "Templates",
+      "description": "Bills that repeat every month. A template never pays anything by itself.",
+      "day": "Day",
+      "everyMonth": "Every month on day {{day}}",
+      "active": "Active",
+      "empty": "No templates yet. Add rent, utilities and salaries.",
+      "paused": "Template paused",
+      "resumed": "Template resumed"
+    },
+    "form": {
+      "name": "Name",
+      "nameHint": "For example: building rent, electricity",
+      "amountHint": "The usual amount. You can change it when paying.",
+      "day": "Payment day",
+      "dayHint": "Day 1 to 28 of the month"
+    },
+    "create": {
+      "open": "Add template",
+      "title": "New recurring bill",
+      "description": "Enter a payment that repeats every month.",
+      "submit": "Add",
+      "success": "Template added",
+      "failed": "Could not save the template. Please try again."
+    },
+    "edit": {
+      "title": "Edit template",
+      "description": "Changes apply to upcoming payments. Paid months stay as they are.",
+      "submit": "Save",
+      "success": "Template updated",
+      "failed": "Could not save the changes. Please try again."
+    },
+    "pay": {
+      "open": "Mark paid",
+      "title": "Confirm payment",
+      "description": "{{name}}, due {{date}}. Enter the amount actually paid.",
+      "submit": "Confirm",
+      "success": "Payment written to the expense journal",
+      "failed": "Could not save the payment. Please try again."
+    },
+    "skip": {
+      "open": "Skip",
+      "title": "Skip this month?",
+      "description": "{{name}}, {{month}}. Nothing is posted. You can still pay it later.",
+      "submit": "Skip month",
+      "success": "Month skipped",
+      "failed": "Could not save. Please try again."
+    },
+    "empty": {
+      "title": "No recurring bills this month",
+      "description": "Add rent, utilities and salaries in the templates section below."
+    },
+    "error": "Could not load recurring bills"
   }
 }

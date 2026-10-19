@@ -3,23 +3,46 @@ export {
   EXPENSES_SOURCE_IS_MOCK,
   expenseKeys,
   expenseQueries,
+  fetchDueMonth,
   fetchExpenseSummary,
   fetchExpenses,
+  fetchRecurringExpenses,
 } from './api/queries'
 export {
   EXPENSE_AMOUNT_MAX,
   type ExpenseFormInput,
   type ExpensePayload,
   emptyExpenseForm,
+  emptyRecurringForm,
   expenseFormFieldOf,
   expenseFormSchema,
+  type PayDueFormInput,
+  type PayDuePayload,
+  payDueFormFieldOf,
+  payDueFormSchema,
+  type RecurringFormInput,
+  type RecurringPayload,
+  recurringFormFieldOf,
+  recurringFormSchema,
   toExpenseForm,
   toExpensePayload,
+  toPayDuePayload,
+  toRecurringForm,
+  toRecurringPayload,
   type VoidExpenseFormInput,
   voidExpenseFormSchema,
 } from './model/formSchema'
-export { expenseSchema, toExpense } from './model/schema'
 export {
+  expenseSchema,
+  recurringExpenseSchema,
+  toExpense,
+  toRecurringExpense,
+} from './model/schema'
+export {
+  type CalendarMonth,
+  type DueExpense,
+  type DueMonth,
+  type DueStatus,
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_KIND,
   EXPENSE_METHODS,
@@ -31,5 +54,9 @@ export {
   type ExpensePage,
   type ExpenseSummary,
   type ExpenseTotals,
+  RECURRING_CATEGORIES,
+  type RecurringCategory,
+  type RecurringExpense,
 } from './model/types'
 export { ExpenseFormFields, type ExpenseFormFieldsProps } from './ui/ExpenseFormFields'
+export { RecurringFormFields, type RecurringFormFieldsProps } from './ui/RecurringFormFields'

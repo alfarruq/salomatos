@@ -70,6 +70,8 @@ export interface Expense {
   voidReason: string | null
   /** The staff member who entered it, as the server recorded. */
   createdBy: string | null
+  /** The recurring template this payment settled, if it came from one. */
+  recurringId: number | null
 }
 
 export interface ExpenseFilters {
@@ -101,4 +103,60 @@ export interface ExpenseSummary {
   previousTotals: ExpenseTotals | null
   byCategory: { category: ExpenseCategory; amount: number }[]
   series: { start: CalendarDate; amount: number }[]
+}
+
+/**
+ * Categories a recurring template may use. A doctor's share is computed from
+ * the money they bring in, so it never repeats at a fixed amount.
+ */
+export const RECURRING_CATEGORIES = EXPENSE_CATEGORIES.filter(
+  (category): category is Exclude<ExpenseCategory, 'doctor_share'> => category !== 'doctor_share',
+)
+
+export type RecurringCategory = Exclude<ExpenseCategory, 'doctor_share'>
+
+/**
+ * A payment the clinic owes every month: rent, a utility, a salary. Only a
+ * reminder: each month's payment is still entered by hand, at its real amount.
+ * Never deleted, only switched off, so past months keep their history.
+ */
+export interface RecurringExpense {
+  id: number
+  name: string
+  category: RecurringCategory
+  /** The usual amount; the real one is entered when it is paid. */
+  amount: number
+  method: ExpenseMethod
+  payee: string | null
+  /** 1–28, so every month has the day. */
+  dayOfMonth: number
+  isActive: boolean
+}
+
+export type DueStatus = 'due' | 'overdue' | 'paid' | 'skipped'
+
+/** One template's slot in one month. */
+export interface DueExpense {
+  recurringId: number
+  name: string
+  category: RecurringCategory
+  amount: number
+  method: ExpenseMethod
+  payee: string | null
+  dueDate: CalendarDate
+  status: DueStatus
+  /** Set once paid: the expense that settled it, and what was actually paid. */
+  expenseId: number | null
+  paidAmount: number | null
+  paidDate: CalendarDate | null
+}
+
+/** `yyyy-MM`. */
+export type CalendarMonth = string
+
+export interface DueMonth {
+  month: CalendarMonth
+  /** The server's sums, never the browser's. */
+  totals: { expected: number; paid: number; remaining: number }
+  items: DueExpense[]
 }

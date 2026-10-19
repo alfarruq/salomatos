@@ -2,7 +2,8 @@
   "title": "Финансы",
   "tabs": {
     "overview": "Обзор",
-    "expenses": "Расходы"
+    "expenses": "Расходы",
+    "recurring": "Регулярные платежи"
   },
   "demo": {
     "title": "Демо-данные",
