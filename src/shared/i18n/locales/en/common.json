@@ -28,6 +28,7 @@
     "patients": "Patients",
     "treatments": "Treatments",
     "appointments": "Appointments",
+    "statistics": "Statistics",
     "billing": "Billing",
     "admin": "Administration"
   },
