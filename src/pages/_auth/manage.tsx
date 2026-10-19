@@ -14,6 +14,7 @@ const SECTIONS = [
   { to: '/manage/doctor-types', labelKey: 'admin:nav.doctorTypes' },
   { to: '/manage/services', labelKey: 'admin:nav.services' },
   { to: '/manage/clinic', labelKey: 'admin:nav.clinic' },
+  { to: '/manage/sms', labelKey: 'admin:nav.sms' },
 ] as const
 
 /**
