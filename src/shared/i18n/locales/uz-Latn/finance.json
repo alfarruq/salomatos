@@ -3,7 +3,8 @@
   "tabs": {
     "overview": "Umumiy",
     "expenses": "Xarajatlar",
-    "recurring": "Doimiy to'lovlar"
+    "recurring": "Doimiy to'lovlar",
+    "payroll": "Shifokor ulushi"
   },
   "demo": {
     "title": "Namuna ma'lumotlar",
@@ -69,5 +70,12 @@
   "error": {
     "title": "Moliya ma'lumotlarini yuklab bo'lmadi",
     "description": "Internet aloqasini tekshirib, qayta urinib ko'ring."
+  },
+  "profit": {
+    "expenses": "Xarajat",
+    "profit": "Sof foyda",
+    "expensesNote": "Tushumning {{percent}}%",
+    "margin": "Foyda marjasi: {{percent}}%",
+    "error": "Xarajatlarni yuklab bo'lmadi, sof foyda hisoblanmadi."
   }
 }

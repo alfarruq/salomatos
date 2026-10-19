@@ -1,6 +1,9 @@
 import * as v from 'valibot'
 import { pageSchema } from '@/shared/api/pagination'
+import { CALENDAR_MONTH } from '@/shared/lib/calendarMonth'
 import {
+  COMPENSATION_BASES,
+  type Compensation,
   type DueMonth,
   EXPENSE_CATEGORIES,
   EXPENSE_METHODS,
@@ -8,6 +11,7 @@ import {
   type ExpensePage,
   type ExpenseSummary,
   type ExpenseTotals,
+  type Payroll,
   RECURRING_CATEGORIES,
   type RecurringExpense,
 } from './types'
@@ -31,7 +35,13 @@ import {
  *   POST  /api/v1/clinic/recurring-expenses/{id}/pay/      the new expense
  *   POST  /api/v1/clinic/recurring-expenses/{id}/skip/     the month's slot
  *
+ *   GET   /api/v1/clinic/payroll/?month                    one row per doctor
+ *   GET   /api/v1/clinic/doctors/{id}/compensation/        terms history, newest first
+ *   POST  /api/v1/clinic/doctors/{id}/compensation/        a new terms entry
+ *
  * The server must refuse all of them to doctors: the frontend gate is UX only (§3).
+ * Payroll and compensation are for `superadmin` alone; the server must also
+ * keep `doctor_share` and `staff_salary` rows out of what an admin is served.
  */
 const som = v.pipe(v.number(), v.integer(), v.minValue(0))
 const id = v.pipe(v.number(), v.integer())
@@ -123,7 +133,7 @@ export function toExpenseSummary(response: ExpenseSummaryResponse): ExpenseSumma
 }
 
 const recurringCategorySchema = v.picklist(RECURRING_CATEGORIES)
-const month = v.pipe(v.string(), v.regex(/^\d{4}-(0[1-9]|1[0-2])$/))
+const month = v.pipe(v.string(), v.regex(CALENDAR_MONTH))
 
 export const recurringExpenseSchema = v.object({
   id,
@@ -190,6 +200,78 @@ export function toDueMonth(response: DueMonthResponse): DueMonth {
       expenseId: item.expense_id,
       paidAmount: item.paid_amount,
       paidDate: item.paid_date,
+    })),
+  }
+}
+
+export const compensationSchema = v.object({
+  id,
+  doctor_id: id,
+  percent: v.pipe(v.number(), v.minValue(0), v.maxValue(100)),
+  fixed: som,
+  base: v.picklist(COMPENSATION_BASES),
+  deduct_lab: v.boolean(),
+  effective_from: month,
+  created_by: v.nullable(v.string()),
+})
+
+export const compensationListSchema = v.array(compensationSchema)
+
+/** Signed: a balance or carry-over is negative when a doctor was paid ahead. */
+const signedSom = v.pipe(v.number(), v.integer())
+
+export const payrollSchema = v.object({
+  month,
+  rows: v.array(
+    v.object({
+      doctor_id: id,
+      doctor: v.string(),
+      compensation: v.nullable(compensationSchema),
+      collected: som,
+      billed: som,
+      lab: som,
+      base_amount: som,
+      accrued: som,
+      opening: signedSom,
+      paid: som,
+      balance: signedSom,
+    }),
+  ),
+  totals: v.object({ accrued: som, paid: som, balance: signedSom }),
+})
+
+export type CompensationResponse = v.InferOutput<typeof compensationSchema>
+export type PayrollResponse = v.InferOutput<typeof payrollSchema>
+
+export function toCompensation(response: CompensationResponse): Compensation {
+  return {
+    id: response.id,
+    doctorId: response.doctor_id,
+    percent: response.percent,
+    fixed: response.fixed,
+    base: response.base,
+    deductLab: response.deduct_lab,
+    effectiveFrom: response.effective_from,
+    createdBy: response.created_by,
+  }
+}
+
+export function toPayroll(response: PayrollResponse): Payroll {
+  return {
+    month: response.month,
+    totals: response.totals,
+    rows: response.rows.map((row) => ({
+      doctorId: row.doctor_id,
+      doctorName: row.doctor,
+      compensation: row.compensation === null ? null : toCompensation(row.compensation),
+      collected: row.collected,
+      billed: row.billed,
+      lab: row.lab,
+      baseAmount: row.base_amount,
+      accrued: row.accrued,
+      opening: row.opening,
+      paid: row.paid,
+      balance: row.balance,
     })),
   }
 }

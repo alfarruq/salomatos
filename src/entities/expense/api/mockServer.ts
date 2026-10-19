@@ -10,14 +10,22 @@
  */
 import { PAGE_SIZE } from '@/shared/api/pagination'
 import { parseCalendarDate, toCalendarDate } from '@/shared/lib/calendarDate'
+import { shiftMonth } from '@/shared/lib/calendarMonth'
 import { clinicNow } from '@/shared/lib/datetime'
 import { addDays, type ReportRange } from '@/shared/lib/report'
-import type { ExpensePayload, PayDuePayload, RecurringPayload } from '../model/formSchema'
 import type {
+  CompensationPayload,
+  ExpensePayload,
+  PayDuePayload,
+  RecurringPayload,
+} from '../model/formSchema'
+import type {
+  CompensationResponse,
   DueMonthResponse,
   ExpensePageResponse,
   ExpenseResponse,
   ExpenseSummaryResponse,
+  PayrollResponse,
   RecurringExpenseResponse,
 } from '../model/schema'
 import {
@@ -37,13 +45,46 @@ const SEED_DAYS = 730
 /** Every seeded amount rounds to 10 000 so'm, the way clinic sums look. */
 const STEP = 10_000
 
+/**
+ * `collected` is a typical month's takings from the doctor's patients; the
+ * last one has no terms yet, so the "not set" state is there to review.
+ */
 const DOCTORS = [
-  { id: 2, name: 'Sardor Usmonov', share: 9_500_000 },
-  { id: 3, name: 'Malika Karimova', share: 7_200_000 },
-  { id: 4, name: 'Jasur Toshmatov', share: 6_400_000 },
-  { id: 5, name: 'Nilufar Aliyeva', share: 4_800_000 },
-  { id: 6, name: 'Bekzod Rahimov', share: 3_600_000 },
+  { id: 2, name: 'Sardor Usmonov', collected: 32_000_000 },
+  { id: 3, name: 'Malika Karimova', collected: 28_000_000 },
+  { id: 4, name: 'Jasur Toshmatov', collected: 24_000_000 },
+  { id: 5, name: 'Nilufar Aliyeva', collected: 19_000_000 },
+  { id: 6, name: 'Bekzod Rahimov', collected: 9_000_000 },
+  { id: 7, name: 'Zarina Qosimova', collected: 6_000_000 },
 ]
+
+/** Lab bills run at about this share of what a doctor's patients pay. */
+const LAB_RATE = 0.15
+
+/** Each doctor's opening terms; Sardor's rise three months ago shows the history. */
+function seedCompensations(start: string, thisMonth: string): CompensationResponse[] {
+  const entry = (
+    id: number,
+    doctorId: number,
+    terms: Pick<CompensationResponse, 'percent' | 'fixed' | 'base' | 'deduct_lab'>,
+    effectiveFrom: string,
+  ): CompensationResponse => ({
+    id,
+    doctor_id: doctorId,
+    ...terms,
+    effective_from: effectiveFrom,
+    created_by: 'Administrator',
+  })
+  const percentOnly = { fixed: 0, base: 'collected', deduct_lab: true } as const
+  return [
+    entry(1, 2, { ...percentOnly, percent: 30 }, start),
+    entry(2, 3, { ...percentOnly, percent: 30 }, start),
+    entry(3, 4, { ...percentOnly, base: 'billed', percent: 25 }, start),
+    entry(4, 5, { ...percentOnly, fixed: 2_000_000, percent: 15 }, start),
+    entry(5, 6, { ...percentOnly, deduct_lab: false, percent: 40 }, start),
+    entry(6, 2, { ...percentOnly, percent: 35 }, shiftMonth(thisMonth, -3)),
+  ]
+}
 
 const ENTERED_BY = ['Dilnoza Rasulova', 'Administrator']
 
@@ -174,6 +215,83 @@ let nextTemplateId = SEED_TEMPLATES.length + 1
 const payments = new Map<string, number>()
 const skipped = new Set<string>()
 
+let compensations: CompensationResponse[] | null = null
+let nextCompensationId = 1
+
+/** The first whole month of seeded history: payroll carries balances from there. */
+function ledgerStart(): string {
+  return shiftMonth(monthOf(addDays(clinicNow().date, -SEED_DAYS)), 1)
+}
+
+function compensationStore(): CompensationResponse[] {
+  if (compensations === null) {
+    compensations = seedCompensations(ledgerStart(), monthOf(clinicNow().date))
+    nextCompensationId = compensations.length + 1
+  }
+  return compensations
+}
+
+/** The terms in force for a month: the latest entry that starts on or before it. */
+function compensationFor(doctorId: number, month: string): CompensationResponse | null {
+  let found: CompensationResponse | null = null
+  for (const entry of compensationStore()) {
+    if (entry.doctor_id !== doctorId || entry.effective_from > month) continue
+    if (
+      found === null ||
+      entry.effective_from > found.effective_from ||
+      (entry.effective_from === found.effective_from && entry.id > found.id)
+    ) {
+      found = entry
+    }
+  }
+  return found
+}
+
+function daysIn(month: string): number {
+  const [year = 0, index = 1] = month.split('-').map(Number)
+  return new Date(year, index, 0).getDate()
+}
+
+/**
+ * A doctor's month: takings, billed work and lab bills. Seeded by doctor and
+ * month, not by today, so a month reads the same on every visit. The current
+ * month is counted up to today; a future one has nothing yet.
+ */
+function figuresOf(doctor: (typeof DOCTORS)[number], month: string) {
+  const today = clinicNow().date
+  const thisMonth = monthOf(today)
+  const part =
+    month > thisMonth ? 0 : month === thisMonth ? Number(today.slice(8, 10)) / daysIn(month) : 1
+  const random = seededRandom(`payroll:${doctor.id}:${month}`)
+  const collected = Math.round((doctor.collected * (0.85 + random() * 0.3) * part) / STEP) * STEP
+  const billed = Math.round((collected * (1.05 + random() * 0.15)) / STEP) * STEP
+  const lab = Math.round((collected * LAB_RATE * (0.7 + random() * 0.6)) / STEP) * STEP
+  return { collected, billed, lab }
+}
+
+function accrualOf(doctor: (typeof DOCTORS)[number], month: string) {
+  const figures = figuresOf(doctor, month)
+  const terms = compensationFor(doctor.id, month)
+  if (terms === null) return { ...figures, terms, baseAmount: 0, accrued: 0 }
+  const gross = terms.base === 'collected' ? figures.collected : figures.billed
+  const baseAmount = Math.max(0, gross - (terms.deduct_lab ? figures.lab : 0))
+  // Whole thousands: nobody hands out the last 437 so'm of a percent.
+  const accrued = Math.round((baseAmount * terms.percent) / 100 / 1000) * 1000 + terms.fixed
+  return { ...figures, terms, baseAmount, accrued }
+}
+
+function paidTo(doctorId: number, month: string): number {
+  return store()
+    .filter(
+      (row) =>
+        !row.is_void &&
+        row.category === 'doctor_share' &&
+        row.doctor_id === doctorId &&
+        monthOf(row.date) === month,
+    )
+    .reduce((acc, row) => acc + row.amount, 0)
+}
+
 function monthOf(date: string): string {
   return date.slice(0, 7)
 }
@@ -243,9 +361,14 @@ function seed(): ExpenseResponse[] {
     }
     if (day === 15) pay(date, 8, 2_100_000 + random() * 800_000)
     if (day === 25) pay(date, 9)
-    if (day === 15 || day === 28) {
+    // An advance on the 15th, the rest on the 28th: past months settle to zero.
+    if ((day === 15 || day === 28) && monthOf(date) >= ledgerStart()) {
       for (const doctor of DOCTORS) {
-        add(date, 'doctor_share', (doctor.share / 2) * (0.75 + random() * 0.5), 'cash', null, {
+        const { accrued } = accrualOf(doctor, monthOf(date))
+        if (accrued === 0) continue
+        const advance = roundSom(accrued * 0.4)
+        add(date, 'doctor_share', 0, 'cash', null, {
+          amount: day === 15 ? advance : accrued - advance,
           doctor_id: doctor.id,
           doctor: doctor.name,
           note: day === 15 ? 'Avans' : null,
@@ -581,6 +704,79 @@ export const mockExpenseServer = {
     })
   },
 
+  /**
+   * Every doctor's month. What was paid is read from the `doctor_share`
+   * expenses dated in it, so a payout is entered once, in the journal, and
+   * a late one is carried by `opening` into the next month.
+   */
+  payroll(month: string, signal?: AbortSignal): Promise<PayrollResponse> {
+    return respond(() => {
+      const start = ledgerStart()
+      const rows = DOCTORS.map((doctor) => {
+        let opening = 0
+        for (let cursor = start; cursor < month; cursor = shiftMonth(cursor, 1)) {
+          opening += accrualOf(doctor, cursor).accrued - paidTo(doctor.id, cursor)
+        }
+        const accrual = accrualOf(doctor, month)
+        const paid = paidTo(doctor.id, month)
+        return {
+          doctor_id: doctor.id,
+          doctor: doctor.name,
+          compensation: accrual.terms === null ? null : { ...accrual.terms },
+          collected: accrual.collected,
+          billed: accrual.billed,
+          lab: accrual.lab,
+          base_amount: accrual.baseAmount,
+          accrued: accrual.accrued,
+          opening,
+          paid,
+          balance: opening + accrual.accrued - paid,
+        }
+      })
+      return {
+        month,
+        rows,
+        totals: {
+          accrued: rows.reduce((acc, row) => acc + row.accrued, 0),
+          paid: rows.reduce((acc, row) => acc + row.paid, 0),
+          balance: rows.reduce((acc, row) => acc + row.balance, 0),
+        },
+      }
+    }, signal)
+  },
+
+  compensationHistory(doctorId: number, signal?: AbortSignal): Promise<CompensationResponse[]> {
+    return respond(
+      () =>
+        compensationStore()
+          .filter((entry) => entry.doctor_id === doctorId)
+          .sort((a, b) =>
+            a.effective_from === b.effective_from
+              ? b.id - a.id
+              : a.effective_from < b.effective_from
+                ? 1
+                : -1,
+          )
+          .map((entry) => ({ ...entry })),
+      signal,
+    )
+  },
+
+  /** New terms from a month on. Entries are never edited; a later one wins. */
+  setCompensation(doctorId: number, payload: CompensationPayload): Promise<CompensationResponse> {
+    return respond(() => {
+      if (!DOCTORS.some((doctor) => doctor.id === doctorId)) throw new Error('Doctor not found')
+      const entry: CompensationResponse = {
+        id: nextCompensationId++,
+        doctor_id: doctorId,
+        ...payload,
+        created_by: 'Administrator',
+      }
+      compensationStore().push(entry)
+      return { ...entry }
+    })
+  },
+
   /** "Not this month" (a holiday, a waived bill): nothing is posted. */
   skip(id: number, month: string): Promise<void> {
     return respond(() => {
@@ -610,4 +806,6 @@ export function resetMockExpenses(): void {
   nextTemplateId = SEED_TEMPLATES.length + 1
   payments.clear()
   skipped.clear()
+  compensations = null
+  nextCompensationId = 1
 }

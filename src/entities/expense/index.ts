@@ -3,12 +3,18 @@ export {
   EXPENSES_SOURCE_IS_MOCK,
   expenseKeys,
   expenseQueries,
+  fetchCompensationHistory,
   fetchDueMonth,
   fetchExpenseSummary,
   fetchExpenses,
+  fetchPayroll,
   fetchRecurringExpenses,
 } from './api/queries'
 export {
+  type CompensationFormInput,
+  type CompensationPayload,
+  compensationFormFieldOf,
+  compensationFormSchema,
   EXPENSE_AMOUNT_MAX,
   type ExpenseFormInput,
   type ExpensePayload,
@@ -24,6 +30,8 @@ export {
   type RecurringPayload,
   recurringFormFieldOf,
   recurringFormSchema,
+  toCompensationForm,
+  toCompensationPayload,
   toExpenseForm,
   toExpensePayload,
   toPayDuePayload,
@@ -33,13 +41,18 @@ export {
   voidExpenseFormSchema,
 } from './model/formSchema'
 export {
+  compensationSchema,
   expenseSchema,
   recurringExpenseSchema,
+  toCompensation,
   toExpense,
   toRecurringExpense,
 } from './model/schema'
 export {
   type CalendarMonth,
+  COMPENSATION_BASES,
+  type Compensation,
+  type CompensationBase,
   type DueExpense,
   type DueMonth,
   type DueStatus,
@@ -54,9 +67,12 @@ export {
   type ExpensePage,
   type ExpenseSummary,
   type ExpenseTotals,
+  type Payroll,
+  type PayrollRow,
   RECURRING_CATEGORIES,
   type RecurringCategory,
   type RecurringExpense,
 } from './model/types'
+export { CompensationTerms } from './ui/CompensationTerms'
 export { ExpenseFormFields, type ExpenseFormFieldsProps } from './ui/ExpenseFormFields'
 export { RecurringFormFields, type RecurringFormFieldsProps } from './ui/RecurringFormFields'

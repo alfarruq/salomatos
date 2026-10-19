@@ -1,7 +1,11 @@
 import * as v from 'valibot'
 import { parseCalendarDate } from '@/shared/lib/calendarDate'
+import { CALENDAR_MONTH } from '@/shared/lib/calendarMonth'
 import { clinicNow } from '@/shared/lib/datetime'
 import {
+  COMPENSATION_BASES,
+  type Compensation,
+  type CompensationBase,
   EXPENSE_CATEGORIES,
   EXPENSE_METHODS,
   type Expense,
@@ -269,4 +273,87 @@ const PAY_SERVER_FIELDS: Record<string, keyof PayDueFormInput> = {
 
 export function payDueFormFieldOf(serverField: string): keyof PayDueFormInput | 'root' {
   return PAY_SERVER_FIELDS[serverField] ?? 'root'
+}
+
+const PERCENT = /^\d{1,3}([.,]\d{1,2})?$/
+
+/** A doctor's new pay terms. A percent, a fixed salary, or both — never neither. */
+export const compensationFormSchema = v.pipe(
+  v.object({
+    /** Text, so "32,5" typed on a Russian keyboard reads as 32.5. */
+    percent: v.pipe(
+      v.string(),
+      v.trim(),
+      v.check(
+        (value) => value === '' || (PERCENT.test(value) && Number(value.replace(',', '.')) <= 100),
+        'validation.invalid',
+      ),
+    ),
+    fixed: v.pipe(
+      v.string(),
+      v.trim(),
+      v.check((value) => value === '' || DIGITS.test(value), 'validation.invalid'),
+      v.check(
+        (value) => value === '' || Number(value) <= EXPENSE_AMOUNT_MAX,
+        'validation.tooLarge',
+      ),
+    ),
+    base: v.picklist(COMPENSATION_BASES),
+    deductLab: v.boolean(),
+    effectiveFrom: v.pipe(v.string(), v.regex(CALENDAR_MONTH, 'validation.invalid')),
+  }),
+  v.forward(
+    v.partialCheck(
+      [['percent'], ['fixed']],
+      (input) => Number(input.percent.replace(',', '.') || 0) > 0 || Number(input.fixed || 0) > 0,
+      'validation.required',
+    ),
+    ['percent'],
+  ),
+)
+
+export type CompensationFormInput = v.InferOutput<typeof compensationFormSchema>
+
+/** The current terms as the starting point, from the given month on. */
+export function toCompensationForm(
+  current: Compensation | null,
+  effectiveFrom: string,
+): CompensationFormInput {
+  return {
+    percent: current === null || current.percent === 0 ? '' : String(current.percent),
+    fixed: current === null || current.fixed === 0 ? '' : String(current.fixed),
+    base: current?.base ?? 'collected',
+    deductLab: current?.deductLab ?? true,
+    effectiveFrom,
+  }
+}
+
+export interface CompensationPayload {
+  percent: number
+  fixed: number
+  base: CompensationBase
+  deduct_lab: boolean
+  effective_from: string
+}
+
+export function toCompensationPayload(input: CompensationFormInput): CompensationPayload {
+  return {
+    percent: Number(input.percent.replace(',', '.') || 0),
+    fixed: Number(input.fixed || 0),
+    base: input.base,
+    deduct_lab: input.deductLab,
+    effective_from: input.effectiveFrom,
+  }
+}
+
+const COMPENSATION_SERVER_FIELDS: Record<string, keyof CompensationFormInput> = {
+  percent: 'percent',
+  fixed: 'fixed',
+  base: 'base',
+  deduct_lab: 'deductLab',
+  effective_from: 'effectiveFrom',
+}
+
+export function compensationFormFieldOf(serverField: string): keyof CompensationFormInput | 'root' {
+  return COMPENSATION_SERVER_FIELDS[serverField] ?? 'root'
 }

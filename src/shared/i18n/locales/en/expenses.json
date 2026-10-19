@@ -189,5 +189,69 @@
       "description": "Add rent, utilities and salaries in the templates section below."
     },
     "error": "Could not load recurring bills"
+  },
+  "payroll": {
+    "demo": "These terms, takings and payouts are made up to show the layout. Real figures come once the server keeps a payment ledger.",
+    "totals": {
+      "accrued": "Accrued",
+      "paid": "Paid out",
+      "balance": "Owed"
+    },
+    "table": {
+      "title": "By doctor",
+      "description": "The server computes each share from the doctor's terms. Every payout is entered by hand.",
+      "doctor": "Doctor",
+      "base": "Percent base",
+      "accrued": "Accrued",
+      "paid": "Paid out",
+      "balance": "Balance",
+      "accruedPaid": "Accrued {{accrued}} · paid {{paid}}",
+      "collectedLab": "{{collected}} − lab {{lab}}",
+      "opening": "From earlier months: {{amount}}",
+      "balanceShort": "Balance: {{amount}}"
+    },
+    "terms": {
+      "none": "No terms set",
+      "fixed": "Salary {{amount}}",
+      "percent": {
+        "collected": "{{percent}}% of collected",
+        "billed": "{{percent}}% of billed work"
+      },
+      "withLab": "{{terms}}, lab deducted",
+      "open": "Terms",
+      "title": "Pay terms",
+      "description": "{{name}}. New terms apply from the chosen month; earlier months stay as they were.",
+      "percentLabel": "Percent, %",
+      "percentHint": "0–100, e.g. 35 or 32.5",
+      "fixedLabel": "Salary, so'm/month",
+      "fixedHint": "Leave empty for percent only",
+      "base": "Percent of",
+      "bases": {
+        "collected": "Money patients paid",
+        "billed": "Value of work done"
+      },
+      "deductLab": "Deduct dental lab costs",
+      "effectiveFrom": "From month",
+      "submit": "Save",
+      "success": "Terms saved",
+      "failed": "Could not save the terms. Please try again.",
+      "history": "Terms history",
+      "noHistory": "No terms set yet.",
+      "since": "From {{month}}:"
+    },
+    "pay": {
+      "open": "Pay",
+      "title": "Pay a doctor",
+      "description": "{{name}}. Owed: {{amount}}. You can change the amount (bonus, deduction).",
+      "submit": "Enter",
+      "success": "Payout written to the expense journal",
+      "failed": "Could not save the payout. Please try again.",
+      "noteHint": "For example: advance, bonus. Do not write patient details."
+    },
+    "empty": {
+      "title": "No doctors",
+      "description": "Once doctors are added, their share is worked out here."
+    },
+    "error": "Could not load doctor pay"
   }
 }

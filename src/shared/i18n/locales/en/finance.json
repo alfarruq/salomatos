@@ -3,7 +3,8 @@
   "tabs": {
     "overview": "Overview",
     "expenses": "Expenses",
-    "recurring": "Recurring"
+    "recurring": "Recurring",
+    "payroll": "Doctor pay"
   },
   "demo": {
     "title": "Sample data",
@@ -69,5 +70,12 @@
   "error": {
     "title": "Finance could not be loaded",
     "description": "Check your connection and try again."
+  },
+  "profit": {
+    "expenses": "Expenses",
+    "profit": "Net profit",
+    "expensesNote": "{{percent}}% of collected",
+    "margin": "Margin: {{percent}}%",
+    "error": "Could not load expenses, so profit is not shown."
   }
 }

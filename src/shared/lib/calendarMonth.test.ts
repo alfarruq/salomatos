@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { shiftMonth } from './month'
+import { shiftMonth } from './calendarMonth'
 
 describe('shiftMonth', () => {
   it('crosses year boundaries both ways', () => {

@@ -18,6 +18,7 @@ import { Route as AuthManageRouteImport } from './pages/_auth/manage'
 import { Route as AuthAppointmentsIndexRouteImport } from './pages/_auth/appointments/index'
 import { Route as AuthFinanceIndexRouteImport } from './pages/_auth/finance/index'
 import { Route as AuthFinanceExpensesRouteImport } from './pages/_auth/finance/expenses'
+import { Route as AuthFinancePayrollRouteImport } from './pages/_auth/finance/payroll'
 import { Route as AuthFinanceRecurringRouteImport } from './pages/_auth/finance/recurring'
 import { Route as AuthManageIndexRouteImport } from './pages/_auth/manage/index'
 import { Route as AuthManageClinicRouteImport } from './pages/_auth/manage/clinic'
@@ -72,6 +73,11 @@ const AuthFinanceIndexRoute = AuthFinanceIndexRouteImport.update({
 const AuthFinanceExpensesRoute = AuthFinanceExpensesRouteImport.update({
   id: '/expenses',
   path: '/expenses',
+  getParentRoute: () => AuthFinanceRoute,
+} as any)
+const AuthFinancePayrollRoute = AuthFinancePayrollRouteImport.update({
+  id: '/payroll',
+  path: '/payroll',
   getParentRoute: () => AuthFinanceRoute,
 } as any)
 const AuthFinanceRecurringRoute = AuthFinanceRecurringRouteImport.update({
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/finance': typeof AuthFinanceRouteWithChildren
   '/manage': typeof AuthManageRouteWithChildren
   '/finance/expenses': typeof AuthFinanceExpensesRoute
+  '/finance/payroll': typeof AuthFinancePayrollRoute
   '/finance/recurring': typeof AuthFinanceRecurringRoute
   '/manage/clinic': typeof AuthManageClinicRoute
   '/manage/doctor-types': typeof AuthManageDoctorTypesRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthDashboardRoute
   '/finance/expenses': typeof AuthFinanceExpensesRoute
+  '/finance/payroll': typeof AuthFinancePayrollRoute
   '/finance/recurring': typeof AuthFinanceRecurringRoute
   '/manage/clinic': typeof AuthManageClinicRoute
   '/manage/doctor-types': typeof AuthManageDoctorTypesRoute
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   '/_auth/finance': typeof AuthFinanceRouteWithChildren
   '/_auth/manage': typeof AuthManageRouteWithChildren
   '/_auth/finance/expenses': typeof AuthFinanceExpensesRoute
+  '/_auth/finance/payroll': typeof AuthFinancePayrollRoute
   '/_auth/finance/recurring': typeof AuthFinanceRecurringRoute
   '/_auth/manage/clinic': typeof AuthManageClinicRoute
   '/_auth/manage/doctor-types': typeof AuthManageDoctorTypesRoute
@@ -202,6 +211,7 @@ export interface FileRouteTypes {
     | '/finance'
     | '/manage'
     | '/finance/expenses'
+    | '/finance/payroll'
     | '/finance/recurring'
     | '/manage/clinic'
     | '/manage/doctor-types'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard'
     | '/finance/expenses'
+    | '/finance/payroll'
     | '/finance/recurring'
     | '/manage/clinic'
     | '/manage/doctor-types'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/_auth/finance'
     | '/_auth/manage'
     | '/_auth/finance/expenses'
+    | '/_auth/finance/payroll'
     | '/_auth/finance/recurring'
     | '/_auth/manage/clinic'
     | '/_auth/manage/doctor-types'
@@ -329,6 +341,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthFinanceExpensesRouteImport
       parentRoute: typeof AuthFinanceRoute
     }
+    '/_auth/finance/payroll': {
+      id: '/_auth/finance/payroll'
+      path: '/payroll'
+      fullPath: '/finance/payroll'
+      preLoaderRoute: typeof AuthFinancePayrollRouteImport
+      parentRoute: typeof AuthFinanceRoute
+    }
     '/_auth/finance/recurring': {
       id: '/_auth/finance/recurring'
       path: '/recurring'
@@ -411,12 +430,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthFinanceRouteChildren {
   AuthFinanceExpensesRoute: typeof AuthFinanceExpensesRoute
+  AuthFinancePayrollRoute: typeof AuthFinancePayrollRoute
   AuthFinanceRecurringRoute: typeof AuthFinanceRecurringRoute
   AuthFinanceIndexRoute: typeof AuthFinanceIndexRoute
 }
 
 const AuthFinanceRouteChildren: AuthFinanceRouteChildren = {
   AuthFinanceExpensesRoute: AuthFinanceExpensesRoute,
+  AuthFinancePayrollRoute: AuthFinancePayrollRoute,
   AuthFinanceRecurringRoute: AuthFinanceRecurringRoute,
   AuthFinanceIndexRoute: AuthFinanceIndexRoute,
 }

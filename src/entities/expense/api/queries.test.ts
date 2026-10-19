@@ -4,9 +4,11 @@ import { rangeOf } from '@/shared/lib/report'
 import { mockExpenseServer, resetMockExpenses } from './mockServer'
 import {
   expenseKeys,
+  fetchCompensationHistory,
   fetchDueMonth,
   fetchExpenseSummary,
   fetchExpenses,
+  fetchPayroll,
   fetchRecurringExpenses,
 } from './queries'
 
@@ -154,5 +156,60 @@ describe('recurring expenses (mock)', () => {
     const after = await fetchDueMonth(next)
 
     expect(after.items.some((row) => row.recurringId === item.recurringId)).toBe(false)
+  })
+})
+
+describe('payroll (mock)', () => {
+  const thisMonth = clinicNow().date.slice(0, 7)
+  const [year = 0, month = 1] = thisMonth.split('-').map(Number)
+  const lastMonth = month === 1 ? `${year - 1}-12` : `${year}-${String(month - 1).padStart(2, '0')}`
+
+  it('settles past months to zero and carries nothing forward', async () => {
+    const payroll = await fetchPayroll(lastMonth)
+
+    for (const row of payroll.rows) {
+      expect(row.opening).toBe(0)
+      expect(row.balance).toBe(0)
+    }
+  })
+
+  it('takes the percent of collected minus lab, and accrues nothing without terms', async () => {
+    const payroll = await fetchPayroll(lastMonth)
+    const malika = payroll.rows.find((row) => row.doctorId === 3)
+    const unset = payroll.rows.find((row) => row.compensation === null)
+
+    expect(malika?.compensation).toMatchObject({ percent: 30, base: 'collected', deductLab: true })
+    if (malika === undefined) throw new Error('seed has no doctor 3')
+    expect(malika.baseAmount).toBe(malika.collected - malika.lab)
+    expect(malika.accrued).toBe(Math.round((malika.baseAmount * 0.3) / 1000) * 1000)
+    expect(unset?.accrued).toBe(0)
+  })
+
+  it('counts a payout entered as a doctor-share expense', async () => {
+    const row = (await fetchPayroll(thisMonth)).rows.find((candidate) => candidate.balance > 0)
+    if (row === undefined) throw new Error('nothing owed this month')
+
+    await mockExpenseServer.create(
+      { ...payload, category: 'doctor_share', amount: row.balance, doctor: row.doctorId },
+      row.doctorName,
+    )
+    const after = (await fetchPayroll(thisMonth)).rows.find((c) => c.doctorId === row.doctorId)
+    expect(after?.balance).toBe(0)
+  })
+
+  it('applies new terms from their month on, leaving earlier months alone', async () => {
+    const before = await fetchPayroll(lastMonth)
+    await mockExpenseServer.setCompensation(3, {
+      percent: 50,
+      fixed: 0,
+      base: 'collected',
+      deduct_lab: true,
+      effective_from: thisMonth,
+    })
+
+    expect(await fetchPayroll(lastMonth)).toEqual(before)
+    const history = await fetchCompensationHistory(3)
+    expect(history[0]).toMatchObject({ percent: 50, effectiveFrom: thisMonth })
+    expect(history).toHaveLength(2)
   })
 })
