@@ -24,12 +24,22 @@ export interface StatsTotals {
   newPatients: number
   returningPatients: number
   treatmentsCompleted: number
+  /** Treatments opened in the period. */
+  treatmentsStarted: number
+  /** Open at the end of the period, whenever they were started. */
+  treatmentsInProgress: number
 }
 
 export interface StatsSeriesPoint {
   /** First day of the bucket. */
   start: CalendarDate
   total: number
+  completed: number
+}
+
+export interface StatsTreatmentPoint {
+  /** First day of the bucket. */
+  start: CalendarDate
   completed: number
 }
 
@@ -54,13 +64,21 @@ export interface StatsBusySlot {
   appointments: number
 }
 
+/** Completed treatments on one tooth, by FDI number ("11"–"48"). */
+export interface StatsToothCount {
+  tooth: string
+  count: number
+}
+
 export interface StatsOverview {
   range: StatsRange
   totals: StatsTotals
   /** The same-length window right before this one, for the deltas. */
   previousTotals: StatsTotals | null
   appointmentsSeries: readonly StatsSeriesPoint[]
+  treatmentsSeries: readonly StatsTreatmentPoint[]
   doctors: readonly StatsDoctorLoad[]
   treatmentTypes: readonly StatsTreatmentTypeCount[]
   busySlots: readonly StatsBusySlot[]
+  teeth: readonly StatsToothCount[]
 }

@@ -15,7 +15,7 @@
     "appointments": "Qabullar",
     "completionRate": "Yakunlanish darajasi",
     "newPatients": "Yangi bemorlar",
-    "treatmentsCompleted": "Yakunlangan davolashlar",
+    "treatmentsCompleted": "Yakunlangan muolajalar",
     "vsPrevious": "oldingi davrga nisbatan",
     "points": "p."
   },
@@ -31,7 +31,7 @@
     },
     "services": {
       "title": "Eng ko'p bajarilgan xizmatlar",
-      "description": "Davr ichida yakunlangan davolashlar"
+      "description": "Davr ichida yakunlangan muolajalar"
     },
     "busy": {
       "title": "Band soatlar",
@@ -43,6 +43,18 @@
       "title": "Yangi va qaytgan bemorlar",
       "new": "Yangi",
       "returning": "Qaytgan"
+    },
+    "treatments": {
+      "title": "Yakunlangan muolajalar dinamikasi"
+    },
+    "treatmentDoctors": {
+      "title": "Eng ko'p muolaja qilgan shifokorlar",
+      "description": "Davr ichida yakunlangan muolajalar"
+    },
+    "teeth": {
+      "title": "Eng ko'p davolangan tishlar",
+      "description": "Tish bo'yicha yakunlangan muolajalar, FDI raqamlash",
+      "top": "Yetakchi tishlar"
     }
   },
   "empty": {
@@ -52,5 +64,14 @@
   "error": {
     "title": "Statistikani yuklab bo'lmadi",
     "description": "Internet aloqasini tekshirib, qayta urinib ko'ring."
+  },
+  "appointments": {
+    "title": "Qabullar"
+  },
+  "treatments": {
+    "title": "Muolajalar",
+    "started": "Boshlangan",
+    "completed": "Yakunlangan",
+    "inProgress": "Jarayonda"
   }
 }

@@ -19,6 +19,8 @@ const totalsSchema = v.object({
   new_patients: count,
   returning_patients: count,
   treatments_completed: count,
+  treatments_started: count,
+  treatments_in_progress: count,
 })
 
 export const statsOverviewSchema = v.object({
@@ -28,6 +30,7 @@ export const statsOverviewSchema = v.object({
   totals: totalsSchema,
   previous_totals: v.nullable(totalsSchema),
   appointments_series: v.array(v.object({ start: date, total: count, completed: count })),
+  treatments_series: v.array(v.object({ start: date, completed: count })),
   doctors: v.array(
     v.object({
       doctor_id: v.pipe(v.number(), v.integer()),
@@ -50,6 +53,7 @@ export const statsOverviewSchema = v.object({
       appointments: count,
     }),
   ),
+  teeth: v.array(v.object({ tooth: v.pipe(v.string(), v.regex(/^[1-4][1-8]$/)), count })),
 })
 
 export type StatsOverviewResponse = v.InferOutput<typeof statsOverviewSchema>
@@ -61,6 +65,8 @@ function toTotals(response: StatsOverviewResponse['totals']): StatsTotals {
     newPatients: response.new_patients,
     returningPatients: response.returning_patients,
     treatmentsCompleted: response.treatments_completed,
+    treatmentsStarted: response.treatments_started,
+    treatmentsInProgress: response.treatments_in_progress,
   }
 }
 
@@ -70,6 +76,7 @@ export function toStatsOverview(response: StatsOverviewResponse): StatsOverview 
     totals: toTotals(response.totals),
     previousTotals: response.previous_totals === null ? null : toTotals(response.previous_totals),
     appointmentsSeries: response.appointments_series,
+    treatmentsSeries: response.treatments_series,
     doctors: response.doctors.map((row) => ({
       doctorId: row.doctor_id,
       doctorName: row.doctor,
@@ -82,5 +89,6 @@ export function toStatsOverview(response: StatsOverviewResponse): StatsOverview 
       count: row.count,
     })),
     busySlots: response.busy_hours,
+    teeth: response.teeth,
   }
 }
