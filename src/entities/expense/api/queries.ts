@@ -3,21 +3,27 @@ import * as v from 'valibot'
 import { cachePolicy } from '@/shared/config/cache'
 import type { ReportRange } from '@/shared/lib/report'
 import {
+  compensationListSchema,
   dueMonthSchema,
   expensePageSchema,
   expenseSummarySchema,
+  payrollSchema,
   recurringExpenseListSchema,
+  toCompensation,
   toDueMonth,
   toExpensePage,
   toExpenseSummary,
+  toPayroll,
   toRecurringExpense,
 } from '../model/schema'
 import type {
   CalendarMonth,
+  Compensation,
   DueMonth,
   ExpenseFilters,
   ExpensePage,
   ExpenseSummary,
+  Payroll,
   RecurringExpense,
 } from '../model/types'
 import { mockExpenseServer } from './mockServer'
@@ -37,6 +43,13 @@ export const expenseKeys = {
 
   due: (clinicId: number, month: CalendarMonth) =>
     [...expenseKeys.scope(clinicId), 'due', month] as const,
+
+  // Payroll reads the doctor_share expenses, so it lives under the same scope.
+  payroll: (clinicId: number, month: CalendarMonth) =>
+    [...expenseKeys.scope(clinicId), 'payroll', month] as const,
+
+  compensation: (clinicId: number, doctorId: number) =>
+    [...expenseKeys.scope(clinicId), 'compensation', doctorId] as const,
 }
 
 /** Drives the "sample data" notice. Goes away with the mock. */
@@ -94,6 +107,29 @@ export async function fetchDueMonth(month: CalendarMonth, signal?: AbortSignal):
   return toDueMonth(v.parse(dueMonthSchema, raw))
 }
 
+/**
+ * ⚠️ Mock, as above. The real call:
+ *
+ *   const raw: unknown = await httpClient(`v1/clinic/payroll/?month=${month}`, { signal })
+ */
+export async function fetchPayroll(month: CalendarMonth, signal?: AbortSignal): Promise<Payroll> {
+  const raw: unknown = await mockExpenseServer.payroll(month, signal)
+  return toPayroll(v.parse(payrollSchema, raw))
+}
+
+/**
+ * ⚠️ Mock, as above. The real call:
+ *
+ *   const raw: unknown = await httpClient(`v1/clinic/doctors/${doctorId}/compensation/`, { signal })
+ */
+export async function fetchCompensationHistory(
+  doctorId: number,
+  signal?: AbortSignal,
+): Promise<Compensation[]> {
+  const raw: unknown = await mockExpenseServer.compensationHistory(doctorId, signal)
+  return v.parse(compensationListSchema, raw).map(toCompensation)
+}
+
 export const expenseQueries = {
   list: (clinicId: number, filters: ExpenseFilters) =>
     queryOptions({
@@ -126,5 +162,20 @@ export const expenseQueries = {
       queryFn: ({ signal }) => fetchDueMonth(month, signal),
       ...cachePolicy.financial,
       placeholderData: keepPreviousData,
+    }),
+
+  payroll: (clinicId: number, month: CalendarMonth) =>
+    queryOptions({
+      queryKey: expenseKeys.payroll(clinicId, month),
+      queryFn: ({ signal }) => fetchPayroll(month, signal),
+      ...cachePolicy.financial,
+      placeholderData: keepPreviousData,
+    }),
+
+  compensation: (clinicId: number, doctorId: number) =>
+    queryOptions({
+      queryKey: expenseKeys.compensation(clinicId, doctorId),
+      queryFn: ({ signal }) => fetchCompensationHistory(doctorId, signal),
+      ...cachePolicy.financial,
     }),
 }

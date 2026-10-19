@@ -50,6 +50,7 @@ export { Field, type FieldProps, useFieldControl } from './Field'
 export { Input, type InputProps, type InputSize } from './Input'
 export { Logo, LogoMark, type LogoProps, type LogoSize } from './Logo'
 export { digitsOf, formatThousands, MoneyInput, type MoneyInputProps } from './MoneyInput'
+export { MonthSwitcher, type MonthSwitcherProps } from './MonthSwitcher'
 export { Pagination, type PaginationProps } from './Pagination'
 export {
   formatSubscriber,

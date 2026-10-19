@@ -3,10 +3,12 @@ import { describe, expect, it } from 'vitest'
 import { clinicNow } from '@/shared/lib/datetime'
 import { addDays } from '@/shared/lib/report'
 import {
+  compensationFormSchema,
   emptyExpenseForm,
   emptyRecurringForm,
   expenseFormSchema,
   recurringFormSchema,
+  toCompensationPayload,
   toExpensePayload,
   toRecurringPayload,
 } from './formSchema'
@@ -79,5 +81,31 @@ describe('recurringFormSchema', () => {
     expect(
       v.safeParse(recurringFormSchema, { ...template, category: 'doctor_share' }).success,
     ).toBe(false)
+  })
+})
+
+describe('compensationFormSchema', () => {
+  const terms = {
+    percent: '32,5',
+    fixed: '',
+    base: 'collected',
+    deductLab: true,
+    effectiveFrom: '2026-10',
+  }
+
+  it('reads a comma decimal and sends numbers', () => {
+    const result = v.safeParse(compensationFormSchema, terms)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(toCompensationPayload(result.output)).toMatchObject({ percent: 32.5, fixed: 0 })
+    }
+  })
+
+  it('needs a percent or a salary, and a percent within 100', () => {
+    expect(v.safeParse(compensationFormSchema, { ...terms, percent: '' }).success).toBe(false)
+    expect(v.safeParse(compensationFormSchema, { ...terms, percent: '120' }).success).toBe(false)
+    expect(
+      v.safeParse(compensationFormSchema, { ...terms, percent: '', fixed: '3000000' }).success,
+    ).toBe(true)
   })
 })

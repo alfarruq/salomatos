@@ -1,6 +1,10 @@
-import type { CalendarMonth } from '@/entities/expense'
-import { parseCalendarDate } from '@/shared/lib/calendarDate'
-import { clinicNow } from '@/shared/lib/datetime'
+import { parseCalendarDate } from './calendarDate'
+import { clinicNow } from './datetime'
+
+/** `yyyy-MM`: a month on a wall calendar, with no zone — see `calendarDate.ts`. */
+export type CalendarMonth = string
+
+export const CALENDAR_MONTH = /^\d{4}-(0[1-9]|1[0-2])$/
 
 /** The clinic's month (§14), not the browser's. */
 export function currentMonth(): CalendarMonth {

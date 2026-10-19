@@ -17,6 +17,8 @@ export type Permission =
   | 'medical-record:write'
   | 'billing:read'
   | 'billing:write'
+  /** Doctors' pay terms and payouts. Pay is private from other staff, admins included. */
+  | 'payroll:manage'
   | 'clinic:manage'
   | 'staff:manage'
 

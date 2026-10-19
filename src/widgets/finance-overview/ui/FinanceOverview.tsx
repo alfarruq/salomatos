@@ -28,6 +28,7 @@ import {
 } from '@/shared/ui'
 import { DebtorsTable } from './DebtorsTable'
 import { FinanceKpis } from './FinanceKpis'
+import { ProfitKpis } from './ProfitKpis'
 
 export interface FinanceOverviewProps {
   clinicId: number
@@ -86,19 +87,25 @@ export function FinanceOverview({ clinicId, period, onPeriodChange }: FinanceOve
         loading={<OverviewSkeleton />}
         query={query}
       >
-        {(data) => <OverviewContent data={data} />}
+        {(data) => <OverviewContent clinicId={clinicId} data={data} />}
       </QueryBoundary>
     </div>
   )
 }
 
-function OverviewContent({ data }: { data: FinanceOverviewData }) {
+function OverviewContent({ clinicId, data }: { clinicId: number; data: FinanceOverviewData }) {
   const { t, i18n } = useTranslation('finance')
   const money = (amount: number) => formatSom(amount, i18n.language, t('common:currency.som'))
 
   return (
     <div className="flex flex-col gap-6">
       <FinanceKpis previous={data.previousTotals} totals={data.totals} />
+      <ProfitKpis
+        clinicId={clinicId}
+        previous={data.previousTotals}
+        range={data.range}
+        totals={data.totals}
+      />
 
       <ChartCard description={t('charts.revenue.description')} title={t('charts.revenue.title')}>
         <BarChart

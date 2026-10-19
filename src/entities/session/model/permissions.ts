@@ -32,6 +32,7 @@ const ALL_PERMISSIONS: readonly Permission[] = [
   'medical-record:write',
   'billing:read',
   'billing:write',
+  'payroll:manage',
   'clinic:manage',
   'staff:manage',
 ]

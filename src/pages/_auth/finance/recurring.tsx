@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import * as v from 'valibot'
-import { currentMonth, FinanceRecurring } from '@/widgets/finance-recurring'
+import { CALENDAR_MONTH, currentMonth } from '@/shared/lib/calendarMonth'
+import { FinanceRecurring } from '@/widgets/finance-recurring'
 
 /** Shareable view state (§3): only the month. */
 const recurringSearchSchema = v.object({
-  month: v.optional(v.pipe(v.string(), v.regex(/^\d{4}-(0[1-9]|1[0-2])$/))),
+  month: v.optional(v.pipe(v.string(), v.regex(CALENDAR_MONTH))),
 })
 
 type RecurringSearch = v.InferOutput<typeof recurringSearchSchema>

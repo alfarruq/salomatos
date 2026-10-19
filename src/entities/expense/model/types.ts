@@ -1,4 +1,5 @@
 import type { CalendarDate } from '@/shared/lib/calendarDate'
+import type { CalendarMonth } from '@/shared/lib/calendarMonth'
 import type { ReportRange } from '@/shared/lib/report'
 
 /**
@@ -152,11 +153,59 @@ export interface DueExpense {
 }
 
 /** `yyyy-MM`. */
-export type CalendarMonth = string
+export type { CalendarMonth }
 
 export interface DueMonth {
   month: CalendarMonth
   /** The server's sums, never the browser's. */
   totals: { expected: number; paid: number; remaining: number }
   items: DueExpense[]
+}
+
+/** What a doctor's percent is taken from. Collected is the default: no share of unpaid debt. */
+export const COMPENSATION_BASES = ['collected', 'billed'] as const
+
+export type CompensationBase = (typeof COMPENSATION_BASES)[number]
+
+/**
+ * A doctor's pay terms from one month on. A change is a new entry, never an
+ * edit, so months already settled keep the terms they were settled under.
+ */
+export interface Compensation {
+  id: number
+  doctorId: number
+  /** 0–100; may be fractional, e.g. 32.5. */
+  percent: number
+  /** Fixed monthly salary in so'm, 0 when the doctor is on percent only. */
+  fixed: number
+  base: CompensationBase
+  /** Subtract the lab's bills for the doctor's work before taking the percent. */
+  deductLab: boolean
+  effectiveFrom: CalendarMonth
+  createdBy: string | null
+}
+
+/** One doctor's month, as the server computes it. The browser never adds money up. */
+export interface PayrollRow {
+  doctorId: number
+  doctorName: string
+  /** `null`: no terms set yet, so nothing is accrued. */
+  compensation: Compensation | null
+  collected: number
+  billed: number
+  lab: number
+  /** What the percent is taken from: collected or billed, minus lab when set. */
+  baseAmount: number
+  accrued: number
+  /** Owed (or overpaid, when negative) from earlier months. */
+  opening: number
+  paid: number
+  /** `opening + accrued − paid`. */
+  balance: number
+}
+
+export interface Payroll {
+  month: CalendarMonth
+  rows: PayrollRow[]
+  totals: { accrued: number; paid: number; balance: number }
 }

@@ -1,10 +1,18 @@
 import { useQuery } from '@tanstack/react-query'
-import { CalendarClock, ChevronLeft, ChevronRight } from 'lucide-react'
+import { CalendarClock } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { type CalendarMonth, EXPENSES_SOURCE_IS_MOCK, expenseQueries } from '@/entities/expense'
+import { monthLabel } from '@/shared/lib/calendarMonth'
 import { formatSom } from '@/shared/lib/money'
-import { Alert, Button, Card, EmptyState, ErrorState, QueryBoundary, Skeleton } from '@/shared/ui'
-import { currentMonth, monthLabel, shiftMonth } from '../lib/month'
+import {
+  Alert,
+  Card,
+  EmptyState,
+  ErrorState,
+  MonthSwitcher,
+  QueryBoundary,
+  Skeleton,
+} from '@/shared/ui'
 import { DueList } from './DueList'
 import { RecurringTemplates } from './RecurringTemplates'
 
@@ -26,35 +34,14 @@ export function FinanceRecurring({ clinicId, month, onMonthChange }: FinanceRecu
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          aria-label={t('expenses:recurring.month.previous')}
-          onClick={() => onMonthChange(shiftMonth(month, -1))}
-          size="sm"
-          variant="secondary"
-        >
-          <ChevronLeft aria-hidden="true" className="size-4" />
-        </Button>
-        <h2
-          aria-live="polite"
-          className="min-w-40 text-center text-headline text-text first-letter:uppercase"
-        >
-          {label}
-        </h2>
-        <Button
-          aria-label={t('expenses:recurring.month.next')}
-          onClick={() => onMonthChange(shiftMonth(month, 1))}
-          size="sm"
-          variant="secondary"
-        >
-          <ChevronRight aria-hidden="true" className="size-4" />
-        </Button>
-        {month === currentMonth() ? null : (
-          <Button onClick={() => onMonthChange(currentMonth())} size="sm" variant="ghost">
-            {t('expenses:recurring.month.current')}
-          </Button>
-        )}
-      </div>
+      <MonthSwitcher
+        currentLabel={t('expenses:recurring.month.current')}
+        locale={i18n.language}
+        month={month}
+        nextLabel={t('expenses:recurring.month.next')}
+        onMonthChange={onMonthChange}
+        previousLabel={t('expenses:recurring.month.previous')}
+      />
 
       {EXPENSES_SOURCE_IS_MOCK ? (
         <Alert title={t('expenses:demo.title')}>{t('expenses:recurring.demo')}</Alert>

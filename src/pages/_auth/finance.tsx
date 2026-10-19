@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import { useCan } from '@/entities/session'
 import { cn } from '@/shared/lib/cn'
 
 /** The finance tabs, in one list — the same shape as the admin area's sections. */
@@ -7,6 +8,7 @@ const TABS = [
   { to: '/finance', labelKey: 'finance:tabs.overview', exact: true },
   { to: '/finance/expenses', labelKey: 'finance:tabs.expenses', exact: false },
   { to: '/finance/recurring', labelKey: 'finance:tabs.recurring', exact: false },
+  { to: '/finance/payroll', labelKey: 'finance:tabs.payroll', exact: false, isPayroll: true },
 ] as const
 
 export const Route = createFileRoute('/_auth/finance')({
@@ -15,6 +17,8 @@ export const Route = createFileRoute('/_auth/finance')({
 
 function FinanceLayout() {
   const { t } = useTranslation('finance')
+  const canManagePayroll = useCan('payroll:manage')
+  const tabs = TABS.filter((tab) => !('isPayroll' in tab) || canManagePayroll)
 
   return (
     <div className="flex flex-col gap-6">
@@ -23,7 +27,7 @@ function FinanceLayout() {
       {/* A nav, not a tab list: each tab is its own route, so links and the back button work. */}
       <nav aria-label={t('title')}>
         <ul className="flex gap-1 overflow-x-auto border-b border-border">
-          {TABS.map((tab) => (
+          {tabs.map((tab) => (
             <li className="shrink-0" key={tab.to}>
               <Link
                 activeOptions={{ exact: tab.exact, includeSearch: false }}

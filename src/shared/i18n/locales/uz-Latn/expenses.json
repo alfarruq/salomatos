@@ -189,5 +189,69 @@
       "description": "Pastdagi shablonlar bo'limidan ijara, kommunal va maoshlarni qo'shing."
     },
     "error": "Doimiy to'lovlarni yuklab bo'lmadi"
+  },
+  "payroll": {
+    "demo": "Shartlar, tushum va to'lovlar namuna uchun o'ylab topilgan. Server to'lovlar jurnalini yurita boshlaganda haqiqiy hisob chiqadi.",
+    "totals": {
+      "accrued": "Hisoblangan",
+      "paid": "Berilgan",
+      "balance": "Berilishi kerak"
+    },
+    "table": {
+      "title": "Shifokorlar bo'yicha",
+      "description": "Hisoblangan ulush shartga ko'ra serverda hisoblanadi. Har bir to'lov qo'lda kiritiladi.",
+      "doctor": "Shifokor",
+      "base": "Foiz olinadigan summa",
+      "accrued": "Hisoblangan",
+      "paid": "Berilgan",
+      "balance": "Qoldiq",
+      "accruedPaid": "Hisoblangan {{accrued}} · berilgan {{paid}}",
+      "collectedLab": "{{collected}} − lab {{lab}}",
+      "opening": "Oldingi oylardan: {{amount}}",
+      "balanceShort": "Qoldiq: {{amount}}"
+    },
+    "terms": {
+      "none": "Shart belgilanmagan",
+      "fixed": "Oklad {{amount}}",
+      "percent": {
+        "collected": "{{percent}}% tushumdan",
+        "billed": "{{percent}}% bajarilgan ishdan"
+      },
+      "withLab": "{{terms}}, laboratoriya ayiriladi",
+      "open": "Shart",
+      "title": "Ish haqi sharti",
+      "description": "{{name}}. Yangi shart tanlangan oydan amal qiladi, oldingi oylar o'zgarmaydi.",
+      "percentLabel": "Foiz, %",
+      "percentHint": "0–100, masalan 35 yoki 32,5",
+      "fixedLabel": "Oklad, so'm/oy",
+      "fixedHint": "Faqat foizda ishlasa bo'sh qoldiring",
+      "base": "Foiz nimadan olinadi",
+      "bases": {
+        "collected": "Bemor to'lagan pul",
+        "billed": "Bajarilgan ish summasi"
+      },
+      "deductLab": "Zubtexnik laboratoriyasi xarajati ayirilsin",
+      "effectiveFrom": "Qaysi oydan",
+      "submit": "Saqlash",
+      "success": "Shart saqlandi",
+      "failed": "Shartni saqlab bo'lmadi. Qayta urinib ko'ring.",
+      "history": "Shartlar tarixi",
+      "noHistory": "Hali shart belgilanmagan.",
+      "since": "{{month}}dan:"
+    },
+    "pay": {
+      "open": "To'lov",
+      "title": "Shifokorga to'lov",
+      "description": "{{name}}. Berilishi kerak: {{amount}}. Summani o'zgartirish mumkin (bonus, ushlab qolish).",
+      "submit": "Kiritish",
+      "success": "To'lov xarajatlar jurnaliga yozildi",
+      "failed": "To'lovni saqlab bo'lmadi. Qayta urinib ko'ring.",
+      "noteHint": "Masalan: avans, bonus. Bemor ma'lumotini yozmang."
+    },
+    "empty": {
+      "title": "Shifokorlar yo'q",
+      "description": "Shifokor qo'shilgach, uning ulushi shu yerda hisoblanadi."
+    },
+    "error": "Shifokor ulushini yuklab bo'lmadi"
   }
 }
