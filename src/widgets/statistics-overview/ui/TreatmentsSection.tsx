@@ -1,8 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import type { StatsOverview } from '@/entities/stats'
-import { BarChart, BarList, Card } from '@/shared/ui'
-import { bucketLabel } from '../model/format'
-import { Section } from './Section'
+import { bucketLabel } from '@/shared/lib/report'
+import { BarChart, BarList, Card, ChartCard } from '@/shared/ui'
 import { ToothHeatmap } from './ToothHeatmap'
 
 /** How many services the ranking shows before the tail stops being informative. */
@@ -38,7 +37,7 @@ export function TreatmentsSection({ data }: { data: StatsOverview }) {
         ))}
       </dl>
 
-      <Section title={t('charts.treatments.title')}>
+      <ChartCard title={t('charts.treatments.title')}>
         <BarChart
           data={data.treatmentsSeries.map((point) => ({
             key: point.start,
@@ -48,10 +47,10 @@ export function TreatmentsSection({ data }: { data: StatsOverview }) {
           label={t('charts.treatments.title')}
           valueLabel={t('treatments.completed')}
         />
-      </Section>
+      </ChartCard>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Section
+        <ChartCard
           description={t('charts.treatmentDoctors.description')}
           title={t('charts.treatmentDoctors.title')}
         >
@@ -65,9 +64,12 @@ export function TreatmentsSection({ data }: { data: StatsOverview }) {
               }))}
             label={t('charts.treatmentDoctors.title')}
           />
-        </Section>
+        </ChartCard>
 
-        <Section description={t('charts.services.description')} title={t('charts.services.title')}>
+        <ChartCard
+          description={t('charts.services.description')}
+          title={t('charts.services.title')}
+        >
           <BarList
             items={[...data.treatmentTypes]
               .sort((a, b) => b.count - a.count)
@@ -79,12 +81,12 @@ export function TreatmentsSection({ data }: { data: StatsOverview }) {
               }))}
             label={t('charts.services.title')}
           />
-        </Section>
+        </ChartCard>
       </div>
 
-      <Section description={t('charts.teeth.description')} title={t('charts.teeth.title')}>
+      <ChartCard description={t('charts.teeth.description')} title={t('charts.teeth.title')}>
         <ToothHeatmap teeth={data.teeth} />
-      </Section>
+      </ChartCard>
     </section>
   )
 }

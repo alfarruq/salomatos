@@ -7,6 +7,7 @@ export { BarList, type BarListItem, type BarListProps } from './BarList'
 export { Breadcrumb, type BreadcrumbItem, type BreadcrumbProps } from './Breadcrumb'
 export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from './Button'
 export { Card, type CardProps } from './Card'
+export { ChartCard, type ChartCardProps } from './ChartCard'
 export { Checkbox, type CheckboxProps } from './Checkbox'
 export {
   type CommandGroup,

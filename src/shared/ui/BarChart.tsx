@@ -19,6 +19,8 @@ export interface BarChartProps {
   partLabel?: string
   /** At most this many axis labels, so a 30-day month does not collide. */
   maxAxisLabels?: number
+  /** Tooltip and table text for a value, e.g. money. */
+  formatValue?: (value: number) => string
   className?: string
 }
 
@@ -36,6 +38,7 @@ export function BarChart({
   valueLabel,
   partLabel,
   maxAxisLabels = 8,
+  formatValue = String,
   className,
 }: BarChartProps) {
   const max = Math.max(1, ...data.map((datum) => datum.value))
@@ -66,7 +69,8 @@ export function BarChart({
               {datum.part === undefined || datum.value === 0 ? null : (
                 <div
                   className="absolute inset-x-0 bottom-0 rounded-t bg-accent"
-                  style={{ height: `${(datum.part / datum.value) * 100}%` }}
+                  // A part larger than its whole (e.g. old debt paid this month) fills the bar, never overflows it.
+                  style={{ height: `${Math.min(1, datum.part / datum.value) * 100}%` }}
                 />
               )}
             </div>
@@ -85,11 +89,11 @@ export function BarChart({
             >
               <span className="font-medium">{datum.label}</span>
               <span className="text-text-secondary tabular-nums">
-                {valueLabel}: {datum.value}
+                {valueLabel}: {formatValue(datum.value)}
               </span>
               {datum.part === undefined || partLabel === undefined ? null : (
                 <span className="text-text-secondary tabular-nums">
-                  {partLabel}: {datum.part}
+                  {partLabel}: {formatValue(datum.part)}
                 </span>
               )}
             </div>
@@ -121,8 +125,10 @@ export function BarChart({
           {data.map((datum) => (
             <tr key={datum.key}>
               <th scope="row">{datum.label}</th>
-              <td>{datum.value}</td>
-              {partLabel === undefined ? null : <td>{datum.part ?? ''}</td>}
+              <td>{formatValue(datum.value)}</td>
+              {partLabel === undefined ? null : (
+                <td>{datum.part === undefined ? '' : formatValue(datum.part)}</td>
+              )}
             </tr>
           ))}
         </tbody>

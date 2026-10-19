@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './pages/login'
 import { Route as AuthDashboardRouteImport } from './pages/_auth/dashboard'
 import { Route as AuthManageRouteImport } from './pages/_auth/manage'
 import { Route as AuthAppointmentsIndexRouteImport } from './pages/_auth/appointments/index'
+import { Route as AuthFinanceIndexRouteImport } from './pages/_auth/finance/index'
 import { Route as AuthManageIndexRouteImport } from './pages/_auth/manage/index'
 import { Route as AuthManageClinicRouteImport } from './pages/_auth/manage/clinic'
 import { Route as AuthManageDoctorTypesRouteImport } from './pages/_auth/manage/doctor-types'
@@ -53,6 +54,11 @@ const AuthManageRoute = AuthManageRouteImport.update({
 const AuthAppointmentsIndexRoute = AuthAppointmentsIndexRouteImport.update({
   id: '/appointments/',
   path: '/appointments/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthFinanceIndexRoute = AuthFinanceIndexRouteImport.update({
+  id: '/finance/',
+  path: '/finance/',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthManageIndexRoute = AuthManageIndexRouteImport.update({
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/manage/sms': typeof AuthManageSmsRoute
   '/patients/$patientId': typeof AuthPatientsPatientIdRoute
   '/appointments/': typeof AuthAppointmentsIndexRoute
+  '/finance/': typeof AuthFinanceIndexRoute
   '/manage/': typeof AuthManageIndexRoute
   '/patients/': typeof AuthPatientsIndexRoute
   '/statistics/': typeof AuthStatisticsIndexRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/manage/sms': typeof AuthManageSmsRoute
   '/patients/$patientId': typeof AuthPatientsPatientIdRoute
   '/appointments': typeof AuthAppointmentsIndexRoute
+  '/finance': typeof AuthFinanceIndexRoute
   '/manage': typeof AuthManageIndexRoute
   '/patients': typeof AuthPatientsIndexRoute
   '/statistics': typeof AuthStatisticsIndexRoute
@@ -153,6 +161,7 @@ export interface FileRoutesById {
   '/_auth/manage/sms': typeof AuthManageSmsRoute
   '/_auth/patients/$patientId': typeof AuthPatientsPatientIdRoute
   '/_auth/appointments/': typeof AuthAppointmentsIndexRoute
+  '/_auth/finance/': typeof AuthFinanceIndexRoute
   '/_auth/manage/': typeof AuthManageIndexRoute
   '/_auth/patients/': typeof AuthPatientsIndexRoute
   '/_auth/statistics/': typeof AuthStatisticsIndexRoute
@@ -172,6 +181,7 @@ export interface FileRouteTypes {
     | '/manage/sms'
     | '/patients/$patientId'
     | '/appointments/'
+    | '/finance/'
     | '/manage/'
     | '/patients/'
     | '/statistics/'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/manage/sms'
     | '/patients/$patientId'
     | '/appointments'
+    | '/finance'
     | '/manage'
     | '/patients'
     | '/statistics'
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/_auth/manage/sms'
     | '/_auth/patients/$patientId'
     | '/_auth/appointments/'
+    | '/_auth/finance/'
     | '/_auth/manage/'
     | '/_auth/patients/'
     | '/_auth/statistics/'
@@ -260,6 +272,13 @@ declare module '@tanstack/react-router' {
       path: '/appointments'
       fullPath: '/appointments/'
       preLoaderRoute: typeof AuthAppointmentsIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/finance/': {
+      id: '/_auth/finance/'
+      path: '/finance'
+      fullPath: '/finance/'
+      preLoaderRoute: typeof AuthFinanceIndexRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/manage/': {
@@ -362,6 +381,7 @@ interface AuthRouteChildren {
   AuthManageRoute: typeof AuthManageRouteWithChildren
   AuthPatientsPatientIdRoute: typeof AuthPatientsPatientIdRoute
   AuthAppointmentsIndexRoute: typeof AuthAppointmentsIndexRoute
+  AuthFinanceIndexRoute: typeof AuthFinanceIndexRoute
   AuthPatientsIndexRoute: typeof AuthPatientsIndexRoute
   AuthStatisticsIndexRoute: typeof AuthStatisticsIndexRoute
   AuthTreatmentsIndexRoute: typeof AuthTreatmentsIndexRoute
@@ -372,6 +392,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthManageRoute: AuthManageRouteWithChildren,
   AuthPatientsPatientIdRoute: AuthPatientsPatientIdRoute,
   AuthAppointmentsIndexRoute: AuthAppointmentsIndexRoute,
+  AuthFinanceIndexRoute: AuthFinanceIndexRoute,
   AuthPatientsIndexRoute: AuthPatientsIndexRoute,
   AuthStatisticsIndexRoute: AuthStatisticsIndexRoute,
   AuthTreatmentsIndexRoute: AuthTreatmentsIndexRoute,

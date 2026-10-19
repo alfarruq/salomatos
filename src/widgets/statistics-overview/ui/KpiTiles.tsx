@@ -1,8 +1,8 @@
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { StatsTotals } from '@/entities/stats'
+import { percentChange, percentOf } from '@/shared/lib/report'
 import { Card } from '@/shared/ui'
-import { percentChange, percentOf } from '../model/format'
 
 /**
  * Headline figures, each with its change against the previous window. The

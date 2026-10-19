@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import type { StatsBusySlot } from '@/entities/stats'
 import { cn } from '@/shared/lib/cn'
-import { weekdayLabel } from '../model/format'
+import { weekdayLabel } from '@/shared/lib/report'
 
 /** Sequential, one hue, light → dark (empty is the neutral sunken fill). */
 const STEPS = ['bg-accent/20', 'bg-accent/40', 'bg-accent/60', 'bg-accent/80', 'bg-accent']

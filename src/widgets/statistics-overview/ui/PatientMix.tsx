@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import type { StatsTotals } from '@/entities/stats'
+import { percentOf } from '@/shared/lib/report'
 import { LegendSwatch } from '@/shared/ui'
-import { percentOf } from '../model/format'
 
 /** New against returning patients: one bar split in two, with both numbers spelled out. */
 export function PatientMix({ totals }: { totals: StatsTotals }) {

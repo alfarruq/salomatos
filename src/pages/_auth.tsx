@@ -227,11 +227,7 @@ function AuthenticatedLayout() {
           </Can>
           <Can permission="billing:read">
             <li>
-              <SidebarItem icon={Wallet} label={t('nav.billing')}>
-                {(content) => (
-                  <span className={cn(sidebarItemClassName, 'text-text-tertiary')}>{content}</span>
-                )}
-              </SidebarItem>
+              <SidebarLink icon={Wallet} label={t('nav.billing')} to="/finance" />
             </li>
           </Can>
           {/* `clinic:manage` is the clinic account alone (ADR-012). */}
