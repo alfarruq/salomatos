@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
+import { type UseQueryResult, useQueries } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Stethoscope } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCan } from '@/entities/session'
 import {
@@ -10,7 +11,7 @@ import {
   TreatmentStatusBadge,
   treatmentQueries,
 } from '@/entities/treatment'
-import { PAGE_SIZE } from '@/shared/api/pagination'
+import { PAGE_SIZE, type Page } from '@/shared/api/pagination'
 import { formatFixedDate } from '@/shared/lib/calendarDate'
 import { cn } from '@/shared/lib/cn'
 import { formatSom } from '@/shared/lib/money'
@@ -28,11 +29,12 @@ import {
   TableRow,
   TableSkeleton,
 } from '@/shared/ui'
+import { PAGES_PER_SCREEN, serverPagesFor } from '../model/screenPages'
 import { TreatmentFilters } from './TreatmentFilters'
 
 export interface TreatmentTableProps {
   clinicId: number
-  /** From the URL — ids and a page number only, never a name (§3). */
+  /** From the URL — ids and a screen number only, never a name (§3). `page` counts screens of up to 30 rows. */
   filters: TreatmentListFilters
   onFiltersChange: (filters: TreatmentListFilters) => void
 }
@@ -40,14 +42,64 @@ export interface TreatmentTableProps {
 /** Shown when the server had nothing to send for a cell. */
 const EMPTY = '—'
 
+interface ScreenData {
+  count: number
+  results: Treatment[]
+  hasNext: boolean
+}
+
+/**
+ * The screen's server pages as one query for `QueryBoundary`: pending until
+ * the first page arrives, rows in page order, and stopping at the first page
+ * still on its way so a later one can never show above it.
+ */
+function combinePages(results: UseQueryResult<Page<Treatment>>[]) {
+  const loaded: Page<Treatment>[] = []
+  for (const result of results) {
+    if (result.data === undefined) break
+    loaded.push(result.data)
+  }
+  const failed = results.filter((result) => result.isError)
+  const last = loaded.at(-1)
+
+  return {
+    data:
+      last === undefined
+        ? undefined
+        : ({
+            count: last.count,
+            results: loaded.flatMap((page) => page.results),
+            hasNext: last.next !== null,
+          } satisfies ScreenData),
+    isPending: last === undefined && failed.length === 0,
+    isError: failed.length > 0,
+    error: failed[0]?.error ?? null,
+    isFetching: results.some((result) => result.isFetching),
+    refetch: () => {
+      for (const result of failed) void result.refetch()
+    },
+  }
+}
+
 /**
  * Every treatment in the clinic, filtered on the server — by patient, doctor,
- * treatment type, debt and status — and a page at a time.
+ * treatment type, debt and status — 10, 20, then 30 rows on the first
+ * screen, and 30 at a time after that.
  */
 export function TreatmentTable({ clinicId, filters, onFiltersChange }: TreatmentTableProps) {
   const { t, i18n } = useTranslation(['treatments', 'common'])
-  const query = useQuery(treatmentQueries.page(clinicId, filters))
-  const { page } = filters
+  const { page: screen } = filters
+  const filterKey = JSON.stringify({ ...filters, page: null })
+  const [growth, setGrowth] = useState({ filterKey, pages: 1 })
+  // A different filter starts the first screen over at ten rows.
+  const firstScreenPages = growth.filterKey === filterKey ? growth.pages : 1
+  const loadedPages = screen === 1 ? firstScreenPages : PAGES_PER_SCREEN
+  const query = useQueries({
+    queries: serverPagesFor(screen, loadedPages).map((serverPage) =>
+      treatmentQueries.page(clinicId, { ...filters, page: serverPage }),
+    ),
+    combine: combinePages,
+  })
   const isFiltered =
     filters.patientId !== null ||
     filters.doctorId !== null ||
@@ -60,6 +112,20 @@ export function TreatmentTable({ clinicId, filters, onFiltersChange }: Treatment
 
   const money = (value: number | null) =>
     value === null ? EMPTY : formatSom(value, i18n.language, t('common:currency.som'))
+
+  const showNext = () => {
+    if (screen === 1 && loadedPages < PAGES_PER_SCREEN) {
+      setGrowth({ filterKey, pages: loadedPages + 1 })
+    } else {
+      onFiltersChange({ ...filters, page: screen + 1 })
+    }
+  }
+
+  const showPrevious = () => {
+    // Back on the first screen, all thirty rows — the user has already seen past them.
+    if (screen === 2) setGrowth({ filterKey, pages: PAGES_PER_SCREEN })
+    onFiltersChange({ ...filters, page: screen - 1 })
+  }
 
   const openPatient = (treatment: Treatment) => {
     if (treatment.patientId === null) return
@@ -195,17 +261,17 @@ export function TreatmentTable({ clinicId, filters, onFiltersChange }: Treatment
             </Table>
 
             <Pagination
-              hasNext={data.next !== null}
-              hasPrevious={data.previous !== null}
+              hasNext={data.hasNext}
+              hasPrevious={screen > 1}
               isLoading={query.isFetching}
               nextLabel={t('common:action.next')}
-              onNext={() => onFiltersChange({ ...filters, page: page + 1 })}
-              onPrevious={() => onFiltersChange({ ...filters, page: page - 1 })}
+              onNext={showNext}
+              onPrevious={showPrevious}
               previousLabel={t('common:action.previous')}
               summary={t('treatments:list.summary', {
                 count: data.count,
-                from: (page - 1) * PAGE_SIZE + 1,
-                to: Math.min(page * PAGE_SIZE, data.count),
+                from: (screen - 1) * PAGES_PER_SCREEN * PAGE_SIZE + 1,
+                to: (screen - 1) * PAGES_PER_SCREEN * PAGE_SIZE + data.results.length,
               })}
             />
           </div>

@@ -131,16 +131,16 @@ describe('TreatmentTable', () => {
     expect(settled.querySelector('.text-danger')).toBeNull()
   })
 
-  it('asks the server for the page it is on, with no patient filter', async () => {
-    const seen: { url: URL | null } = { url: null }
+  it('asks the server for the three pages of the screen it is on, with no patient filter', async () => {
+    const seen: URL[] = []
     server.events.on('request:start', ({ request }) => {
-      if (request.url.includes('/clinic/treatments/')) seen.url = new URL(request.url)
+      if (request.url.includes('/clinic/treatments/')) seen.push(new URL(request.url))
     })
-    renderTable({ page: 3 })
+    renderTable({ page: 2 })
 
-    await vi.waitFor(() => expect(seen.url).not.toBeNull())
-    expect(seen.url?.searchParams.get('page')).toBe('3')
-    expect(seen.url?.searchParams.has('patient_id')).toBe(false)
+    await vi.waitFor(() => expect(seen).toHaveLength(3))
+    expect(seen.map((url) => url.searchParams.get('page')).sort()).toEqual(['4', '5', '6'])
+    expect(seen.some((url) => url.searchParams.has('patient_id'))).toBe(false)
   })
 
   it('hides the money columns from a doctor', async () => {
@@ -161,23 +161,54 @@ describe('TreatmentTable', () => {
     expect(router.state.location.pathname).toBe('/patients/101')
   })
 
-  it('moves to the next page', async () => {
+  it('grows the first screen by ten rows per "next", then moves to the next screen of thirty', async () => {
     server.use(
-      http.get('/api/v1/clinic/treatments/', () =>
-        HttpResponse.json({
-          count: 11,
-          next: 'https://salomatos.uz/api/v1/clinic/treatments/?page=2',
+      http.get('/api/v1/clinic/treatments/', ({ request }) => {
+        const page = Number(new URL(request.url).searchParams.get('page'))
+        return HttpResponse.json({
+          count: 70,
+          next: `https://salomatos.uz/api/v1/clinic/treatments/?page=${page + 1}`,
           previous: null,
-          results: [ROW],
-        }),
-      ),
+          results: Array.from({ length: 10 }, (_, index) => ({
+            ...ROW,
+            id: page * 100 + index,
+            treatment_type: `Tur ${page}-${index}`,
+          })),
+        })
+      }),
     )
     const { onFiltersChange } = renderTable()
 
-    await screen.findByText('11 tadan 1–10')
+    await screen.findByText('70 tadan 1–10')
     await userEvent.click(screen.getByRole('button', { name: 'Keyingi' }))
+    await screen.findByText('70 tadan 1–20')
+    expect(screen.getByText('Tur 1-0')).toBeInTheDocument()
+    expect(screen.getByText('Tur 2-9')).toBeInTheDocument()
 
+    await userEvent.click(screen.getByRole('button', { name: 'Keyingi' }))
+    await screen.findByText('70 tadan 1–30')
+    expect(onFiltersChange).not.toHaveBeenCalled()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Keyingi' }))
     expect(onFiltersChange).toHaveBeenCalledWith(expect.objectContaining({ page: 2 }))
+  })
+
+  it('shows a later screen as thirty rows at once', async () => {
+    server.use(
+      http.get('/api/v1/clinic/treatments/', ({ request }) => {
+        const page = Number(new URL(request.url).searchParams.get('page'))
+        return HttpResponse.json({
+          count: 70,
+          next: `https://salomatos.uz/api/v1/clinic/treatments/?page=${page + 1}`,
+          previous: null,
+          results: Array.from({ length: 10 }, (_, index) => ({ ...ROW, id: page * 100 + index })),
+        })
+      }),
+    )
+    renderTable({ page: 2 })
+
+    expect(await screen.findByText('70 tadan 31–60')).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Vali Aliyev' })).toHaveLength(30)
   })
 
   it('shows a skeleton while loading', async () => {
