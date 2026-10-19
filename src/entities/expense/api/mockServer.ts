@@ -12,9 +12,16 @@ import { PAGE_SIZE } from '@/shared/api/pagination'
 import { parseCalendarDate, toCalendarDate } from '@/shared/lib/calendarDate'
 import { clinicNow } from '@/shared/lib/datetime'
 import { addDays, type ReportRange } from '@/shared/lib/report'
-import type { ExpensePayload } from '../model/formSchema'
-import type { ExpensePageResponse, ExpenseResponse, ExpenseSummaryResponse } from '../model/schema'
+import type { ExpensePayload, PayDuePayload, RecurringPayload } from '../model/formSchema'
+import type {
+  DueMonthResponse,
+  ExpensePageResponse,
+  ExpenseResponse,
+  ExpenseSummaryResponse,
+  RecurringExpenseResponse,
+} from '../model/schema'
 import {
+  type DueStatus,
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_KIND,
   type ExpenseCategory,
@@ -40,6 +47,103 @@ const DOCTORS = [
 
 const ENTERED_BY = ['Dilnoza Rasulova', 'Administrator']
 
+/** The monthly bills a clinic pays the same way every month. */
+const SEED_TEMPLATES: RecurringExpenseResponse[] = [
+  {
+    id: 1,
+    name: 'Xodimlar maoshi',
+    category: 'staff_salary',
+    amount: 4_500_000,
+    method: 'card',
+    payee: 'Administrator, hamshira',
+    day_of_month: 1,
+    is_active: true,
+  },
+  {
+    id: 2,
+    name: 'Farrosh maoshi',
+    category: 'staff_salary',
+    amount: 2_200_000,
+    method: 'cash',
+    payee: 'Farrosh',
+    day_of_month: 1,
+    is_active: true,
+  },
+  {
+    id: 3,
+    name: 'Internet va telefon',
+    category: 'communication',
+    amount: 650_000,
+    method: 'transfer',
+    payee: 'Internet va telefon',
+    day_of_month: 3,
+    is_active: true,
+  },
+  {
+    id: 4,
+    name: 'Bino ijarasi',
+    category: 'rent',
+    amount: 12_000_000,
+    method: 'transfer',
+    payee: 'Bino ijarasi',
+    day_of_month: 5,
+    is_active: true,
+  },
+  {
+    id: 5,
+    name: 'Elektr energiyasi',
+    category: 'utilities',
+    amount: 1_800_000,
+    method: 'transfer',
+    payee: 'Elektr energiyasi',
+    day_of_month: 10,
+    is_active: true,
+  },
+  {
+    id: 6,
+    name: 'Gaz',
+    category: 'utilities',
+    amount: 600_000,
+    method: 'transfer',
+    payee: 'Gaz',
+    day_of_month: 10,
+    is_active: true,
+  },
+  {
+    id: 7,
+    name: 'Suv va chiqindi',
+    category: 'utilities',
+    amount: 240_000,
+    method: 'cash',
+    payee: 'Suv va chiqindi',
+    day_of_month: 10,
+    is_active: true,
+  },
+  {
+    id: 8,
+    name: 'Soliq',
+    category: 'taxes_fees',
+    amount: 2_500_000,
+    method: 'transfer',
+    payee: 'Soliq',
+    day_of_month: 15,
+    is_active: true,
+  },
+  {
+    id: 9,
+    name: 'Klinika dasturi obunasi',
+    category: 'communication',
+    amount: 300_000,
+    method: 'card',
+    payee: 'SalomatOS',
+    day_of_month: 25,
+    is_active: true,
+  },
+]
+
+/** Left unpaid this month, so the "overdue" state is there to review. */
+const UNPAID_THIS_MONTH = 6
+
 /** mulberry32 — tiny, deterministic, good enough for fake rows. */
 function seededRandom(seed: string): () => number {
   let state = 0
@@ -59,6 +163,25 @@ function roundSom(value: number): number {
 let rows: ExpenseResponse[] | null = null
 let nextId = 1
 
+interface MockTemplate extends RecurringExpenseResponse {
+  /** First month the template applies to: a new bill is not overdue for the past. */
+  since: string
+}
+
+let templates: MockTemplate[] | null = null
+let nextTemplateId = SEED_TEMPLATES.length + 1
+/** `templateId:yyyy-MM` → the expense that paid it. The server keeps this link on the row. */
+const payments = new Map<string, number>()
+const skipped = new Set<string>()
+
+function monthOf(date: string): string {
+  return date.slice(0, 7)
+}
+
+function slot(templateId: number, month: string): string {
+  return `${templateId}:${month}`
+}
+
 function seed(): ExpenseResponse[] {
   const today = clinicNow().date
   const random = seededRandom(`expenses:${today}`)
@@ -74,6 +197,7 @@ function seed(): ExpenseResponse[] {
   ) => {
     seeded.push({
       id: nextId++,
+      recurring_id: null,
       date,
       category,
       amount: roundSom(amount),
@@ -89,23 +213,36 @@ function seed(): ExpenseResponse[] {
     })
   }
 
+  const thisMonth = monthOf(today)
+  const pay = (date: string, templateId: number, amount?: number) => {
+    const template = SEED_TEMPLATES.find((candidate) => candidate.id === templateId)
+    if (template === undefined) return
+    if (templateId === UNPAID_THIS_MONTH && monthOf(date) === thisMonth) return
+    add(date, template.category, amount ?? template.amount, template.method, template.payee, {
+      recurring_id: templateId,
+    })
+    payments.set(slot(templateId, monthOf(date)), nextId - 1)
+  }
+
   for (let offset = SEED_DAYS; offset >= 0; offset -= 1) {
     const date = addDays(today, -offset)
     const day = parseCalendarDate(date)?.getDate() ?? 1
     const weekday = parseCalendarDate(date)?.getDay() ?? 1
 
     if (day === 1) {
-      add(date, 'staff_salary', 4_500_000, 'card', 'Administrator, hamshira')
-      add(date, 'staff_salary', 2_200_000, 'cash', 'Farrosh')
+      pay(date, 1)
+      pay(date, 2)
     }
-    if (day === 3) add(date, 'communication', 650_000, 'transfer', 'Internet va telefon')
-    if (day === 5) add(date, 'rent', 12_000_000, 'transfer', 'Bino ijarasi')
+    if (day === 3) pay(date, 3)
+    if (day === 5) pay(date, 4)
+    // Meter bills differ from the template every month: what was paid is what counts.
     if (day === 10) {
-      add(date, 'utilities', 1_400_000 + random() * 900_000, 'transfer', 'Elektr energiyasi')
-      add(date, 'utilities', 350_000 + random() * 500_000, 'transfer', 'Gaz')
-      add(date, 'utilities', 180_000 + random() * 120_000, 'cash', 'Suv va chiqindi')
+      pay(date, 5, 1_400_000 + random() * 900_000)
+      pay(date, 6, 350_000 + random() * 500_000)
+      pay(date, 7, 180_000 + random() * 120_000)
     }
-    if (day === 15) add(date, 'taxes_fees', 2_100_000 + random() * 800_000, 'transfer', 'Soliq')
+    if (day === 15) pay(date, 8, 2_100_000 + random() * 800_000)
+    if (day === 25) pay(date, 9)
     if (day === 15 || day === 28) {
       for (const doctor of DOCTORS) {
         add(date, 'doctor_share', (doctor.share / 2) * (0.75 + random() * 0.5), 'cash', null, {
@@ -143,6 +280,32 @@ function seed(): ExpenseResponse[] {
 function store(): ExpenseResponse[] {
   rows ??= seed()
   return rows
+}
+
+function templateStore(): MockTemplate[] {
+  if (templates === null) {
+    store()
+    const since = monthOf(addDays(clinicNow().date, -SEED_DAYS))
+    templates = SEED_TEMPLATES.map((template) => ({ ...template, since }))
+  }
+  return templates
+}
+
+function findTemplate(id: number): MockTemplate {
+  const template = templateStore().find((candidate) => candidate.id === id)
+  if (template === undefined) throw new Error('Recurring expense not found')
+  return template
+}
+
+/** A voided payment frees its month again: the bill is still owed. */
+function paymentOf(templateId: number, month: string): ExpenseResponse | null {
+  const expenseId = payments.get(slot(templateId, month))
+  const row = store().find((candidate) => candidate.id === expenseId)
+  return row === undefined || row.is_void ? null : row
+}
+
+function publicTemplate({ since: _since, ...template }: MockTemplate): RecurringExpenseResponse {
+  return { ...template }
 }
 
 function respond<T>(build: () => T, signal?: AbortSignal): Promise<T> {
@@ -268,6 +431,7 @@ export const mockExpenseServer = {
     return respond(() => {
       const row: ExpenseResponse = {
         id: nextId++,
+        recurring_id: null,
         ...withoutDoctor(payload),
         doctor_id: payload.doctor,
         doctor: payload.doctor === null ? null : doctorName,
@@ -299,6 +463,132 @@ export const mockExpenseServer = {
       return { ...row }
     })
   },
+
+  listRecurring(signal?: AbortSignal): Promise<RecurringExpenseResponse[]> {
+    return respond(
+      () =>
+        templateStore()
+          .map(publicTemplate)
+          .sort((a, b) => a.day_of_month - b.day_of_month || a.id - b.id),
+      signal,
+    )
+  },
+
+  createRecurring(payload: RecurringPayload): Promise<RecurringExpenseResponse> {
+    return respond(() => {
+      const template: MockTemplate = {
+        id: nextTemplateId++,
+        ...payload,
+        is_active: true,
+        since: monthOf(clinicNow().date),
+      }
+      templateStore().push(template)
+      return publicTemplate(template)
+    })
+  },
+
+  updateRecurring(
+    id: number,
+    payload: Partial<RecurringPayload> & { is_active?: boolean },
+  ): Promise<RecurringExpenseResponse> {
+    return respond(() => {
+      const template = findTemplate(id)
+      Object.assign(template, payload)
+      return publicTemplate(template)
+    })
+  },
+
+  due(month: string, signal?: AbortSignal): Promise<DueMonthResponse> {
+    return respond(() => {
+      const today = clinicNow().date
+      const items = templateStore()
+        .filter((template) => template.since <= month)
+        .map((template) => {
+          const dueDate = `${month}-${String(template.day_of_month).padStart(2, '0')}`
+          const paid = paymentOf(template.id, month)
+          const status: DueStatus =
+            paid !== null
+              ? 'paid'
+              : skipped.has(slot(template.id, month))
+                ? 'skipped'
+                : dueDate < today
+                  ? 'overdue'
+                  : 'due'
+          return {
+            recurring_id: template.id,
+            name: template.name,
+            category: template.category,
+            amount: template.amount,
+            method: template.method,
+            payee: template.payee,
+            due_date: dueDate,
+            status,
+            expense_id: paid?.id ?? null,
+            paid_amount: paid?.amount ?? null,
+            paid_date: paid?.date ?? null,
+            isActive: template.is_active,
+          }
+        })
+        // A paused bill stays in the months it was settled in, and nowhere else.
+        .filter((item) => item.isActive || item.status === 'paid')
+        .map(({ isActive: _isActive, ...item }) => item)
+        .sort((a, b) =>
+          a.due_date === b.due_date
+            ? a.recurring_id - b.recurring_id
+            : a.due_date < b.due_date
+              ? -1
+              : 1,
+        )
+
+      const open = items.filter((item) => item.status === 'due' || item.status === 'overdue')
+      const sum = (list: { amount: number }[]) => list.reduce((acc, item) => acc + item.amount, 0)
+      return {
+        month,
+        totals: {
+          expected: sum(items.filter((item) => item.status !== 'skipped')),
+          paid: items.reduce((acc, item) => acc + (item.paid_amount ?? 0), 0),
+          remaining: sum(open),
+        },
+        items,
+      }
+    }, signal)
+  },
+
+  /** Records what was really paid for one month of a template, as a normal expense. */
+  pay(id: number, payload: PayDuePayload): Promise<ExpenseResponse> {
+    return respond(() => {
+      const template = findTemplate(id)
+      if (paymentOf(id, payload.month) !== null) throw new Error('This month is already paid')
+      const row: ExpenseResponse = {
+        id: nextId++,
+        recurring_id: id,
+        date: payload.date,
+        category: template.category,
+        amount: payload.amount,
+        method: payload.method,
+        payee: template.payee,
+        note: payload.note,
+        doctor_id: null,
+        doctor: null,
+        is_void: false,
+        void_reason: null,
+        created_by: 'Administrator',
+      }
+      store().push(row)
+      payments.set(slot(id, payload.month), row.id)
+      skipped.delete(slot(id, payload.month))
+      return { ...row }
+    })
+  },
+
+  /** "Not this month" (a holiday, a waived bill): nothing is posted. */
+  skip(id: number, month: string): Promise<void> {
+    return respond(() => {
+      findTemplate(id)
+      if (paymentOf(id, month) !== null) throw new Error('This month is already paid')
+      skipped.add(slot(id, month))
+    })
+  },
 }
 
 function withoutDoctor({ doctor: _doctor, ...rest }: ExpensePayload) {
@@ -316,4 +606,8 @@ function findActive(id: number): ExpenseResponse {
 export function resetMockExpenses(): void {
   rows = null
   nextId = 1
+  templates = null
+  nextTemplateId = SEED_TEMPLATES.length + 1
+  payments.clear()
+  skipped.clear()
 }

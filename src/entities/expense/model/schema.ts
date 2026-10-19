@@ -1,12 +1,15 @@
 import * as v from 'valibot'
 import { pageSchema } from '@/shared/api/pagination'
 import {
+  type DueMonth,
   EXPENSE_CATEGORIES,
   EXPENSE_METHODS,
   type Expense,
   type ExpensePage,
   type ExpenseSummary,
   type ExpenseTotals,
+  RECURRING_CATEGORIES,
+  type RecurringExpense,
 } from './types'
 
 /**
@@ -20,6 +23,13 @@ import {
  *   PATCH /api/v1/clinic/expenses/{id}/                    one expense
  *   POST  /api/v1/clinic/expenses/{id}/void/  {reason}     one expense
  *   GET   /api/v1/clinic/expenses/summary/?from&to         sums only
+ *
+ *   GET   /api/v1/clinic/recurring-expenses/               plain array
+ *   POST  /api/v1/clinic/recurring-expenses/               one template
+ *   PATCH /api/v1/clinic/recurring-expenses/{id}/          one template
+ *   GET   /api/v1/clinic/recurring-expenses/due/?month     one month's slots
+ *   POST  /api/v1/clinic/recurring-expenses/{id}/pay/      the new expense
+ *   POST  /api/v1/clinic/recurring-expenses/{id}/skip/     the month's slot
  *
  * The server must refuse all of them to doctors: the frontend gate is UX only (§3).
  */
@@ -43,6 +53,8 @@ export const expenseSchema = v.object({
   is_void: v.boolean(),
   void_reason: v.nullable(v.string()),
   created_by: v.nullable(v.string()),
+  // Optional on the wire: older rows and manual entries have no template.
+  recurring_id: v.optional(v.nullable(id), null),
 })
 
 export const expensePageSchema = pageSchema(expenseSchema)
@@ -83,6 +95,7 @@ export function toExpense(response: ExpenseResponse): Expense {
     isVoid: response.is_void,
     voidReason: response.void_reason,
     createdBy: response.created_by,
+    recurringId: response.recurring_id,
   }
 }
 
@@ -106,5 +119,77 @@ export function toExpenseSummary(response: ExpenseSummaryResponse): ExpenseSumma
     previousTotals: response.previous_totals === null ? null : toTotals(response.previous_totals),
     byCategory: response.by_category,
     series: response.series,
+  }
+}
+
+const recurringCategorySchema = v.picklist(RECURRING_CATEGORIES)
+const month = v.pipe(v.string(), v.regex(/^\d{4}-(0[1-9]|1[0-2])$/))
+
+export const recurringExpenseSchema = v.object({
+  id,
+  name: v.string(),
+  category: recurringCategorySchema,
+  amount: v.pipe(v.number(), v.integer(), v.minValue(1)),
+  method: v.picklist(EXPENSE_METHODS),
+  payee: v.nullable(v.string()),
+  day_of_month: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(28)),
+  is_active: v.boolean(),
+})
+
+export const recurringExpenseListSchema = v.array(recurringExpenseSchema)
+
+export const dueMonthSchema = v.object({
+  month,
+  totals: v.object({ expected: som, paid: som, remaining: som }),
+  items: v.array(
+    v.object({
+      recurring_id: id,
+      name: v.string(),
+      category: recurringCategorySchema,
+      amount: som,
+      method: v.picklist(EXPENSE_METHODS),
+      payee: v.nullable(v.string()),
+      due_date: date,
+      status: v.picklist(['due', 'overdue', 'paid', 'skipped']),
+      expense_id: v.nullable(id),
+      paid_amount: v.nullable(som),
+      paid_date: v.nullable(date),
+    }),
+  ),
+})
+
+export type RecurringExpenseResponse = v.InferOutput<typeof recurringExpenseSchema>
+export type DueMonthResponse = v.InferOutput<typeof dueMonthSchema>
+
+export function toRecurringExpense(response: RecurringExpenseResponse): RecurringExpense {
+  return {
+    id: response.id,
+    name: response.name,
+    category: response.category,
+    amount: response.amount,
+    method: response.method,
+    payee: response.payee,
+    dayOfMonth: response.day_of_month,
+    isActive: response.is_active,
+  }
+}
+
+export function toDueMonth(response: DueMonthResponse): DueMonth {
+  return {
+    month: response.month,
+    totals: response.totals,
+    items: response.items.map((item) => ({
+      recurringId: item.recurring_id,
+      name: item.name,
+      category: item.category,
+      amount: item.amount,
+      method: item.method,
+      payee: item.payee,
+      dueDate: item.due_date,
+      status: item.status,
+      expenseId: item.expense_id,
+      paidAmount: item.paid_amount,
+      paidDate: item.paid_date,
+    })),
   }
 }

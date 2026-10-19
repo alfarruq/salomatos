@@ -2,7 +2,8 @@
   "title": "Finance",
   "tabs": {
     "overview": "Overview",
-    "expenses": "Expenses"
+    "expenses": "Expenses",
+    "recurring": "Recurring"
   },
   "demo": {
     "title": "Sample data",
