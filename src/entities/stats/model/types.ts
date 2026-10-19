@@ -1,21 +1,13 @@
 import type { CalendarDate } from '@/shared/lib/calendarDate'
+import type { ReportRange } from '@/shared/lib/report'
 
-/**
- * A preset window ending today (clinic time). Presets rather than free dates
- * for the MVP: they are what a clinic owner reaches for, and each one has an
- * obvious bucket size for its chart.
- */
-export const STATS_PERIODS = ['week', 'month', 'quarter', 'year'] as const
-
-export type StatsPeriod = (typeof STATS_PERIODS)[number]
-
-export type StatsBucket = 'day' | 'week' | 'month'
-
-export interface StatsRange {
-  from: CalendarDate
-  to: CalendarDate
-  bucket: StatsBucket
-}
+export type {
+  ReportBucket as StatsBucket,
+  ReportPeriod as StatsPeriod,
+  ReportRange as StatsRange,
+} from '@/shared/lib/report'
+/** The statistics names for the shared report period types (`shared/lib/report`). */
+export { REPORT_PERIODS as STATS_PERIODS } from '@/shared/lib/report'
 
 /** Counts only — no names, phones or money: statistics carries no PHI (finance is its own section). */
 export interface StatsTotals {
@@ -71,7 +63,7 @@ export interface StatsToothCount {
 }
 
 export interface StatsOverview {
-  range: StatsRange
+  range: ReportRange
   totals: StatsTotals
   /** The same-length window right before this one, for the deltas. */
   previousTotals: StatsTotals | null

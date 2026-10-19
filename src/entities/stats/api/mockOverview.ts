@@ -8,7 +8,7 @@
  * charts under the viewer.
  */
 import { parseCalendarDate, toCalendarDate } from '@/shared/lib/calendarDate'
-import { addDays } from '../model/period'
+import { addDays } from '@/shared/lib/report'
 import type { StatsOverviewResponse } from '../model/schema'
 import type { StatsRange } from '../model/types'
 

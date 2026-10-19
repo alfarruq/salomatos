@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 import { BarChart3 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import {
-  rangeOf,
   STATS_PERIODS,
   STATS_SOURCE_IS_MOCK,
   type StatsOverview,
@@ -10,21 +9,21 @@ import {
   statsQueries,
 } from '@/entities/stats'
 import { clinicNow } from '@/shared/lib/datetime'
+import { bucketLabel, rangeOf } from '@/shared/lib/report'
 import {
   Alert,
   BarChart,
   BarList,
+  ChartCard,
   EmptyState,
   ErrorState,
   QueryBoundary,
   Select,
   Skeleton,
 } from '@/shared/ui'
-import { bucketLabel } from '../model/format'
 import { BusyHoursHeatmap } from './BusyHoursHeatmap'
 import { KpiTiles } from './KpiTiles'
 import { PatientMix } from './PatientMix'
-import { Section } from './Section'
 import { TreatmentsSection } from './TreatmentsSection'
 
 export interface StatisticsOverviewProps {
@@ -89,7 +88,7 @@ function OverviewContent({ data }: { data: StatsOverview }) {
 
       <h2 className="text-title2 text-text">{t('appointments.title')}</h2>
 
-      <Section title={t('charts.appointments.title')}>
+      <ChartCard title={t('charts.appointments.title')}>
         <BarChart
           data={data.appointmentsSeries.map((point) => ({
             key: point.start,
@@ -101,10 +100,10 @@ function OverviewContent({ data }: { data: StatsOverview }) {
           partLabel={t('charts.appointments.completed')}
           valueLabel={t('charts.appointments.booked')}
         />
-      </Section>
+      </ChartCard>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Section description={t('charts.doctors.description')} title={t('charts.doctors.title')}>
+        <ChartCard description={t('charts.doctors.description')} title={t('charts.doctors.title')}>
           <BarList
             items={[...data.doctors]
               .sort((a, b) => b.appointments - a.appointments)
@@ -115,16 +114,16 @@ function OverviewContent({ data }: { data: StatsOverview }) {
               }))}
             label={t('charts.doctors.title')}
           />
-        </Section>
+        </ChartCard>
 
-        <Section title={t('charts.patients.title')}>
+        <ChartCard title={t('charts.patients.title')}>
           <PatientMix totals={data.totals} />
-        </Section>
+        </ChartCard>
       </div>
 
-      <Section description={t('charts.busy.description')} title={t('charts.busy.title')}>
+      <ChartCard description={t('charts.busy.description')} title={t('charts.busy.title')}>
         <BusyHoursHeatmap slots={data.busySlots} />
-      </Section>
+      </ChartCard>
 
       <TreatmentsSection data={data} />
     </div>

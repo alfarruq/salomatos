@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { rangeOf } from '../model/period'
+import { rangeOf } from '@/shared/lib/report'
 import { fetchStatsOverview, statsKeys } from './queries'
 
 describe('statsKeys', () => {
@@ -7,17 +7,6 @@ describe('statsKeys', () => {
     const range = rangeOf('week', '2026-10-19')
     expect(statsKeys.overview(1, range)).toEqual(['clinics', 1, 'stats', 'overview', range])
     expect(statsKeys.overview(1, range)).not.toEqual(statsKeys.overview(2, range))
-  })
-})
-
-describe('rangeOf', () => {
-  it('ends on the given day and counts it in', () => {
-    expect(rangeOf('week', '2026-10-19')).toEqual({
-      from: '2026-10-13',
-      to: '2026-10-19',
-      bucket: 'day',
-    })
-    expect(rangeOf('year', '2026-10-19')).toMatchObject({ from: '2025-10-20', bucket: 'month' })
   })
 })
 

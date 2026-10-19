@@ -1,17 +1,15 @@
 import type { ReactNode } from 'react'
-import { Card } from '@/shared/ui'
+import { Card } from './Card'
 
-export function Section({
-  title,
-  description,
-  className,
-  children,
-}: {
+export interface ChartCardProps {
   title: string
   description?: string
   className?: string
   children: ReactNode
-}) {
+}
+
+/** A titled card around one chart or ranking — the building block of the report pages. */
+export function ChartCard({ title, description, className, children }: ChartCardProps) {
   return (
     <Card {...(className === undefined ? {} : { className })}>
       <section className="flex flex-col gap-4 p-4 sm:p-6">
