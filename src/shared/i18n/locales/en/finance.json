@@ -1,5 +1,9 @@
 {
   "title": "Finance",
+  "tabs": {
+    "overview": "Overview",
+    "expenses": "Expenses"
+  },
   "demo": {
     "title": "Sample data",
     "description": "These amounts are made up to show the layout. Real figures appear once the server keeps a payment ledger."

@@ -10,5 +10,7 @@
   "max_length": "Too long",
   "min_length": "Too short",
   "invalid_choice": "Choose one of the available options",
-  "smsOffsetRequired": "Choose at least one time"
+  "smsOffsetRequired": "Choose at least one time",
+  "futureDate": "The date cannot be in the future",
+  "tooLarge": "The amount is too large"
 }

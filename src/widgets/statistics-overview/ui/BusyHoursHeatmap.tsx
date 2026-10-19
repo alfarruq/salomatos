@@ -23,7 +23,8 @@ export function BusyHoursHeatmap({ slots }: { slots: readonly StatsBusySlot[] })
 
   return (
     <figure className="flex flex-col gap-3">
-      <div className="overflow-x-auto">
+      {/* `relative`: the cells' `sr-only` counts would otherwise escape the scroll clip. */}
+      <div className="relative overflow-x-auto">
         <table className="w-full border-separate border-spacing-1">
           <caption className="sr-only">{t('charts.busy.title')}</caption>
           <thead>
