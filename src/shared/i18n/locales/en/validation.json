@@ -9,5 +9,6 @@
   "unique": "This value is already taken",
   "max_length": "Too long",
   "min_length": "Too short",
-  "invalid_choice": "Choose one of the available options"
+  "invalid_choice": "Choose one of the available options",
+  "smsOffsetRequired": "Choose at least one time"
 }

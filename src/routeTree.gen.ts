@@ -20,6 +20,7 @@ import { Route as AuthManageClinicRouteImport } from './pages/_auth/manage/clini
 import { Route as AuthManageDoctorTypesRouteImport } from './pages/_auth/manage/doctor-types'
 import { Route as AuthManageDoctorsRouteImport } from './pages/_auth/manage/doctors'
 import { Route as AuthManageServicesRouteImport } from './pages/_auth/manage/services'
+import { Route as AuthManageSmsRouteImport } from './pages/_auth/manage/sms'
 import { Route as AuthPatientsIndexRouteImport } from './pages/_auth/patients/index'
 import { Route as AuthPatientsPatientIdRouteImport } from './pages/_auth/patients/$patientId'
 import { Route as AuthTreatmentsIndexRouteImport } from './pages/_auth/treatments/index'
@@ -78,6 +79,11 @@ const AuthManageServicesRoute = AuthManageServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => AuthManageRoute,
 } as any)
+const AuthManageSmsRoute = AuthManageSmsRouteImport.update({
+  id: '/sms',
+  path: '/sms',
+  getParentRoute: () => AuthManageRoute,
+} as any)
 const AuthPatientsIndexRoute = AuthPatientsIndexRouteImport.update({
   id: '/patients/',
   path: '/patients/',
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/manage/doctor-types': typeof AuthManageDoctorTypesRoute
   '/manage/doctors': typeof AuthManageDoctorsRoute
   '/manage/services': typeof AuthManageServicesRoute
+  '/manage/sms': typeof AuthManageSmsRoute
   '/patients/$patientId': typeof AuthPatientsPatientIdRoute
   '/appointments/': typeof AuthAppointmentsIndexRoute
   '/manage/': typeof AuthManageIndexRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/manage/doctor-types': typeof AuthManageDoctorTypesRoute
   '/manage/doctors': typeof AuthManageDoctorsRoute
   '/manage/services': typeof AuthManageServicesRoute
+  '/manage/sms': typeof AuthManageSmsRoute
   '/patients/$patientId': typeof AuthPatientsPatientIdRoute
   '/appointments': typeof AuthAppointmentsIndexRoute
   '/manage': typeof AuthManageIndexRoute
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/_auth/manage/doctor-types': typeof AuthManageDoctorTypesRoute
   '/_auth/manage/doctors': typeof AuthManageDoctorsRoute
   '/_auth/manage/services': typeof AuthManageServicesRoute
+  '/_auth/manage/sms': typeof AuthManageSmsRoute
   '/_auth/patients/$patientId': typeof AuthPatientsPatientIdRoute
   '/_auth/appointments/': typeof AuthAppointmentsIndexRoute
   '/_auth/manage/': typeof AuthManageIndexRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/manage/doctor-types'
     | '/manage/doctors'
     | '/manage/services'
+    | '/manage/sms'
     | '/patients/$patientId'
     | '/appointments/'
     | '/manage/'
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/manage/doctor-types'
     | '/manage/doctors'
     | '/manage/services'
+    | '/manage/sms'
     | '/patients/$patientId'
     | '/appointments'
     | '/manage'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/_auth/manage/doctor-types'
     | '/_auth/manage/doctors'
     | '/_auth/manage/services'
+    | '/_auth/manage/sms'
     | '/_auth/patients/$patientId'
     | '/_auth/appointments/'
     | '/_auth/manage/'
@@ -273,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthManageServicesRouteImport
       parentRoute: typeof AuthManageRoute
     }
+    '/_auth/manage/sms': {
+      id: '/_auth/manage/sms'
+      path: '/sms'
+      fullPath: '/manage/sms'
+      preLoaderRoute: typeof AuthManageSmsRouteImport
+      parentRoute: typeof AuthManageRoute
+    }
     '/_auth/patients/': {
       id: '/_auth/patients/'
       path: '/patients'
@@ -302,6 +321,7 @@ interface AuthManageRouteChildren {
   AuthManageDoctorTypesRoute: typeof AuthManageDoctorTypesRoute
   AuthManageDoctorsRoute: typeof AuthManageDoctorsRoute
   AuthManageServicesRoute: typeof AuthManageServicesRoute
+  AuthManageSmsRoute: typeof AuthManageSmsRoute
   AuthManageIndexRoute: typeof AuthManageIndexRoute
 }
 
@@ -310,6 +330,7 @@ const AuthManageRouteChildren: AuthManageRouteChildren = {
   AuthManageDoctorTypesRoute: AuthManageDoctorTypesRoute,
   AuthManageDoctorsRoute: AuthManageDoctorsRoute,
   AuthManageServicesRoute: AuthManageServicesRoute,
+  AuthManageSmsRoute: AuthManageSmsRoute,
   AuthManageIndexRoute: AuthManageIndexRoute,
 }
 

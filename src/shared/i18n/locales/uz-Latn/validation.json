@@ -9,5 +9,6 @@
   "unique": "Bu qiymat allaqachon band",
   "max_length": "Juda uzun",
   "min_length": "Juda qisqa",
-  "invalid_choice": "Mavjud variantlardan birini tanlang"
+  "invalid_choice": "Mavjud variantlardan birini tanlang",
+  "smsOffsetRequired": "Kamida bitta vaqtni tanlang"
 }
