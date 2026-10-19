@@ -16,11 +16,13 @@ import { useUpdateSmsSettings } from '../model/useUpdateSmsSettings'
 export interface SmsSettingsFormProps {
   clinicId: number
   settings: SmsSettings
+  /** Sample data with no backend behind it: the controls work, saving does not. */
+  isPreview?: boolean
 }
 
 const HOURS_PER_DAY = 24
 
-export function SmsSettingsForm({ clinicId, settings }: SmsSettingsFormProps) {
+export function SmsSettingsForm({ clinicId, settings, isPreview = false }: SmsSettingsFormProps) {
   const { t } = useTranslation(['admin', 'common', 'validation'])
 
   const form = useForm<SmsSettingsFormInput>({
@@ -30,7 +32,8 @@ export function SmsSettingsForm({ clinicId, settings }: SmsSettingsFormProps) {
 
   const { mutate, isPending } = useUpdateSmsSettings(clinicId)
 
-  const handleSubmit = form.handleSubmit((values) =>
+  const handleSubmit = form.handleSubmit((values) => {
+    if (isPreview) return
     mutate(values, {
       onSuccess: (saved) => {
         form.reset(toSmsSettingsForm(saved))
@@ -55,8 +58,8 @@ export function SmsSettingsForm({ clinicId, settings }: SmsSettingsFormProps) {
           })
         }
       },
-    }),
-  )
+    })
+  })
 
   const message = (value: string | undefined): string | undefined => {
     if (value === undefined) return undefined
@@ -155,7 +158,7 @@ export function SmsSettingsForm({ clinicId, settings }: SmsSettingsFormProps) {
 
         <div className="flex justify-end">
           <Button
-            disabled={!form.formState.isDirty}
+            disabled={isPreview || !form.formState.isDirty}
             isLoading={isPending}
             type="submit"
             variant="primary"

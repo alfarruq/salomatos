@@ -105,6 +105,9 @@
     "saved": "SMS settings saved",
     "saveFailed": "Couldn't save the settings. Please try again.",
     "unavailable": "SMS service isn't connected yet",
-    "unavailableDescription": "Once it's live, your balance and reminder settings will appear here."
+    "unavailableDescription": "Once it's live, your balance and reminder settings will appear here.",
+    "previewModeTitle": "Preview mode",
+    "previewModeBody": "The SMS service isn't connected yet. Figures are samples and settings aren't saved.",
+    "sampleText": "Clinic: your appointment is on 21.10 at 14:30. Tel: +998 71 200 00 00"
   }
 }

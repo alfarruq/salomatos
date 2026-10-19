@@ -27,7 +27,7 @@ const SETTINGS: SmsSettings = {
   preview: 'Dental Plus: qabulingiz 21.10 kuni 14:30 da.',
 }
 
-function renderForm(settings: SmsSettings = SETTINGS) {
+function renderForm(settings: SmsSettings = SETTINGS, isPreview = false) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   })
@@ -36,7 +36,7 @@ function renderForm(settings: SmsSettings = SETTINGS) {
     <QueryClientProvider client={queryClient}>
       <I18nextProvider i18n={createI18n('uz-Latn')}>
         <Suspense fallback={null}>
-          <SmsSettingsForm clinicId={1} settings={settings} />
+          <SmsSettingsForm clinicId={1} isPreview={isPreview} settings={settings} />
         </Suspense>
       </I18nextProvider>
     </QueryClientProvider>,
@@ -92,5 +92,14 @@ describe('SmsSettingsForm', () => {
         send_on_create: false,
       }),
     )
+  })
+
+  it('never saves sample data in preview mode', async () => {
+    // No PATCH handler: with `onUnhandledRequest: 'error'` a request would fail the test.
+    renderForm(SETTINGS, true)
+
+    await userEvent.click(await screen.findByLabelText('Qabuldan 1 kun oldin'))
+
+    expect(screen.getByRole('button', { name: 'Saqlash' })).toBeDisabled()
   })
 })

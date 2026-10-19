@@ -105,6 +105,9 @@
     "saved": "SMS sozlamalari saqlandi",
     "saveFailed": "Sozlamalarni saqlab bo'lmadi. Qayta urinib ko'ring.",
     "unavailable": "SMS xizmati hali ulanmagan",
-    "unavailableDescription": "Xizmat ishga tushgach, shu yerda balans va eslatma sozlamalari paydo bo'ladi."
+    "unavailableDescription": "Xizmat ishga tushgach, shu yerda balans va eslatma sozlamalari paydo bo'ladi.",
+    "previewModeTitle": "Namuna rejimi",
+    "previewModeBody": "SMS xizmati hali ulanmagan. Raqamlar namuna uchun, sozlamalar saqlanmaydi.",
+    "sampleText": "Klinika: qabulingiz 21.10 kuni 14:30 da. Tel: +998 71 200 00 00"
   }
 }

@@ -2,14 +2,23 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { MessageSquare } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { SmsBalanceCard, smsQueries } from '@/entities/sms'
+import { SMS_PREVIEW_BALANCE, SmsBalanceCard, smsPreviewSettings, smsQueries } from '@/entities/sms'
 import { SmsSettingsForm } from '@/features/sms-settings-update'
 import { ApiError } from '@/shared/api/errors'
-import { Card, EmptyState, ErrorState, QueryBoundary, Skeleton } from '@/shared/ui'
+import { Alert, Card, EmptyState, ErrorState, QueryBoundary, Skeleton } from '@/shared/ui'
 
 export const Route = createFileRoute('/_auth/manage/sms')({
   component: SmsSection,
 })
+
+/**
+ * Flip once the backend serves `/clinic/sms/settings/` and `/clinic/sms/balance/`.
+ *
+ * Until then the section renders sample data and never calls those endpoints:
+ * a thousand clinics opening this tab should not each send two requests that
+ * can only 404.
+ */
+const SMS_BACKEND_READY = false
 
 /**
  * Appointment reminders by SMS, paid from the clinic's own balance.
@@ -19,6 +28,29 @@ export const Route = createFileRoute('/_auth/manage/sms')({
  * the SMS provider or a lock screen (§3).
  */
 function SmsSection() {
+  return SMS_BACKEND_READY ? <SmsLive /> : <SmsPreview />
+}
+
+function SmsPreview() {
+  const { t } = useTranslation('admin')
+  const { clinicId } = Route.useRouteContext()
+
+  return (
+    <div className="flex max-w-lg flex-col gap-4">
+      <Alert title={t('sms.previewModeTitle')} tone="info">
+        {t('sms.previewModeBody')}
+      </Alert>
+      <SmsBalanceCard balance={SMS_PREVIEW_BALANCE} />
+      <SmsSettingsForm
+        clinicId={clinicId}
+        isPreview
+        settings={smsPreviewSettings(t('sms.sampleText'))}
+      />
+    </div>
+  )
+}
+
+function SmsLive() {
   const { t } = useTranslation(['admin', 'common'])
   // Set by the `_auth` guard, which resolved the session before this rendered.
   const { clinicId } = Route.useRouteContext()
