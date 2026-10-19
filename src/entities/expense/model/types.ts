@@ -1,0 +1,104 @@
+import type { CalendarDate } from '@/shared/lib/calendarDate'
+import type { ReportRange } from '@/shared/lib/report'
+
+/**
+ * The fixed category list every clinic starts with. A proposal, like the rest
+ * of this entity: the backend has no expense model yet. Clinic-defined
+ * categories come later, so readers must already tolerate an unknown value
+ * (see `schema.ts`).
+ */
+export const EXPENSE_CATEGORIES = [
+  'doctor_share',
+  'staff_salary',
+  'rent',
+  'utilities',
+  'communication',
+  'materials',
+  'lab',
+  'equipment',
+  'marketing',
+  'taxes_fees',
+  'other',
+] as const
+
+export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number]
+
+/**
+ * The three questions an owner asks of their costs: what people cost, what is
+ * owed every month whether or not a patient comes, and what moves with the work.
+ */
+export type ExpenseKind = 'payroll' | 'fixed' | 'variable'
+
+export const EXPENSE_CATEGORY_KIND: Record<ExpenseCategory, ExpenseKind> = {
+  doctor_share: 'payroll',
+  staff_salary: 'payroll',
+  rent: 'fixed',
+  utilities: 'fixed',
+  communication: 'fixed',
+  taxes_fees: 'fixed',
+  materials: 'variable',
+  lab: 'variable',
+  equipment: 'variable',
+  marketing: 'variable',
+  other: 'variable',
+}
+
+/** How money left the clinic. Narrower than `PaymentMethod`: nobody pays rent with Payme. */
+export const EXPENSE_METHODS = ['cash', 'card', 'transfer'] as const
+
+export type ExpenseMethod = (typeof EXPENSE_METHODS)[number]
+
+/**
+ * One payment the clinic made, entered by hand. Money is whole so'm (§7.3).
+ *
+ * Never deleted: a mistaken entry is voided with a reason, stays in the
+ * journal and drops out of every total. No patient data belongs here (§3).
+ */
+export interface Expense {
+  id: number
+  date: CalendarDate
+  category: ExpenseCategory
+  amount: number
+  method: ExpenseMethod
+  /** Who was paid: a landlord, a supplier, a utility. */
+  payee: string | null
+  note: string | null
+  /** Set for `doctor_share` only. */
+  doctorId: number | null
+  doctorName: string | null
+  isVoid: boolean
+  voidReason: string | null
+  /** The staff member who entered it, as the server recorded. */
+  createdBy: string | null
+}
+
+export interface ExpenseFilters {
+  from: CalendarDate
+  to: CalendarDate
+  category: ExpenseCategory | null
+  page: number
+}
+
+export interface ExpensePage {
+  count: number
+  hasNext: boolean
+  hasPrevious: boolean
+  results: Expense[]
+}
+
+/** The server's own sums, voided entries excluded. The browser never adds money up. */
+export interface ExpenseTotals {
+  total: number
+  count: number
+  payroll: number
+  fixed: number
+  variable: number
+}
+
+export interface ExpenseSummary {
+  range: ReportRange
+  totals: ExpenseTotals
+  previousTotals: ExpenseTotals | null
+  byCategory: { category: ExpenseCategory; amount: number }[]
+  series: { start: CalendarDate; amount: number }[]
+}

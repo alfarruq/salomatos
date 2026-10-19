@@ -26,8 +26,10 @@ export function Table({ density = 'compact', className, ...props }: TableProps) 
       {/*
        * A table is the one thing that legitimately overflows on a 360px screen.
        * It scrolls inside its own container so the page itself never does.
+       * `relative` keeps an `sr-only` cell label (absolutely positioned) inside
+       * that container too; otherwise it escapes the clip and widens the page.
        */}
-      <div className="w-full overflow-x-auto">
+      <div className="relative w-full overflow-x-auto">
         <table className={cn('w-full border-collapse text-left', className)} {...props} />
       </div>
     </DensityContext.Provider>

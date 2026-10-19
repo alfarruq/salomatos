@@ -1,0 +1,112 @@
+{
+  "demo": {
+    "title": "Sample data",
+    "description": "These entries are made up to show the screen. Expenses you add are kept until the page reloads. Real entries will appear once the server keeps an expense journal."
+  },
+  "kpi": {
+    "total": "Total expenses",
+    "entries_one": "{{count}} entry",
+    "entries_other": "{{count}} entries",
+    "share": "{{percent}}% of all expenses",
+    "vsPrevious": "vs previous period"
+  },
+  "kinds": {
+    "payroll": "Payroll",
+    "fixed": "Fixed costs",
+    "variable": "Variable costs"
+  },
+  "categories": {
+    "doctor_share": "Doctor share",
+    "staff_salary": "Staff salaries",
+    "rent": "Rent",
+    "utilities": "Utilities",
+    "communication": "Phone, internet, software",
+    "materials": "Materials and medicines",
+    "lab": "Dental lab",
+    "equipment": "Equipment",
+    "marketing": "Marketing",
+    "taxes_fees": "Taxes and bank fees",
+    "other": "Other"
+  },
+  "methods": {
+    "cash": "Cash",
+    "card": "Card",
+    "transfer": "Bank transfer"
+  },
+  "charts": {
+    "trend": {
+      "title": "Expenses over time",
+      "description": "Amounts paid in the period"
+    },
+    "categories": {
+      "title": "By category",
+      "description": "Each category's share of all expenses"
+    }
+  },
+  "journal": {
+    "title": "Expense journal",
+    "description": "Every entry in the period, newest first",
+    "categoryFilter": "Filter by category",
+    "allCategories": "All categories",
+    "date": "Date",
+    "category": "Category",
+    "payee": "Paid to / note",
+    "method": "Method",
+    "enteredBy": "Entered by",
+    "amount": "Amount",
+    "actions": "Actions",
+    "voided": "Voided",
+    "voidReason": "Reason: {{reason}}",
+    "empty": "No expenses were entered in this period.",
+    "emptyFiltered": "No expenses in this category.",
+    "pageSummary": "{{from}}–{{to}} of {{total}}"
+  },
+  "form": {
+    "date": "Date",
+    "datePlaceholder": "Pick a date",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "amount": "Amount, so'm",
+    "category": "Category",
+    "categoryPlaceholder": "Pick a category",
+    "method": "Payment method",
+    "doctor": "Doctor",
+    "doctorPlaceholder": "Pick a doctor",
+    "payee": "Paid to",
+    "payeeHint": "For example: landlord, supplier, utility company",
+    "note": "Note",
+    "noteHint": "Do not write a patient's name or other personal details."
+  },
+  "create": {
+    "open": "Add expense",
+    "title": "New expense",
+    "description": "Enter a payment the clinic made.",
+    "submit": "Add",
+    "success": "Expense added",
+    "failed": "Could not save the expense. Please try again."
+  },
+  "edit": {
+    "title": "Edit expense",
+    "description": "The server keeps the history of changes.",
+    "success": "Expense updated",
+    "failed": "Could not save the changes. Please try again."
+  },
+  "void": {
+    "title": "Void entry",
+    "description": "{{date}}, {{category}}, {{amount}}. The entry stays in the journal but no longer counts in any total. This cannot be undone.",
+    "reason": "Reason",
+    "reasonHint": "For example: entered twice, wrong amount",
+    "keep": "Keep",
+    "submit": "Void",
+    "success": "Entry voided",
+    "failed": "Could not void the entry. Please try again."
+  },
+  "empty": {
+    "title": "No expenses in this period",
+    "description": "Pick a longer period or enter the first expense."
+  },
+  "error": {
+    "title": "Could not load expenses",
+    "description": "Check your internet connection and try again."
+  }
+}

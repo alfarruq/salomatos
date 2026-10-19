@@ -1,5 +1,9 @@
 {
   "title": "Moliya",
+  "tabs": {
+    "overview": "Umumiy",
+    "expenses": "Xarajatlar"
+  },
   "demo": {
     "title": "Namuna ma'lumotlar",
     "description": "Bu summalar faqat ko'rinishni ko'rsatish uchun o'ylab topilgan. Haqiqiy raqamlar server to'lovlar jurnalini yurita boshlaganda chiqadi."

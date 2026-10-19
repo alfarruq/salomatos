@@ -112,27 +112,30 @@ export function BarChart({
         ))}
       </div>
 
-      <table className="sr-only">
-        <caption>{label}</caption>
-        <thead>
-          <tr>
-            <th scope="col">{label}</th>
-            <th scope="col">{valueLabel}</th>
-            {partLabel === undefined ? null : <th scope="col">{partLabel}</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((datum) => (
-            <tr key={datum.key}>
-              <th scope="row">{datum.label}</th>
-              <td>{formatValue(datum.value)}</td>
-              {partLabel === undefined ? null : (
-                <td>{datum.part === undefined ? '' : formatValue(datum.part)}</td>
-              )}
+      {/* On a wrapper, not the table: a table ignores `width: 1px` and widened the page on phones. */}
+      <div className="sr-only">
+        <table>
+          <caption>{label}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{label}</th>
+              <th scope="col">{valueLabel}</th>
+              {partLabel === undefined ? null : <th scope="col">{partLabel}</th>}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((datum) => (
+              <tr key={datum.key}>
+                <th scope="row">{datum.label}</th>
+                <td>{formatValue(datum.value)}</td>
+                {partLabel === undefined ? null : (
+                  <td>{datum.part === undefined ? '' : formatValue(datum.part)}</td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </figure>
   )
 }
