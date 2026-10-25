@@ -56,6 +56,12 @@ describe('fetchPatients', () => {
     expect(page.results[0]?.fullName).toBe('Nodira Karimova')
   })
 
+  it('asks only for patients who owe money', async () => {
+    const page = await fetchPatients({ ...defaultPatientFilters, hasDebt: true })
+
+    expect(page.results.map((patient) => patient.fullName)).toEqual(['Vali Aliyev'])
+  })
+
   it('filters by treatment status', async () => {
     const page = await fetchPatients({ ...defaultPatientFilters, status: 'completed' })
 

@@ -1,12 +1,17 @@
 import { type UseQueryResult, useQuery } from '@tanstack/react-query'
-import { CalendarDays, CheckCircle2, Stethoscope, Users } from 'lucide-react'
+import { CheckCircle2, Stethoscope, Users, Wallet } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { appointmentQueries } from '@/entities/appointment'
 import { defaultPatientFilters, patientQueries } from '@/entities/patient'
 import type { Page } from '@/shared/api/pagination'
-import { clinicNow } from '@/shared/lib/datetime'
 import { Card, Skeleton } from '@/shared/ui'
+
+/**
+ * ⚠️ The list endpoint does not filter by debt yet. Until it does, an unknown
+ * `?has_debt=true` would be ignored and the tile would show every patient as
+ * a debtor, so it shows a dash instead. Flip this once the backend ships it.
+ */
+const DEBT_FILTER_ON_SERVER = false
 
 /**
  * Four counts above the patient list.
@@ -18,8 +23,6 @@ import { Card, Skeleton } from '@/shared/ui'
  */
 export function PatientSummary({ clinicId }: { clinicId: number }) {
   const { t } = useTranslation('patients')
-  // The clinic's day, not the browser's (§14).
-  const today = clinicNow().date
 
   const total = useQuery(patientQueries.list(clinicId, defaultPatientFilters))
   const inProgress = useQuery(
@@ -28,18 +31,14 @@ export function PatientSummary({ clinicId }: { clinicId: number }) {
   const completed = useQuery(
     patientQueries.list(clinicId, { ...defaultPatientFilters, status: 'completed' }),
   )
-  const appointmentsToday = useQuery(
-    appointmentQueries.page(clinicId, { view: 'day', date: today }, 1),
-  )
+  const debtors = useQuery({
+    ...patientQueries.list(clinicId, { ...defaultPatientFilters, hasDebt: true }),
+    enabled: DEBT_FILTER_ON_SERVER,
+  })
 
   return (
     <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <SummaryTile icon={<Users className="size-5" />} label={t('summary.total')} query={total} />
-      <SummaryTile
-        icon={<CalendarDays className="size-5" />}
-        label={t('summary.appointmentsToday')}
-        query={appointmentsToday}
-      />
       <SummaryTile
         icon={<Stethoscope className="size-5" />}
         label={t('summary.inProgress')}
@@ -50,6 +49,12 @@ export function PatientSummary({ clinicId }: { clinicId: number }) {
         label={t('summary.completed')}
         query={completed}
       />
+      <SummaryTile
+        icon={<Wallet className="size-5" />}
+        isAvailable={DEBT_FILTER_ON_SERVER}
+        label={t('summary.debtors')}
+        query={debtors}
+      />
     </dl>
   )
 }
@@ -58,9 +63,11 @@ function SummaryTile({
   icon,
   label,
   query,
+  isAvailable = true,
 }: {
   icon: ReactNode
   label: string
+  isAvailable?: boolean
   query: UseQueryResult<Page<unknown>>
 }) {
   const { i18n } = useTranslation()
@@ -76,7 +83,9 @@ function SummaryTile({
       <div className="flex min-w-0 flex-col">
         <dt className="text-caption text-text-secondary">{label}</dt>
         <dd className="text-title2 text-text tabular-nums">
-          {query.isPending ? (
+          {!isAvailable ? (
+            '—'
+          ) : query.isPending ? (
             <Skeleton className="my-1 h-6 w-12" />
           ) : query.isError ? (
             // A tile is a convenience; the table below carries its own error state.

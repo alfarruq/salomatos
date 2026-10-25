@@ -40,6 +40,7 @@ function toQueryString(filters: PatientFilters): string {
   if (filters.status !== null) params.set('status', filters.status)
   if (filters.doctor !== '') params.set('doctor', filters.doctor)
   if (filters.treatmentTypeId !== null) params.set('treatment_id', String(filters.treatmentTypeId))
+  if (filters.hasDebt === true) params.set('has_debt', 'true')
   if (filters.page > 1) params.set('page', String(filters.page))
 
   const query = params.toString()

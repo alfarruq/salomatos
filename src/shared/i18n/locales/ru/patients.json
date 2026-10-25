@@ -54,9 +54,9 @@
   "title": "Пациенты",
   "summary": {
     "total": "Всего пациентов",
-    "appointmentsToday": "Приёмы сегодня",
     "inProgress": "На лечении",
-    "completed": "Завершено"
+    "completed": "Завершено",
+    "debtors": "Должники"
   },
   "column": {
     "fullName": "Имя",
