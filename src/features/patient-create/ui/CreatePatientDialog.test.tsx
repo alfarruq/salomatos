@@ -8,7 +8,7 @@ import { accessTokenFor } from '@/shared/api/mocks/fixtures'
 import { server } from '@/shared/api/mocks/server'
 import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
 import { createI18n } from '@/shared/i18n'
-import { formatFixedDate } from '@/shared/lib/calendarDate'
+import { toTypedDate } from '@/shared/lib/calendarDate'
 import { clinicNow } from '@/shared/lib/datetime'
 import { CreatePatientDialog } from './CreatePatientDialog'
 
@@ -62,7 +62,33 @@ describe('CreatePatientDialog', () => {
   it("opens with today's date as the birth date", async () => {
     renderDialog()
 
-    expect(await screen.findByText(formatFixedDate(clinicNow().date))).toBeInTheDocument()
+    expect(await screen.findByLabelText("Tug'ilgan sana")).toHaveValue(
+      toTypedDate(clinicNow().date),
+    )
+  })
+
+  it('lets the birth date be typed as dd/mm/yyyy', async () => {
+    renderDialog()
+
+    const birthDate = await screen.findByLabelText("Tug'ilgan sana")
+    await userEvent.clear(birthDate)
+    await userEvent.type(birthDate, '12051994')
+
+    expect(birthDate).toHaveValue('12/05/1994')
+  })
+
+  it('refuses a birth date that is not a real day', async () => {
+    const { onCreated } = renderDialog()
+
+    await userEvent.type(await screen.findByLabelText('F. I. Sh.'), 'Yangi Bemor')
+    await userEvent.type(screen.getByLabelText('Telefon raqami'), '935550022')
+    const birthDate = screen.getByLabelText("Tug'ilgan sana")
+    await userEvent.clear(birthDate)
+    await userEvent.type(birthDate, '31021994')
+    await userEvent.click(screen.getByRole('button', { name: "Bemor qo'shish" }))
+
+    expect(await screen.findByText("Qiymat noto'g'ri")).toBeInTheDocument()
+    expect(onCreated).not.toHaveBeenCalled()
   })
 
   it('creates a patient and closes', async () => {

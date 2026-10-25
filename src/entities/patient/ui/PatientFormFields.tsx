@@ -1,7 +1,6 @@
 import { Controller, type UseFormReturn } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { todayCalendarDate } from '@/shared/lib/calendarDate'
-import { DatePicker, Field, Input, PhoneInput, Select, type SelectOption } from '@/shared/ui'
+import { DateInput, Field, Input, PhoneInput, Select, type SelectOption } from '@/shared/ui'
 import type { PatientFormInput } from '../model/formSchema'
 
 export interface PatientFormFieldsProps {
@@ -32,7 +31,7 @@ export function PatientFormFields({
   isDisabled = false,
   doctorOptions,
 }: PatientFormFieldsProps) {
-  const { t, i18n } = useTranslation(['patients', 'validation'])
+  const { t } = useTranslation(['patients', 'validation'])
 
   /** Valibot and the server both speak `validation.<code>` — see §10. */
   const message = (value: string | undefined): string | undefined => {
@@ -71,49 +70,45 @@ export function PatientFormFields({
         />
       </Field>
 
-      <Field error={message(errors.doctorId?.message)} isRequired label={t('patients:form.doctor')}>
-        <Controller
-          control={form.control}
-          name="doctorId"
-          render={({ field }) => (
-            <Select
-              disabled={isDisabled}
-              name={field.name}
-              onValueChange={field.onChange}
-              options={doctorOptions}
-              placeholder={t('patients:form.doctorPlaceholder')}
-              value={field.value}
-            />
-          )}
-        />
-      </Field>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field
+          error={message(errors.doctorId?.message)}
+          isRequired
+          label={t('patients:form.doctor')}
+        >
+          <Controller
+            control={form.control}
+            name="doctorId"
+            render={({ field }) => (
+              <Select
+                disabled={isDisabled}
+                name={field.name}
+                onValueChange={field.onChange}
+                options={doctorOptions}
+                placeholder={t('patients:form.doctorPlaceholder')}
+                value={field.value}
+              />
+            )}
+          />
+        </Field>
 
-      <Field error={message(errors.birthDate?.message)} label={t('patients:form.birthDate')}>
-        <Controller
-          control={form.control}
-          name="birthDate"
-          render={({ field }) => (
-            <DatePicker
-              disabled={isDisabled}
-              locale={i18n.language}
-              /*
-               * A birth date is never in the future, and the picker saying so
-               * is cheaper than a server round trip.
-               *
-               * `todayCalendarDate()`, not `toISOString().slice(0, 10)` — the
-               * latter is the UTC day, which before 05:00 in Tashkent is still
-               * yesterday and would refuse a baby born this morning.
-               */
-              max={todayCalendarDate()}
-              nextMonthLabel={t('patients:form.nextMonth')}
-              onChange={field.onChange}
-              placeholder={t('patients:form.birthDatePlaceholder')}
-              previousMonthLabel={t('patients:form.previousMonth')}
-              value={field.value}
-            />
-          )}
-        />
-      </Field>
+        <Field error={message(errors.birthDate?.message)} label={t('patients:form.birthDate')}>
+          <Controller
+            control={form.control}
+            name="birthDate"
+            render={({ field }) => (
+              <DateInput
+                disabled={isDisabled}
+                name={field.name}
+                onBlur={field.onBlur}
+                onChange={field.onChange}
+                placeholder={t('patients:form.birthDatePlaceholder')}
+                value={field.value}
+              />
+            )}
+          />
+        </Field>
+      </div>
 
       <Field error={message(errors.address?.message)} label={t('patients:form.address')}>
         <Input autoComplete="off" disabled={isDisabled} {...form.register('address')} />

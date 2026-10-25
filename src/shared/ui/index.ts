@@ -16,6 +16,7 @@ export {
   type CommandPaletteProps,
   useCommandShortcut,
 } from './CommandPalette'
+export { DateInput, type DateInputProps, maskTypedDate } from './DateInput'
 export { DatePicker, type DatePickerProps } from './DatePicker'
 export {
   DentalChart,

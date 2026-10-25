@@ -113,3 +113,25 @@ export function weekDatesOf(reference: CalendarDate): CalendarDate[] {
     return toCalendarDate(day)
   })
 }
+
+/** `dd/mm/yyyy` — how people type a date they know by heart, like a birthday. */
+const TYPED_DATE = /^(\d{2})\/(\d{2})\/(\d{4})$/
+
+/** Reads a typed `dd/mm/yyyy`, or null when it is incomplete or not a real date. */
+export function parseTypedDate(value: string): CalendarDate | null {
+  const match = TYPED_DATE.exec(value)
+  if (!match) return null
+
+  const [, day, month, year] = match
+  const date = `${year}-${month}-${day}`
+  return parseCalendarDate(date) === null ? null : date
+}
+
+/** The inverse of `parseTypedDate`; empty for anything that is not a real date. */
+export function toTypedDate(date: CalendarDate): string {
+  const match = ISO_DATE.exec(date)
+  if (!match || parseCalendarDate(date) === null) return ''
+
+  const [, year, month, day] = match
+  return `${day}/${month}/${year}`
+}

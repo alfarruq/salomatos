@@ -103,6 +103,8 @@ export function EditPatientDialog({
 
   return (
     <Dialog
+      // Wider than the default: the doctor and the birth date share a row.
+      className="max-w-xl"
       description={t('patients:edit.description')}
       footer={
         <>
