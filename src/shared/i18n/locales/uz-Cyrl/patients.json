@@ -48,9 +48,16 @@
     "doctorPlaceholder": "Шифокор",
     "doctorAll": "Барча шифокорлар",
     "title": "Филтр",
-    "apply": "Натижаларни кўрсатиш"
+    "apply": "Натижаларни кўрсатиш",
+    "clear": "Филтрларни тозалаш"
   },
   "title": "Беморлар",
+  "summary": {
+    "total": "Жами беморлар",
+    "appointmentsToday": "Бугунги қабуллар",
+    "inProgress": "Даволанмоқда",
+    "completed": "Якунланган"
+  },
   "column": {
     "fullName": "Исм",
     "age": "Ёш",

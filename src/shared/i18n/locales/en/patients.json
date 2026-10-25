@@ -48,9 +48,16 @@
     "doctorPlaceholder": "Doctor",
     "doctorAll": "All doctors",
     "title": "Filters",
-    "apply": "Show results"
+    "apply": "Show results",
+    "clear": "Clear filters"
   },
   "title": "Patients",
+  "summary": {
+    "total": "Total patients",
+    "appointmentsToday": "Appointments today",
+    "inProgress": "In treatment",
+    "completed": "Completed"
+  },
   "column": {
     "fullName": "Name",
     "age": "Age",

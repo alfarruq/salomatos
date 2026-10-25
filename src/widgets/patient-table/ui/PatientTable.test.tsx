@@ -58,6 +58,7 @@ function renderTable(filterOverrides: Partial<Omit<PatientFilters, 'search'>> = 
           <PatientTable
             clinicId={CLINIC_ID}
             filters={{ ...filters, ...filterOverrides }}
+            heading={<h1>Bemorlar</h1>}
             onFiltersChange={onFiltersChange}
             onOpenPatient={onOpenPatient}
           />
@@ -101,6 +102,33 @@ describe('PatientTable', () => {
       'Qoldiq',
       '',
     ])
+  })
+
+  it("counts the clinic's patients above the list", async () => {
+    renderTable()
+
+    const tile = (await screen.findByText('Jami bemorlar')).parentElement
+    await waitFor(() => expect(tile).toHaveTextContent('3'))
+  })
+
+  it('offers to clear the filters only when one is set', async () => {
+    renderTable()
+    await screen.findByText('Vali Aliyev')
+    expect(screen.queryByRole('button', { name: 'Filtrlarni tozalash' })).not.toBeInTheDocument()
+  })
+
+  it('clears every filter at once', async () => {
+    const user = userEvent.setup()
+    const { onFiltersChange } = renderTable({ status: 'completed', page: 3 })
+
+    await user.click(await screen.findByRole('button', { name: 'Filtrlarni tozalash' }))
+
+    expect(onFiltersChange).toHaveBeenCalledWith({
+      status: null,
+      doctor: '',
+      treatmentTypeId: null,
+      page: 1,
+    })
   })
 
   it('shows a dash rather than a blank cell for a patient with nothing on record', async () => {
