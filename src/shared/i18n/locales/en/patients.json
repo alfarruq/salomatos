@@ -10,11 +10,9 @@
     "doctor": "Doctor",
     "doctorPlaceholder": "Select a doctor",
     "birthDate": "Date of birth",
-    "birthDatePlaceholder": "dd.mm.yyyy",
-    "previousMonth": "Previous month",
-    "nextMonth": "Next month",
+    "birthDatePlaceholder": "dd/mm/yyyy",
     "address": "Address",
-    "office": "Office"
+    "office": "Workplace"
   },
   "create": {
     "title": "New patient",

@@ -1,5 +1,5 @@
 import * as v from 'valibot'
-import { parseCalendarDate } from '@/shared/lib/calendarDate'
+import { parseTypedDate, todayCalendarDate, toTypedDate } from '@/shared/lib/calendarDate'
 import type { Patient } from './types'
 
 /**
@@ -39,11 +39,21 @@ export const patientFormSchema = v.object({
    * matching the same requirement already confirmed on `entities/appointment`.
    */
   doctorId: v.pipe(v.string(), v.minLength(1, 'validation.required')),
+  /**
+   * Held as typed, `dd/mm/yyyy`, and converted to the wire's `yyyy-MM-dd` in
+   * `toPatientPayload`. Optional, but not a licence to send nonsense:
+   * `parseTypedDate` rejects 31/02/2026, which JavaScript would otherwise turn
+   * into 3 March.
+   */
   birthDate: v.pipe(
     v.string(),
-    // Optional, but not a licence to send nonsense: `parseCalendarDate`
-    // rejects 2026-02-31, which JavaScript would otherwise turn into 3 March.
-    v.check((value) => value === '' || parseCalendarDate(value) !== null, 'validation.invalid'),
+    v.check((value) => value === '' || parseTypedDate(value) !== null, 'validation.invalid'),
+    // `todayCalendarDate()`, not the UTC day, which before 05:00 in Tashkent is
+    // still yesterday and would refuse a baby born this morning.
+    v.check((value) => {
+      const date = parseTypedDate(value)
+      return date === null || date <= todayCalendarDate()
+    }, 'validation.futureDate'),
   ),
   address: v.string(),
   office: v.string(),
@@ -79,7 +89,7 @@ export function toPatientForm(
     // guarded by `dirtyFields` in the edit mutation, so it is never sent
     // unless the person actually picks a doctor this session.
     doctorId: '',
-    birthDate: patient.birthDate ?? '',
+    birthDate: patient.birthDate === null ? '' : toTypedDate(patient.birthDate),
     address: patient.address ?? '',
     office: patient.office ?? '',
   }
@@ -93,7 +103,7 @@ export function toPatientPayload(input: PatientFormInput): Record<string, string
     full_name: input.fullName,
     phone_number: input.phoneNumber,
     doctor: input.doctorId === '' ? null : Number(input.doctorId),
-    birth_date: orNull(input.birthDate),
+    birth_date: parseTypedDate(input.birthDate),
     address: orNull(input.address),
     office: orNull(input.office),
   }

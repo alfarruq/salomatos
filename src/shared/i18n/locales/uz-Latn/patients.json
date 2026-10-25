@@ -10,11 +10,9 @@
     "doctor": "Shifokor",
     "doctorPlaceholder": "Shifokorni tanlang",
     "birthDate": "Tug'ilgan sana",
-    "birthDatePlaceholder": "kk.oo.yyyy",
-    "previousMonth": "Oldingi oy",
-    "nextMonth": "Keyingi oy",
+    "birthDatePlaceholder": "kk/oo/yyyy",
     "address": "Manzil",
-    "office": "Kabinet"
+    "office": "Ish joyi"
   },
   "create": {
     "title": "Yangi bemor",

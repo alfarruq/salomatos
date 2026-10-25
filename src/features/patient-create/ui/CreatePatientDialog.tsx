@@ -12,6 +12,7 @@ import {
   patientFormSchema,
 } from '@/entities/patient'
 import { ApiError } from '@/shared/api/errors'
+import { toTypedDate } from '@/shared/lib/calendarDate'
 import { clinicNow } from '@/shared/lib/datetime'
 import { Alert, Button, Dialog } from '@/shared/ui'
 import { useCreatePatient } from '../model/useCreatePatient'
@@ -50,7 +51,7 @@ export function CreatePatientDialog({
    */
   useEffect(() => {
     if (open && !form.getFieldState('birthDate').isDirty) {
-      form.setValue('birthDate', clinicNow().date)
+      form.setValue('birthDate', toTypedDate(clinicNow().date))
     }
   }, [open, form])
 
@@ -58,7 +59,11 @@ export function CreatePatientDialog({
   // survive into the next one's form.
   useEffect(() => {
     if (open && initialValues !== undefined) {
-      form.reset({ ...emptyPatientForm, ...initialValues, birthDate: clinicNow().date })
+      form.reset({
+        ...emptyPatientForm,
+        ...initialValues,
+        birthDate: toTypedDate(clinicNow().date),
+      })
     }
   }, [open, initialValues, form])
 
@@ -106,6 +111,8 @@ export function CreatePatientDialog({
 
   return (
     <Dialog
+      // Wider than the default: the doctor and the birth date share a row.
+      className="max-w-xl"
       description={t('patients:create.description')}
       footer={
         <>

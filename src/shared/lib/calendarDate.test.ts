@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { ageOn, isSameCalendarDay, parseCalendarDate, toCalendarDate } from './calendarDate'
+import {
+  ageOn,
+  isSameCalendarDay,
+  parseCalendarDate,
+  parseTypedDate,
+  toCalendarDate,
+  toTypedDate,
+} from './calendarDate'
 
 describe('calendarDate', () => {
   it('round-trips a date without shifting the day', () => {
@@ -50,5 +57,18 @@ describe('ageOn', () => {
   it('returns null for a date that is not real or is in the future', () => {
     expect(ageOn('1988-02-31', '2026-10-15')).toBeNull()
     expect(ageOn('2027-01-01', '2026-10-15')).toBeNull()
+  })
+})
+
+describe('typed dates', () => {
+  it('converts dd/mm/yyyy to and from the wire format', () => {
+    expect(parseTypedDate('12/05/1994')).toBe('1994-05-12')
+    expect(toTypedDate('1994-05-12')).toBe('12/05/1994')
+  })
+
+  it('rejects incomplete or impossible dates', () => {
+    for (const input of ['', '12/05', '12/05/94', '31/02/1994', '1994-05-12']) {
+      expect(parseTypedDate(input)).toBeNull()
+    }
   })
 })

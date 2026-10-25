@@ -10,11 +10,9 @@
     "doctor": "Шифокор",
     "doctorPlaceholder": "Шифокорни танланг",
     "birthDate": "Туғилган сана",
-    "birthDatePlaceholder": "кк.оо.йййй",
-    "previousMonth": "Олдинги ой",
-    "nextMonth": "Кейинги ой",
+    "birthDatePlaceholder": "кк/оо/йййй",
     "address": "Манзил",
-    "office": "Кабинет"
+    "office": "Иш жойи"
   },
   "create": {
     "title": "Янги бемор",

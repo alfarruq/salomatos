@@ -10,11 +10,9 @@
     "doctor": "Врач",
     "doctorPlaceholder": "Выберите врача",
     "birthDate": "Дата рождения",
-    "birthDatePlaceholder": "дд.мм.гггг",
-    "previousMonth": "Предыдущий месяц",
-    "nextMonth": "Следующий месяц",
+    "birthDatePlaceholder": "дд/мм/гггг",
     "address": "Адрес",
-    "office": "Кабинет"
+    "office": "Место работы"
   },
   "create": {
     "title": "Новый пациент",
