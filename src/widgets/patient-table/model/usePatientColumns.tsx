@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import type { PatientListItem } from '@/entities/patient'
 import { PatientAvatar, PatientStatusBadge } from '@/entities/patient'
 import { Can } from '@/entities/session'
-import { ageOn, formatCalendarDate, todayCalendarDate } from '@/shared/lib/calendarDate'
+import { formatCalendarDate } from '@/shared/lib/calendarDate'
 import { formatSom } from '@/shared/lib/money'
 import { DropdownMenu, DropdownMenuItem, formatSubscriber, subscriberDigitsOf } from '@/shared/ui'
 
@@ -53,19 +53,6 @@ export function usePatientColumns({ onEdit, onDelete }: UsePatientColumnsOptions
         ),
       }),
 
-      column.accessor('birthDate', {
-        id: 'age',
-        header: () => t('column.age'),
-        meta: { align: 'right' },
-        // Computed here rather than read from the server, whose `age` is off by
-        // one until the birthday passes (see `Patient.age`).
-        cell: (info) => {
-          const birthDate = info.getValue()
-          if (birthDate === null) return EMPTY
-          return ageOn(birthDate, todayCalendarDate()) ?? EMPTY
-        },
-      }),
-
       column.accessor('phoneNumber', {
         header: () => t('column.phoneNumber'),
         cell: (info) => {
@@ -77,23 +64,6 @@ export function usePatientColumns({ onEdit, onDelete }: UsePatientColumnsOptions
         },
       }),
 
-      column.accessor('status', {
-        header: () => t('column.status'),
-        cell: (info) => <PatientStatusBadge status={info.getValue()} />,
-      }),
-
-      column.accessor('treatmentType', {
-        header: () => t('column.treatmentType'),
-        cell: (info) => info.getValue() ?? EMPTY,
-      }),
-
-      column.accessor('doctorName', {
-        header: () => t('column.doctor'),
-        // A name with no id behind it — the serializer sends no doctor id, so
-        // this cannot become a link until it does.
-        cell: (info) => info.getValue() ?? EMPTY,
-      }),
-
       column.accessor('lastAppointment', {
         header: () => t('column.lastAppointment'),
         cell: (info) => {
@@ -103,6 +73,23 @@ export function usePatientColumns({ onEdit, onDelete }: UsePatientColumnsOptions
           const date = formatCalendarDate(slot.date, locale)
           return date === null ? EMPTY : `${date}, ${slot.time}`
         },
+      }),
+
+      column.accessor('treatmentType', {
+        header: () => t('column.treatmentType'),
+        cell: (info) => info.getValue() ?? EMPTY,
+      }),
+
+      column.accessor('status', {
+        header: () => t('column.status'),
+        cell: (info) => <PatientStatusBadge status={info.getValue()} />,
+      }),
+
+      column.accessor('doctorName', {
+        header: () => t('column.doctor'),
+        // A name with no id behind it — the serializer sends no doctor id, so
+        // this cannot become a link until it does.
+        cell: (info) => info.getValue() ?? EMPTY,
       }),
 
       column.accessor('totalRemaining', {

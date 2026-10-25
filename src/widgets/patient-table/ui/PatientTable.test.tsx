@@ -86,6 +86,23 @@ describe('PatientTable', () => {
     expect(await screen.findByText('+998-90-123-45-67')).toBeInTheDocument()
   })
 
+  it('lays the columns out in the order the desk reads them', async () => {
+    renderTable()
+
+    await screen.findByText('Vali Aliyev')
+    const headers = screen.getAllByRole('columnheader').map((cell) => cell.textContent)
+    expect(headers).toEqual([
+      'Ism',
+      'Telefon',
+      'Qabul',
+      'Muolaja',
+      'Holat',
+      'Shifokor',
+      'Qoldiq',
+      '',
+    ])
+  })
+
   it('shows a dash rather than a blank cell for a patient with nothing on record', async () => {
     renderTable()
 
