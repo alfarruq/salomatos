@@ -22,8 +22,10 @@ import {
   PatientStatusBadge,
   patientQueries,
 } from '@/entities/patient'
+import { recipeQueries } from '@/entities/recipe'
 import { Can } from '@/entities/session'
 import type { Treatment } from '@/entities/treatment'
+import { treatmentQueries } from '@/entities/treatment'
 import { CreateAppointmentDialog } from '@/features/appointment-create'
 import { DeletePatientDialog } from '@/features/patient-delete'
 import { EditPatientDialog } from '@/features/patient-edit'
@@ -406,6 +408,27 @@ function PatientSidebar({
   )
 }
 
+/** A tab name with its item count raised to the top-right, like a notification dot. */
+function TabLabel({ children, count }: { children: string; count: number | undefined }) {
+  return (
+    <span className="inline-flex items-start gap-1">
+      {children}
+      {/* Absent until the list has loaded: a "0" that flips to "5" reads as a change. */}
+      {count === undefined ? null : (
+        <span
+          className={cn(
+            'inline-flex h-5 min-w-5 -translate-y-1 items-center justify-center rounded-full px-1',
+            'text-caption leading-none font-semibold tabular-nums',
+            count === 0 ? 'bg-sunken text-text-tertiary' : 'bg-accent text-on-accent',
+          )}
+        >
+          {count}
+        </span>
+      )}
+    </span>
+  )
+}
+
 function PatientTabs({
   patient,
   onOpenComposer,
@@ -418,6 +441,10 @@ function PatientTabs({
   const { t } = useTranslation(['patients', 'common'])
   const { clinicId } = Route.useRouteContext()
   const [deletingTreatment, setDeletingTreatment] = useState<Treatment | null>(null)
+  // The same queries (and cache entries) the tabs' own contents read, so the
+  // counts cost no extra request once a tab has been opened.
+  const treatmentCount = useQuery(treatmentQueries.list(clinicId, patient.id)).data?.length
+  const recipeCount = useQuery(recipeQueries.list(clinicId, patient.id)).data?.length
 
   return (
     <>
@@ -441,7 +468,7 @@ function PatientTabs({
           },
           {
             value: 'treatments',
-            label: t('patients:detail.tabTreatments'),
+            label: <TabLabel count={treatmentCount}>{t('patients:detail.tabTreatments')}</TabLabel>,
             content: (
               <TreatmentHistoryTable
                 clinicId={clinicId}
@@ -456,7 +483,7 @@ function PatientTabs({
           },
           {
             value: 'prescriptions',
-            label: t('patients:detail.tabPrescriptions'),
+            label: <TabLabel count={recipeCount}>{t('patients:detail.tabPrescriptions')}</TabLabel>,
             content: (
               <Card className="p-6">
                 <PrescriptionCards
@@ -472,7 +499,9 @@ function PatientTabs({
           },
           {
             value: 'gallery',
-            label: t('patients:detail.tabGallery'),
+            label: (
+              <TabLabel count={patient.gallery.length}>{t('patients:detail.tabGallery')}</TabLabel>
+            ),
             content: (
               <Card className="p-6">
                 <div className="flex flex-col gap-4">
