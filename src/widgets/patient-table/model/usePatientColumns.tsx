@@ -82,7 +82,12 @@ export function usePatientColumns({ onEdit, onDelete }: UsePatientColumnsOptions
 
       column.accessor('status', {
         header: () => t('column.status'),
-        cell: (info) => <PatientStatusBadge status={info.getValue()} />,
+        // A dash, not a "no treatment" badge: on most rows that badge was noise
+        // that hid the ones actually in treatment.
+        cell: (info) => {
+          const status = info.getValue()
+          return status === null ? EMPTY : <PatientStatusBadge status={status} />
+        },
       }),
 
       column.accessor('doctorName', {
@@ -98,7 +103,17 @@ export function usePatientColumns({ onEdit, onDelete }: UsePatientColumnsOptions
         // density guidance is about scanning, and this is what makes a
         // financial column scannable.
         meta: { align: 'right' },
-        cell: (info) => formatSom(info.getValue(), locale, t('common:currency.som')),
+        // Zero reads as a dash so the rows that owe money stand out; weight
+        // rather than red, since red is reserved for deletion (§13).
+        cell: (info) => {
+          const amount = info.getValue()
+          if (amount === 0) return <span className="text-text-tertiary">{EMPTY}</span>
+          return (
+            <span className="font-semibold text-text">
+              {formatSom(amount, locale, t('common:currency.som'))}
+            </span>
+          )
+        },
       }),
 
       column.display({

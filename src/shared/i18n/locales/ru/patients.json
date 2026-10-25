@@ -48,7 +48,8 @@
     "doctorPlaceholder": "Врач",
     "doctorAll": "Все врачи",
     "title": "Фильтры",
-    "apply": "Показать"
+    "apply": "Показать",
+    "clear": "Сбросить фильтры"
   },
   "title": "Пациенты",
   "column": {

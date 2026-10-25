@@ -48,7 +48,8 @@
     "doctorPlaceholder": "Doctor",
     "doctorAll": "All doctors",
     "title": "Filters",
-    "apply": "Show results"
+    "apply": "Show results",
+    "clear": "Clear filters"
   },
   "title": "Patients",
   "column": {

@@ -52,11 +52,10 @@ function PatientsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-title1 text-text">{t('title')}</h1>
-
       <PatientTable
         clinicId={clinicId}
         filters={filters}
+        heading={<h1 className="text-title1 text-text">{t('title')}</h1>}
         onFiltersChange={(next) => {
           /*
            * Undefined rather than the default value, so a default never

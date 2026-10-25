@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { SlidersHorizontal, UserPlus } from 'lucide-react'
+import { Plus, RotateCcw, SlidersHorizontal, UserPlus } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { doctorQueries } from '@/entities/doctor'
@@ -53,6 +53,8 @@ export interface PatientTableProps {
   filters: Omit<PatientFilters, 'search'>
   onFiltersChange: (next: Omit<PatientFilters, 'search'>) => void
   onOpenPatient: (patientId: PatientId) => void
+  /** The page's heading, laid out beside the create button on wider screens. */
+  heading: ReactNode
 }
 
 /**
@@ -67,6 +69,7 @@ export function PatientTable({
   filters,
   onFiltersChange,
   onOpenPatient,
+  heading,
 }: PatientTableProps) {
   const { t } = useTranslation(['patients', 'common'])
   const queryClient = useQueryClient()
@@ -117,6 +120,17 @@ export function PatientTable({
     onFiltersChange({ ...filters, doctor: value === FILTER_ALL ? '' : value, page: 1 })
   }
 
+  const hasActiveFilters =
+    search.term !== '' ||
+    filters.status !== null ||
+    filters.doctor !== '' ||
+    filters.treatmentTypeId !== null
+
+  const handleClearFilters = () => {
+    search.clear()
+    onFiltersChange({ status: null, doctor: '', treatmentTypeId: null, page: 1 })
+  }
+
   const statusOptions = [
     { value: FILTER_ALL, label: t('patients:filters.statusAll') },
     { value: 'in_progress', label: t('patients:status.in_progress') },
@@ -155,6 +169,24 @@ export function PatientTable({
 
   return (
     <div className="flex flex-col gap-4">
+      {isPhone ? (
+        heading
+      ) : (
+        <div className="flex items-center justify-between gap-3">
+          {heading}
+          {/* UX only — Django decides what may actually be created (§9.1). */}
+          <Can permission="patient:write">
+            <Button
+              iconLeft={<Plus aria-hidden="true" className="size-4" />}
+              onClick={() => setCreateOpen(true)}
+              variant="primary"
+            >
+              {t('patients:create.submit')}
+            </Button>
+          </Can>
+        </div>
+      )}
+
       {isPhone ? (
         <div className="flex flex-col gap-3">
           <PatientSearchInput
@@ -225,8 +257,8 @@ export function PatientTable({
           </Dialog>
         </div>
       ) : (
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+        <div className="rounded-card border border-border bg-surface p-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             <div className="min-w-0 flex-1 basis-full sm:basis-auto">
               <PatientSearchInput
                 onChange={handleSearchChange}
@@ -274,14 +306,20 @@ export function PatientTable({
               size="sm"
               value={filters.doctor === '' ? FILTER_ALL : filters.doctor}
             />
-          </div>
 
-          {/* UX only — Django decides what may actually be created (§9.1). */}
-          <Can permission="patient:write">
-            <Button onClick={() => setCreateOpen(true)} size="sm" variant="primary">
-              {t('patients:create.submit')}
-            </Button>
-          </Can>
+            {/* Only when there is something to clear: a reset button over an
+                unfiltered list is a control that does nothing. */}
+            {hasActiveFilters ? (
+              <Button
+                iconLeft={<RotateCcw aria-hidden="true" className="size-4" />}
+                onClick={handleClearFilters}
+                size="sm"
+                variant="ghost"
+              >
+                {t('patients:filters.clear')}
+              </Button>
+            ) : null}
+          </div>
         </div>
       )}
 
@@ -506,7 +544,7 @@ function PatientCards({
             <span className="flex min-w-0 flex-1 flex-col gap-1">
               <span className="flex items-center justify-between gap-2">
                 <span className="truncate text-body font-medium text-text">{patient.fullName}</span>
-                <PatientStatusBadge status={patient.status} />
+                {patient.status === null ? null : <PatientStatusBadge status={patient.status} />}
               </span>
               {patient.phoneNumber === null ? null : (
                 <span className="text-callout text-text-secondary tabular-nums">
@@ -515,7 +553,7 @@ function PatientCards({
               )}
               {/* Its own line: beside the phone number it squeezed both. */}
               {patient.totalRemaining > 0 ? (
-                <span className="text-caption font-medium text-danger tabular-nums">
+                <span className="text-caption font-semibold text-text tabular-nums">
                   {formatSom(patient.totalRemaining, i18n.language, t('common:currency.som'))}
                 </span>
               ) : null}

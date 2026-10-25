@@ -48,7 +48,8 @@
     "doctorPlaceholder": "Shifokor",
     "doctorAll": "Barcha shifokorlar",
     "title": "Filtr",
-    "apply": "Natijalarni ko'rsatish"
+    "apply": "Natijalarni ko'rsatish",
+    "clear": "Filtrlarni tozalash"
   },
   "title": "Bemorlar",
   "column": {
