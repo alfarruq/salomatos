@@ -19,6 +19,10 @@ overrides:
   fast-uri@<3.1.7: ^3.1.7
   # via eslint-plugin-boundaries (lint only)
   handlebars@<4.7.10: ^4.7.10
+  # via orval > @scalar/json-magic (codegen only)
+  undici@>=7.18.0 <7.30.1: ^7.30.1
+  # via orval > typedoc (codegen only)
+  markdown-it@<14.3.3: ^14.3.3
 
 auditConfig:
   ignoreGhsas:
