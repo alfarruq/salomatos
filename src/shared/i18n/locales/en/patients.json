@@ -54,9 +54,9 @@
   "title": "Patients",
   "summary": {
     "total": "Total patients",
-    "appointmentsToday": "Appointments today",
     "inProgress": "In treatment",
-    "completed": "Completed"
+    "completed": "Completed",
+    "debtors": "With balance due"
   },
   "column": {
     "fullName": "Name",

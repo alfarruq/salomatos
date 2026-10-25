@@ -54,9 +54,9 @@
   "title": "Беморлар",
   "summary": {
     "total": "Жами беморлар",
-    "appointmentsToday": "Бугунги қабуллар",
     "inProgress": "Даволанмоқда",
-    "completed": "Якунланган"
+    "completed": "Якунланган",
+    "debtors": "Қарздорлар"
   },
   "column": {
     "fullName": "Исм",

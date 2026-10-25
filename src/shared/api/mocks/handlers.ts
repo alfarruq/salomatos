@@ -152,9 +152,11 @@ export const handlers = [
     const search = url.searchParams.get('search')?.toLowerCase() ?? ''
     const status = url.searchParams.get('status')
     const doctor = url.searchParams.get('doctor')?.toLowerCase() ?? ''
+    const hasDebt = url.searchParams.get('has_debt') === 'true'
     const page = Number(url.searchParams.get('page') ?? '1')
 
     const matched = MOCK_PATIENTS.filter((patient) => {
+      if (hasDebt && !((patient.total_remaining ?? 0) > 0)) return false
       if (search !== '' && !patient.full_name.toLowerCase().includes(search)) return false
       if (status !== null && patient.status !== status) return false
       if (doctor !== '' && !(patient.doctor?.toLowerCase().includes(doctor) ?? false)) return false

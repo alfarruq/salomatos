@@ -125,6 +125,8 @@ export interface PatientFilters {
   /** Doctor name substring. A staff name, not patient data. */
   doctor: string
   treatmentTypeId: number | null
+  /** Only patients with an outstanding balance. Sent as `?has_debt=true`. */
+  hasDebt?: boolean
   page: number
 }
 
