@@ -52,6 +52,12 @@
     "clear": "Сбросить фильтры"
   },
   "title": "Пациенты",
+  "summary": {
+    "total": "Всего пациентов",
+    "appointmentsToday": "Приёмы сегодня",
+    "inProgress": "На лечении",
+    "completed": "Завершено"
+  },
   "column": {
     "fullName": "Имя",
     "age": "Возраст",

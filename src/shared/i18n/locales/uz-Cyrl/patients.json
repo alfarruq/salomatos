@@ -52,6 +52,12 @@
     "clear": "Филтрларни тозалаш"
   },
   "title": "Беморлар",
+  "summary": {
+    "total": "Жами беморлар",
+    "appointmentsToday": "Бугунги қабуллар",
+    "inProgress": "Даволанмоқда",
+    "completed": "Якунланган"
+  },
   "column": {
     "fullName": "Исм",
     "age": "Ёш",

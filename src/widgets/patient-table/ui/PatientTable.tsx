@@ -35,6 +35,7 @@ import {
   TableSkeleton,
 } from '@/shared/ui'
 import { usePatientColumns } from '../model/usePatientColumns'
+import { PatientSummary } from './PatientSummary'
 
 /*
  * Radix's `Select` hardcodes `""` to mean "nothing selected, show the
@@ -186,6 +187,8 @@ export function PatientTable({
           </Can>
         </div>
       )}
+
+      <PatientSummary clinicId={clinicId} />
 
       {isPhone ? (
         <div className="flex flex-col gap-3">

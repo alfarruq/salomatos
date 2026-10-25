@@ -104,6 +104,13 @@ describe('PatientTable', () => {
     ])
   })
 
+  it("counts the clinic's patients above the list", async () => {
+    renderTable()
+
+    const tile = (await screen.findByText('Jami bemorlar')).parentElement
+    await waitFor(() => expect(tile).toHaveTextContent('3'))
+  })
+
   it('offers to clear the filters only when one is set', async () => {
     renderTable()
     await screen.findByText('Vali Aliyev')

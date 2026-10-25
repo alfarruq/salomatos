@@ -52,6 +52,12 @@
     "clear": "Clear filters"
   },
   "title": "Patients",
+  "summary": {
+    "total": "Total patients",
+    "appointmentsToday": "Appointments today",
+    "inProgress": "In treatment",
+    "completed": "Completed"
+  },
   "column": {
     "fullName": "Name",
     "age": "Age",

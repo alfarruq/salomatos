@@ -52,6 +52,12 @@
     "clear": "Filtrlarni tozalash"
   },
   "title": "Bemorlar",
+  "summary": {
+    "total": "Jami bemorlar",
+    "appointmentsToday": "Bugungi qabullar",
+    "inProgress": "Davolanmoqda",
+    "completed": "Yakunlangan"
+  },
   "column": {
     "fullName": "Ism",
     "age": "Yosh",
