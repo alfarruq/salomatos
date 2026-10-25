@@ -58,6 +58,9 @@
     "completed": "Завершено",
     "debtors": "Должники"
   },
+  "table": {
+    "noAppointment": "Приём не найден"
+  },
   "column": {
     "fullName": "Имя",
     "age": "Возраст",

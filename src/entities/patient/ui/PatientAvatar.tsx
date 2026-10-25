@@ -1,4 +1,4 @@
-import { Avatar, type AvatarSize } from '@/shared/ui'
+import { Avatar, type AvatarSize, type AvatarTone } from '@/shared/ui'
 
 export interface PatientAvatarProps {
   name: string
@@ -8,6 +8,17 @@ export interface PatientAvatarProps {
    */
   imageUrl?: string | null
   size?: AvatarSize
+  className?: string
+}
+
+/**
+ * Picks one of the six fills from the name, so a patient keeps the same
+ * colour on every screen and every visit rather than a new one per render.
+ */
+function toneOf(name: string): AvatarTone {
+  let hash = 0
+  for (const char of name) hash = (hash * 31 + (char.codePointAt(0) ?? 0)) % 1_000_003
+  return ((hash % 6) + 1) as AvatarTone
 }
 
 /**
@@ -17,6 +28,14 @@ export interface PatientAvatarProps {
  * treatment — a signed URL, a placeholder for minors, a privacy setting — there
  * is one place to change rather than every table and card that shows a face.
  */
-export function PatientAvatar({ name, imageUrl, size = 'md' }: PatientAvatarProps) {
-  return <Avatar name={name} size={size} {...(imageUrl ? { src: imageUrl } : {})} />
+export function PatientAvatar({ name, imageUrl, size = 'md', className }: PatientAvatarProps) {
+  return (
+    <Avatar
+      name={name}
+      size={size}
+      tone={toneOf(name)}
+      {...(imageUrl ? { src: imageUrl } : {})}
+      {...(className === undefined ? {} : { className })}
+    />
+  )
 }

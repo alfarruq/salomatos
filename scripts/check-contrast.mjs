@@ -38,6 +38,7 @@ const TEXT_PAIRS = [
   ['danger', ['canvas', 'surface']],
   ['on-accent', ['accent', 'accent-hover']],
   ['on-danger', ['danger-fill', 'danger-hover']],
+  ...Array.from({ length: 6 }, (_, index) => [`avatar-${index + 1}-ink`, [`avatar-${index + 1}`]]),
 ]
 
 /**

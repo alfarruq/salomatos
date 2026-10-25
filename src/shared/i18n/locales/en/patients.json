@@ -58,6 +58,9 @@
     "completed": "Completed",
     "debtors": "With balance due"
   },
+  "table": {
+    "noAppointment": "No appointment"
+  },
   "column": {
     "fullName": "Name",
     "age": "Age",

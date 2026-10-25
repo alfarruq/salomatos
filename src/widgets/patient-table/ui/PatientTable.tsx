@@ -1,6 +1,14 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { Plus, RotateCcw, SlidersHorizontal, UserPlus } from 'lucide-react'
+import {
+  Activity,
+  Plus,
+  RotateCcw,
+  SlidersHorizontal,
+  Stethoscope,
+  UserPlus,
+  UserRound,
+} from 'lucide-react'
 import { type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { doctorQueries } from '@/entities/doctor'
@@ -236,6 +244,7 @@ export function PatientTable({
               </label>
               <Select
                 className="w-full"
+                icon={<Stethoscope className="size-4" />}
                 id="patient-treatment-type-filter"
                 onValueChange={handleTreatmentTypeChange}
                 options={treatmentTypeOptions}
@@ -250,6 +259,7 @@ export function PatientTable({
               </label>
               <Select
                 className="w-full"
+                icon={<UserRound className="size-4" />}
                 id="patient-doctor-filter"
                 onValueChange={handleDoctorChange}
                 options={doctorOptions}
@@ -275,6 +285,7 @@ export function PatientTable({
             </label>
             <Select
               className="w-auto shrink-0"
+              icon={<Activity className="size-4" />}
               id="patient-status-filter"
               onValueChange={handleStatusChange}
               options={statusOptions}
@@ -289,6 +300,7 @@ export function PatientTable({
             </label>
             <Select
               className="w-auto shrink-0"
+              icon={<Stethoscope className="size-4" />}
               id="patient-treatment-type-filter"
               onValueChange={handleTreatmentTypeChange}
               options={treatmentTypeOptions}
@@ -303,6 +315,7 @@ export function PatientTable({
             </label>
             <Select
               className="w-auto shrink-0"
+              icon={<UserRound className="size-4" />}
               id="patient-doctor-filter"
               onValueChange={handleDoctorChange}
               options={doctorOptions}
@@ -543,7 +556,7 @@ function PatientCards({
             onClick={() => onOpenPatient(patient.id)}
             type="button"
           >
-            <PatientAvatar name={patient.fullName} />
+            <PatientAvatar className="text-caption" name={patient.fullName} />
             <span className="flex min-w-0 flex-1 flex-col gap-1">
               <span className="flex items-center justify-between gap-2">
                 <span className="truncate text-body font-medium text-text">{patient.fullName}</span>
@@ -556,7 +569,7 @@ function PatientCards({
               )}
               {/* Its own line: beside the phone number it squeezed both. */}
               {patient.totalRemaining > 0 ? (
-                <span className="text-caption font-semibold text-text tabular-nums">
+                <span className="text-caption font-semibold text-danger tabular-nums">
                   {formatSom(patient.totalRemaining, i18n.language, t('common:currency.som'))}
                 </span>
               ) : null}

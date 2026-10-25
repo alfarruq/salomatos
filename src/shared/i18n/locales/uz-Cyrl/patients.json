@@ -1,7 +1,7 @@
 {
   "status": {
     "in_progress": "Даволанмоқда",
-    "completed": "Якунланган",
+    "completed": "Тугалланган",
     "none": "Даволаниш йўқ"
   },
   "form": {
@@ -55,8 +55,11 @@
   "summary": {
     "total": "Жами беморлар",
     "inProgress": "Даволанмоқда",
-    "completed": "Якунланган",
+    "completed": "Тугалланган",
     "debtors": "Қарздорлар"
+  },
+  "table": {
+    "noAppointment": "Қабул топилмади"
   },
   "column": {
     "fullName": "Исм",
