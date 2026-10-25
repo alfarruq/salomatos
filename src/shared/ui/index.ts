@@ -1,6 +1,6 @@
 export { Alert, type AlertProps, type AlertTone } from './Alert'
 export { AppShell, type AppShellProps, tabBarItemClassName, useSidebarCollapsed } from './AppShell'
-export { Avatar, type AvatarProps, type AvatarSize } from './Avatar'
+export { Avatar, type AvatarProps, type AvatarSize, type AvatarTone } from './Avatar'
 export { Badge, type BadgeProps, type BadgeTone } from './Badge'
 export { BarChart, type BarChartDatum, type BarChartProps, LegendSwatch } from './BarChart'
 export { BarList, type BarListItem, type BarListProps } from './BarList'

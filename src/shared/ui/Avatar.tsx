@@ -12,7 +12,21 @@ export interface AvatarProps {
    */
   src?: string
   size?: AvatarSize
+  /** One of the six `avatar-N` fills for the initials; neutral when absent. */
+  tone?: AvatarTone
   className?: string
+}
+
+export type AvatarTone = 1 | 2 | 3 | 4 | 5 | 6
+
+// Spelled out in full so Tailwind's scanner sees every class.
+const tones: Record<AvatarTone, string> = {
+  1: 'bg-avatar-1 text-avatar-1-ink',
+  2: 'bg-avatar-2 text-avatar-2-ink',
+  3: 'bg-avatar-3 text-avatar-3-ink',
+  4: 'bg-avatar-4 text-avatar-4-ink',
+  5: 'bg-avatar-5 text-avatar-5-ink',
+  6: 'bg-avatar-6 text-avatar-6-ink',
 }
 
 const sizes: Record<AvatarSize, string> = {
@@ -35,12 +49,13 @@ function initialsOf(name: string): string {
     .join('')
 }
 
-export function Avatar({ name, src, size = 'md', className }: AvatarProps) {
+export function Avatar({ name, src, size = 'md', tone, className }: AvatarProps) {
   return (
     <AvatarPrimitive.Root
       className={cn(
         'relative flex shrink-0 items-center justify-center overflow-hidden rounded-full',
-        'bg-sunken font-medium text-text-secondary select-none',
+        'font-medium select-none',
+        tone === undefined ? 'bg-sunken text-text-secondary' : tones[tone],
         sizes[size],
         className,
       )}

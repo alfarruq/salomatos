@@ -111,6 +111,13 @@ describe('PatientTable', () => {
     await waitFor(() => expect(tile).toHaveTextContent('3'))
   })
 
+  it('says so when a patient has no appointment yet', async () => {
+    renderTable()
+
+    await screen.findByText('Jasur Toshmatov')
+    expect(screen.getAllByText('Qabul topilmadi').length).toBeGreaterThan(0)
+  })
+
   it('offers to clear the filters only when one is set', async () => {
     renderTable()
     await screen.findByText('Vali Aliyev')
@@ -271,7 +278,7 @@ describe('PatientTable', () => {
 
     const select = screen.getByRole('combobox', { name: "Holat bo'yicha filtr" })
     await userEvent.click(select)
-    await userEvent.click(screen.getByRole('option', { name: 'Yakunlangan' }))
+    await userEvent.click(screen.getByRole('option', { name: 'Tugallangan' }))
 
     expect(onFiltersChange).toHaveBeenCalledWith({ ...filters, status: 'completed', page: 1 })
   })

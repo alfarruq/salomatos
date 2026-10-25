@@ -25,6 +25,8 @@ export interface SelectProps {
   id?: string
   /** Names the trigger where no visible `Field` label fits, e.g. a table cell. */
   'aria-label'?: string
+  /** A decorative icon before the value, so a toolbar of selects reads at a glance. */
+  icon?: ReactNode
   className?: string
 }
 
@@ -66,6 +68,7 @@ export function Select({
   name,
   id,
   'aria-label': ariaLabel,
+  icon,
   className,
 }: SelectProps) {
   const field = useFieldControl()
@@ -112,9 +115,16 @@ export function Select({
           className,
         )}
       >
-        <SelectPrimitive.Value placeholder={placeholder}>
-          {options.find((option) => option.value === value)?.label}
-        </SelectPrimitive.Value>
+        <span className="flex min-w-0 items-center gap-2">
+          {icon === undefined ? null : (
+            <span aria-hidden="true" className="shrink-0 text-text-secondary">
+              {icon}
+            </span>
+          )}
+          <SelectPrimitive.Value placeholder={placeholder}>
+            {options.find((option) => option.value === value)?.label}
+          </SelectPrimitive.Value>
+        </span>
         <SelectPrimitive.Icon>
           <ChevronDown aria-hidden="true" className="size-4 shrink-0 text-text-secondary" />
         </SelectPrimitive.Icon>

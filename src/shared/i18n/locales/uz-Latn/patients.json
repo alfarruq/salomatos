@@ -1,7 +1,7 @@
 {
   "status": {
     "in_progress": "Davolanmoqda",
-    "completed": "Yakunlangan",
+    "completed": "Tugallangan",
     "none": "Davolanish yo'q"
   },
   "form": {
@@ -55,8 +55,11 @@
   "summary": {
     "total": "Jami bemorlar",
     "inProgress": "Davolanmoqda",
-    "completed": "Yakunlangan",
+    "completed": "Tugallangan",
     "debtors": "Qarzdorlar"
+  },
+  "table": {
+    "noAppointment": "Qabul topilmadi"
   },
   "column": {
     "fullName": "Ism",

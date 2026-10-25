@@ -47,7 +47,8 @@ export function usePatientColumns({ onEdit, onDelete }: UsePatientColumnsOptions
         header: () => t('column.fullName'),
         cell: (info) => (
           <div className="flex items-center gap-2">
-            <PatientAvatar name={info.getValue()} size="sm" />
+            {/* Caption-sized initials in the 32px circle leave room around the letters. */}
+            <PatientAvatar className="text-caption" name={info.getValue()} size="md" />
             <span className="text-text">{info.getValue()}</span>
           </div>
         ),
@@ -68,7 +69,9 @@ export function usePatientColumns({ onEdit, onDelete }: UsePatientColumnsOptions
         header: () => t('column.lastAppointment'),
         cell: (info) => {
           const slot = info.getValue()
-          if (slot === null) return EMPTY
+          if (slot === null) {
+            return <span className="text-text-tertiary">{t('table.noAppointment')}</span>
+          }
 
           const date = formatCalendarDate(slot.date, locale)
           return date === null ? EMPTY : `${date}, ${slot.time}`
@@ -103,13 +106,12 @@ export function usePatientColumns({ onEdit, onDelete }: UsePatientColumnsOptions
         // density guidance is about scanning, and this is what makes a
         // financial column scannable.
         meta: { align: 'right' },
-        // Zero reads as a dash so the rows that owe money stand out; weight
-        // rather than red, since red is reserved for deletion (§13).
+        // Debt in red at the clinic's request (§2: design is the user's call),
+        // so the rows that owe money stand out from the zeros.
         cell: (info) => {
           const amount = info.getValue()
-          if (amount === 0) return <span className="text-text-tertiary">{EMPTY}</span>
           return (
-            <span className="font-semibold text-text">
+            <span className={amount > 0 ? 'font-semibold text-danger' : 'text-text'}>
               {formatSom(amount, locale, t('common:currency.som'))}
             </span>
           )

@@ -84,6 +84,19 @@
   --color-doctor-6: #3a8a1e;
   --color-doctor-7: #9a6b2f;
   --color-doctor-8: #0b7fa8;
+  /* Initials avatars: a fill and its ink per slot, so patients tell apart at a glance. */
+  --color-avatar-1: #dbeafe;
+  --color-avatar-1-ink: #1d4ed8;
+  --color-avatar-2: #dcfce7;
+  --color-avatar-2-ink: #15803d;
+  --color-avatar-3: #f3e8ff;
+  --color-avatar-3-ink: #7e22ce;
+  --color-avatar-4: #ffedd5;
+  --color-avatar-4-ink: #c2410c;
+  --color-avatar-5: #fce7f3;
+  --color-avatar-5-ink: #be185d;
+  --color-avatar-6: #ccfbf1;
+  --color-avatar-6-ink: #0f766e;
 
   /* Scrim behind modals — dims the page without tinting it. */
   --color-scrim: oklch(0% 0 0 / 0.4);
@@ -312,6 +325,19 @@
       --color-doctor-6: #7ed957;
       --color-doctor-7: #d4a373;
       --color-doctor-8: #5ac8fa;
+      /* Initials avatars: a fill and its ink per slot, so patients tell apart at a glance. */
+      --color-avatar-1: #1e3a8a;
+      --color-avatar-1-ink: #bfdbfe;
+      --color-avatar-2: #14532d;
+      --color-avatar-2-ink: #bbf7d0;
+      --color-avatar-3: #581c87;
+      --color-avatar-3-ink: #e9d5ff;
+      --color-avatar-4: #7c2d12;
+      --color-avatar-4-ink: #fed7aa;
+      --color-avatar-5: #831843;
+      --color-avatar-5-ink: #fbcfe8;
+      --color-avatar-6: #134e4a;
+      --color-avatar-6-ink: #99f6e4;
 
       --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.5), 0 1px 2px oklch(0% 0 0 / 0.4);
       --shadow-popover: 0 8px 28px oklch(0% 0 0 / 0.6);
@@ -355,6 +381,19 @@
     --color-doctor-6: #7ed957;
     --color-doctor-7: #d4a373;
     --color-doctor-8: #5ac8fa;
+    /* Initials avatars: a fill and its ink per slot, so patients tell apart at a glance. */
+    --color-avatar-1: #1e3a8a;
+    --color-avatar-1-ink: #bfdbfe;
+    --color-avatar-2: #14532d;
+    --color-avatar-2-ink: #bbf7d0;
+    --color-avatar-3: #581c87;
+    --color-avatar-3-ink: #e9d5ff;
+    --color-avatar-4: #7c2d12;
+    --color-avatar-4-ink: #fed7aa;
+    --color-avatar-5: #831843;
+    --color-avatar-5-ink: #fbcfe8;
+    --color-avatar-6: #134e4a;
+    --color-avatar-6-ink: #99f6e4;
 
     --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.5), 0 1px 2px oklch(0% 0 0 / 0.4);
     --shadow-popover: 0 8px 28px oklch(0% 0 0 / 0.6);

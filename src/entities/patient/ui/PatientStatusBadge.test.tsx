@@ -34,7 +34,7 @@ describe('PatientStatusBadge', () => {
   it('names a finished one', async () => {
     renderBadge('completed')
 
-    expect(await screen.findByText('Yakunlangan')).toBeInTheDocument()
+    expect(await screen.findByText('Tugallangan')).toBeInTheDocument()
   })
 
   it('says so when there is no treatment rather than rendering an empty badge', async () => {
