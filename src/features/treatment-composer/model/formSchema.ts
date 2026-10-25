@@ -26,7 +26,7 @@ export interface NewTreatmentPayload {
   tooth_number: number | null
   start_date: string
   notes: string
-  status: ComposerFields['status']
+  status: TreatmentRow['status']
 }
 
 export function toNewTreatmentPayload(
@@ -50,7 +50,7 @@ export function toNewTreatmentPayload(
     tooth_number: row.toothNumber,
     start_date: context.startDate,
     notes: fields.notes,
-    status: fields.status,
+    status: row.status,
   }
 }
 
@@ -70,7 +70,7 @@ export interface ExistingTreatmentPayload {
   total_treatment_cost: number
   total_paid: number
   notes: string
-  status: ComposerFields['status']
+  status: TreatmentRow['status']
 }
 
 export function toExistingTreatmentPayload(
@@ -91,6 +91,6 @@ export function toExistingTreatmentPayload(
     total_treatment_cost: Number(digitsOf(row.totalCost) || '0'),
     total_paid: Number(digitsOf(row.totalPaid) || '0'),
     notes: fields.notes,
-    status: fields.status,
+    status: row.status,
   }
 }

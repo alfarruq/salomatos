@@ -16,6 +16,8 @@ export interface TreatmentRow {
   /** Digits only — a `MoneyInput` value, converted to a number at save time. */
   totalCost: string
   totalPaid: string
+  /** Per row, not per save: one visit can finish one tooth and leave another in progress. */
+  status: TreatmentStatus
   /**
    * Set only for the single row that came from an existing `Treatment`
    * (edit mode). Every other row — including ones added during that same
@@ -24,8 +26,8 @@ export interface TreatmentRow {
   existingTreatmentId: number | null
 }
 
+/** Shared by every row of one save — the backend repeats them on each entry. */
 export interface ComposerFields {
   doctorId: string
-  status: TreatmentStatus
   notes: string
 }

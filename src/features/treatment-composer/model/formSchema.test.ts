@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { toExistingTreatmentPayload, toNewTreatmentPayload } from './formSchema'
 import type { ComposerFields, TreatmentRow } from './types'
 
-const fields: ComposerFields = { doctorId: '7', status: 'in_progress', notes: 'Izoh' }
+const fields: ComposerFields = { doctorId: '7', notes: 'Izoh' }
 
 const newRow: TreatmentRow = {
   rowId: 'row-1',
@@ -11,6 +11,7 @@ const newRow: TreatmentRow = {
   treatmentTypeName: 'Implantatsiya',
   totalCost: '1,200,000',
   totalPaid: '500000',
+  status: 'in_progress',
   existingTreatmentId: null,
 }
 
@@ -69,6 +70,15 @@ describe('toNewTreatmentPayload', () => {
         },
       ),
     ).toBeNull()
+  })
+
+  it("takes each row's own status, so one save can mix finished and ongoing teeth", () => {
+    const context = { patientId: 101, startDate: '2026-10-05', visitNumber: 4 }
+    const done = toNewTreatmentPayload({ ...newRow, status: 'completed' }, fields, context)
+    const ongoing = toNewTreatmentPayload(newRow, fields, context)
+
+    expect(done?.status).toBe('completed')
+    expect(ongoing?.status).toBe('in_progress')
   })
 
   it('treats an unset money field as zero, not NaN', () => {

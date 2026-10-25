@@ -56,6 +56,8 @@
     "rowType": "Treatment",
     "rowCost": "Total cost",
     "rowPaid": "Total paid",
+    "rowsTitle": "Added treatments ({{total}})",
+    "rowsEmpty": "Pick a tooth or a treatment type above to add a treatment.",
     "totalsLabel": "Total",
     "save": "Save",
     "saveFailed": "Could not save the treatment. Please try again.",

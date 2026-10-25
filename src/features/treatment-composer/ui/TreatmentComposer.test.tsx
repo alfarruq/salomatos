@@ -115,6 +115,19 @@ describe('TreatmentComposer', () => {
     expect(screen.queryByRole('columnheader', { name: 'Tish' })).not.toBeInTheDocument()
   })
 
+  it('gives every row its own status instead of one for the whole save', async () => {
+    renderComposer()
+    await chooseDoctor('Aziz Karimov')
+    await userEvent.click(screen.getByRole('combobox', { name: "Davolash turini qo'shish" }))
+    await userEvent.click(await screen.findByRole('option', { name: 'Tozalash' }))
+
+    expect(screen.getByRole('combobox', { name: 'Holat — Tozalash' })).toHaveTextContent(
+      'Davolanmoqda',
+    )
+    // The dialog-wide status select is gone — only the per-row one remains.
+    expect(screen.getAllByRole('combobox', { name: /^Holat/ })).toHaveLength(1)
+  })
+
   it('clears unsaved rows when the doctor switches to another specialty', async () => {
     renderComposer()
     await chooseDoctor('Aziz Karimov')

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { Doctor } from '@/entities/doctor'
 import { doctorQueries } from '@/entities/doctor'
 import { isDentalDoctorType } from '@/entities/doctor-type'
-import type { Treatment, TreatmentStatus } from '@/entities/treatment'
+import type { Treatment } from '@/entities/treatment'
 import type { TreatmentType } from '@/entities/treatment-type'
 import { treatmentTypeQueries } from '@/entities/treatment-type'
 import { ApiError } from '@/shared/api/errors'
@@ -129,6 +129,7 @@ function buildInitialRows(
           ? ''
           : String(initialTreatment.totalTreatmentCost),
       totalPaid: initialTreatment.totalPaid === null ? '' : String(initialTreatment.totalPaid),
+      status: initialTreatment.status ?? 'in_progress',
       existingTreatmentId: initialTreatment.id,
     },
   ]
@@ -165,7 +166,6 @@ function TreatmentComposerForm({
       doctors.find((doctor) => doctor.fullName === initialTreatment.doctorName)?.id ?? '',
     )
   })
-  const [status, setStatus] = useState<TreatmentStatus>(initialTreatment?.status ?? 'in_progress')
   const [notes, setNotes] = useState(initialTreatment?.notes ?? '')
   const [doctorTouched, setDoctorTouched] = useState(false)
   const [existingRowTypeTouched, setExistingRowTypeTouched] = useState(false)
@@ -193,10 +193,6 @@ function TreatmentComposerForm({
     value: String(doctor.id),
     label: doctor.fullName,
   }))
-  const statusOptions: { value: TreatmentStatus; label: string }[] = [
-    { value: 'in_progress', label: t('patients:status.in_progress') },
-    { value: 'completed', label: t('patients:status.completed') },
-  ]
 
   function handleDoctorChange(value: string) {
     const nextSpecialty =
@@ -220,6 +216,7 @@ function TreatmentComposerForm({
         treatmentTypeName: type.name,
         totalCost: type.price === null ? '' : String(type.price),
         totalPaid: '',
+        status: 'in_progress',
         existingTreatmentId: null,
       },
     ])
@@ -249,7 +246,7 @@ function TreatmentComposerForm({
       {
         patientId,
         rows,
-        fields: { doctorId, status, notes } satisfies ComposerFields,
+        fields: { doctorId, notes } satisfies ComposerFields,
         startDate: initialTreatment?.startDate ?? todayCalendarDate(),
         visitNumber: nextVisitNumber,
         touched: { doctor: doctorTouched, treatmentType: existingRowTypeTouched },
@@ -260,7 +257,7 @@ function TreatmentComposerForm({
 
   return (
     <Dialog
-      className="sm:max-w-4xl"
+      className="sm:max-w-6xl"
       footer={
         <>
           <Button disabled={isPending} onClick={() => onOpenChange(false)} variant="secondary">
@@ -278,8 +275,9 @@ function TreatmentComposerForm({
       <div className="flex flex-col gap-6">
         {errorMessage === null ? null : <Alert title={errorMessage} tone="danger" />}
 
-        {/* Fields first: the doctor has to be chosen before the right half means anything. */}
-        <div className="grid gap-6 sm:grid-cols-2">
+        {/* Fields first: the doctor has to be chosen before the right half means anything.
+            Two columns only from `lg`: below that the chart needs the full width. */}
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
           <div className="flex flex-col gap-4">
             <Field isRequired={doctorRequired} label={t('treatments:composer.doctorLabel')}>
               <Select
@@ -287,14 +285,6 @@ function TreatmentComposerForm({
                 options={doctorOptions}
                 placeholder={t('treatments:composer.doctorPlaceholder')}
                 {...(doctorId === '' ? {} : { value: doctorId })}
-              />
-            </Field>
-
-            <Field label={t('treatments:composer.statusLabel')}>
-              <Select
-                onValueChange={(value) => setStatus(value as TreatmentStatus)}
-                options={statusOptions}
-                value={status}
               />
             </Field>
 
