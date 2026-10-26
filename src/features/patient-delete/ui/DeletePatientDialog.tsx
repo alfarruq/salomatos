@@ -48,12 +48,19 @@ export function DeletePatientDialog({
     return () => clearInterval(timer)
   }, [open])
 
+  /*
+   * Specific on purpose: a bare "could not delete" left the user with no way
+   * to tell a missing permission from a server refusal. The status code is
+   * there so a screenshot is enough to know which one it was.
+   */
   const errorMessage =
     error === null
       ? null
-      : error instanceof ApiError && error.kind === 'network'
+      : !(error instanceof ApiError) || error.kind === 'network'
         ? t('common:error.network')
-        : t('patients:delete.failed')
+        : error.kind === 'forbidden'
+          ? t('patients:delete.forbidden')
+          : t('patients:delete.failedWithCode', { status: error.status ?? '—' })
 
   const canConfirm = secondsLeft <= 0
 
@@ -75,7 +82,18 @@ export function DeletePatientDialog({
           <Button
             disabled={!canConfirm}
             isLoading={isPending}
-            onClick={() => mutate(patient.id, { onSuccess: onDeleted })}
+            onClick={() =>
+              mutate(patient.id, {
+                onSuccess: onDeleted,
+                // Already gone (deleted from another tab or device): the goal
+                // is met, so leave the page rather than report a failure.
+                onError: (deleteError) => {
+                  if (deleteError instanceof ApiError && deleteError.kind === 'notFound') {
+                    onDeleted()
+                  }
+                },
+              })
+            }
             variant="danger"
           >
             {canConfirm

@@ -30,7 +30,9 @@
     "description": "Delete “{{name}}” entirely?",
     "warning": "This cannot be undone. What happens to the patient's treatment, appointment and payment history is unknown — it may be deleted too, or left without an owner.",
     "wait": "Delete ({{seconds}})",
-    "failed": "Could not delete the patient. Please try again."
+    "failed": "Could not delete the patient. Please try again.",
+    "forbidden": "You don't have permission to delete patients.",
+    "failedWithCode": "The server did not delete the patient (error code: {{status}}). Try again; if it keeps happening, send this message."
   },
   "search": {
     "label": "Search patients",
