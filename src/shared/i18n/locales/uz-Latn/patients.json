@@ -30,7 +30,9 @@
     "description": "\"{{name}}\" bemori butunlay o'chirilsinmi?",
     "warning": "Bu amalni ortga qaytarib bo'lmaydi. Bemorning davolash, uchrashuv va to'lov tarixi bilan nima bo'lishi aniq emas — ular ham o'chishi yoki egasiz qolishi mumkin.",
     "wait": "O'chirish ({{seconds}})",
-    "failed": "Bemorni o'chirib bo'lmadi. Qayta urinib ko'ring."
+    "failed": "Bemorni o'chirib bo'lmadi. Qayta urinib ko'ring.",
+    "forbidden": "Bemorni o'chirishga ruxsatingiz yo'q.",
+    "failedWithCode": "Server bemorni o'chirmadi (xato kodi: {{status}}). Qayta urinib ko'ring, takrorlansa shu xabarni yuboring."
   },
   "search": {
     "label": "Bemorlarni qidirish",

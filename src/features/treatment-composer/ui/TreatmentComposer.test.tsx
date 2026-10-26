@@ -72,7 +72,9 @@ describe('TreatmentComposer', () => {
   it('waits for a doctor before offering any treatment', async () => {
     renderComposer()
 
-    expect(await screen.findByText(CHOOSE_DOCTOR_FIRST)).toBeInTheDocument()
+    // The file's first render pays the cold-start cost (i18n, both reference
+    // queries); under a full parallel run that alone can exceed the 1s default.
+    expect(await screen.findByText(CHOOSE_DOCTOR_FIRST, {}, { timeout: 5000 })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^Tish 16/ })).not.toBeInTheDocument()
     expect(
       screen.queryByRole('combobox', { name: "Davolash turini qo'shish" }),
