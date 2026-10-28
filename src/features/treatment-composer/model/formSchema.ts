@@ -25,14 +25,26 @@ export interface NewTreatmentPayload {
    */
   tooth_number: number | null
   start_date: string
+  /** The day the row was marked completed; `null` while it is in progress. */
+  completed_date: string | null
   notes: string
   status: TreatmentRow['status']
+}
+
+/**
+ * The day a row is completed by this save, which the statistics count by: the
+ * clinic's today, never before the treatment started (the backend refuses
+ * that). `null` when this save does not complete it.
+ */
+function completionDateOf(row: TreatmentRow, today: string, startDate: string): string | null {
+  if (row.status !== 'completed' || row.initialStatus === 'completed') return null
+  return today < startDate ? startDate : today
 }
 
 export function toNewTreatmentPayload(
   row: TreatmentRow,
   fields: ComposerFields,
-  context: { patientId: number; startDate: string; visitNumber: number },
+  context: { patientId: number; startDate: string; visitNumber: number; today: string },
 ): NewTreatmentPayload | null {
   if (row.treatmentTypeId === null) return null
   // `Number('')` is 0, and an unselected doctor is not doctor zero.
@@ -49,6 +61,7 @@ export function toNewTreatmentPayload(
     visit_number: context.visitNumber,
     tooth_number: row.toothNumber,
     start_date: context.startDate,
+    completed_date: completionDateOf(row, context.today, context.startDate),
     notes: fields.notes,
     status: row.status,
   }
@@ -69,6 +82,11 @@ export interface ExistingTreatmentPayload {
   treatment_type?: number
   total_treatment_cost: number
   total_paid: number
+  /**
+   * Sent only when the row is completed by this save. A row already completed
+   * keeps its day on the server, and one reopened has it cleared there.
+   */
+  completed_date?: string
   notes: string
   status: TreatmentRow['status']
 }
@@ -77,7 +95,10 @@ export function toExistingTreatmentPayload(
   row: TreatmentRow,
   fields: ComposerFields,
   touched: { doctor: boolean; treatmentType: boolean },
+  context: { startDate: string; today: string },
 ): ExistingTreatmentPayload {
+  const completedDate = completionDateOf(row, context.today, context.startDate)
+
   // `Number('')` is 0, and an unselected doctor is not doctor zero.
   const doctorId = fields.doctorId === '' ? null : Number(fields.doctorId)
 
@@ -90,6 +111,7 @@ export function toExistingTreatmentPayload(
       : {}),
     total_treatment_cost: Number(digitsOf(row.totalCost) || '0'),
     total_paid: Number(digitsOf(row.totalPaid) || '0'),
+    ...(completedDate === null ? {} : { completed_date: completedDate }),
     notes: fields.notes,
     status: row.status,
   }

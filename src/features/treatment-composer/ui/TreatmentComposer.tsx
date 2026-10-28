@@ -130,6 +130,7 @@ function buildInitialRows(
           : String(initialTreatment.totalTreatmentCost),
       totalPaid: initialTreatment.totalPaid === null ? '' : String(initialTreatment.totalPaid),
       status: initialTreatment.status ?? 'in_progress',
+      initialStatus: initialTreatment.status,
       existingTreatmentId: initialTreatment.id,
     },
   ]
@@ -217,6 +218,7 @@ function TreatmentComposerForm({
         totalCost: type.price === null ? '' : String(type.price),
         totalPaid: '',
         status: 'in_progress',
+        initialStatus: null,
         existingTreatmentId: null,
       },
     ])
