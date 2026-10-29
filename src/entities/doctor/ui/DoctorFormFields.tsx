@@ -12,6 +12,11 @@ export interface DoctorFormFieldsProps {
    * (§4), so the feature that fetches the list converts it before it gets here.
    */
   doctorTypeOptions: SelectOption[]
+  /**
+   * `create` requires a password; `edit` treats an empty one as "keep the
+   * current password", since the server never sends it back.
+   */
+  mode: 'create' | 'edit'
 }
 
 /**
@@ -24,6 +29,7 @@ export function DoctorFormFields({
   form,
   isDisabled = false,
   doctorTypeOptions,
+  mode,
 }: DoctorFormFieldsProps) {
   const { t } = useTranslation(['admin', 'validation'])
 
@@ -82,6 +88,35 @@ export function DoctorFormFields({
               value={field.value}
             />
           )}
+        />
+      </Field>
+
+      <Field
+        error={message(errors.username?.message)}
+        isRequired
+        label={t('admin:doctor.username')}
+      >
+        <Input
+          autoCapitalize="none"
+          autoComplete="off"
+          disabled={isDisabled}
+          spellCheck={false}
+          {...form.register('username')}
+        />
+      </Field>
+
+      <Field
+        description={mode === 'edit' ? t('admin:doctor.passwordKeep') : undefined}
+        error={message(errors.password?.message)}
+        isRequired={mode === 'create'}
+        label={mode === 'create' ? t('admin:doctor.password') : t('admin:doctor.newPassword')}
+      >
+        {/* `new-password` stops the browser from filling in the superadmin's own login. */}
+        <Input
+          autoComplete="new-password"
+          disabled={isDisabled}
+          type="password"
+          {...form.register('password')}
         />
       </Field>
     </div>

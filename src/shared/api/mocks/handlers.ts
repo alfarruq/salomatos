@@ -5,6 +5,7 @@ import { readJwtPayload } from '@/shared/lib/jwt'
 import {
   accessTokenFor,
   errorEnvelope,
+  MOCK_ADMINISTRATORS,
   MOCK_APPOINTMENTS,
   MOCK_DOCTOR_TYPES,
   MOCK_DOCTORS,
@@ -397,6 +398,7 @@ export const handlers = [
     // The server assigns role and clinic itself.
     return HttpResponse.json({
       id: 900,
+      username: body['username'] ?? null,
       full_name: body['full_name'] ?? '',
       phone_number: phone,
       email: body['email'] ?? null,
@@ -415,6 +417,8 @@ export const handlers = [
 
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
     const updated: Record<string, unknown> = { ...existing, ...body }
+    // `password` is write-only on the server; the list serializer never echoes it.
+    delete updated['password']
     // Same id-in, name-out translation as create — otherwise a saved
     // assignment would echo back as the raw id instead of what the server
     // actually returns.
@@ -428,6 +432,49 @@ export const handlers = [
 
     const id = Number(params['doctorId'])
     const existing = MOCK_DOCTORS.find((doctor) => doctor.id === id)
+    if (existing === undefined) return new HttpResponse(null, { status: 404 })
+
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  /** `AdminService.get_admins` — a plain array, not a page. */
+  http.get('/api/v1/clinic/admins/', ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+    return HttpResponse.json(MOCK_ADMINISTRATORS)
+  }),
+
+  http.post('/api/v1/clinic/admins/', async ({ request }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
+
+    if (MOCK_ADMINISTRATORS.some((administrator) => administrator.username === body['username'])) {
+      return HttpResponse.json(
+        errorEnvelope({
+          message: 'Validation error',
+          messageKey: 'validation_error',
+          errors: { username: 'unique' },
+          exceptionClass: 'ValidationError',
+        }),
+        { status: 400 },
+      )
+    }
+
+    // The server assigns role and clinic itself, and never echoes the password.
+    return HttpResponse.json({
+      id: 950,
+      username: body['username'] ?? null,
+      full_name: body['full_name'] ?? '',
+      phone_number: body['phone_number'] ?? null,
+      email: body['email'] ?? null,
+    })
+  }),
+
+  http.delete('/api/v1/clinic/admins/:administratorId/', ({ request, params }) => {
+    if (authenticate(request) === null) return unauthorized()
+
+    const id = Number(params['administratorId'])
+    const existing = MOCK_ADMINISTRATORS.find((administrator) => administrator.id === id)
     if (existing === undefined) return new HttpResponse(null, { status: 404 })
 
     return new HttpResponse(null, { status: 204 })

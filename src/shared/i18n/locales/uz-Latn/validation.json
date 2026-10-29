@@ -12,5 +12,7 @@
   "invalid_choice": "Mavjud variantlardan birini tanlang",
   "smsOffsetRequired": "Kamida bitta vaqtni tanlang",
   "futureDate": "Kelajakdagi sana bo'lishi mumkin emas",
-  "tooLarge": "Summa juda katta"
+  "tooLarge": "Summa juda katta",
+  "username": "Faqat lotin harflari, raqamlar va . @ + - _ belgilari",
+  "passwordTooShort": "Parol kamida 8 belgidan iborat bo'lsin"
 }

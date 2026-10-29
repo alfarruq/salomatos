@@ -318,6 +318,7 @@ export function errorEnvelope({
 export const MOCK_DOCTORS = [
   {
     id: 2,
+    username: 'sardor',
     full_name: 'Sardor Usmonov',
     phone_number: '+998901112244',
     email: 'doctor@example.test',
@@ -329,6 +330,8 @@ export const MOCK_DOCTORS = [
   {
     // Everything optional absent: a doctor added in a hurry at reception.
     id: 4,
+    // Created before the server issued logins.
+    username: null,
     full_name: 'Malika Yusupova',
     phone_number: null,
     email: null,
@@ -347,6 +350,17 @@ export const MOCK_TREATMENT_TYPES = [
   { id: 8, name: 'Tozalash', price: 250_000, doctor_type: 'Ortodont' },
   // Quoted per case — a real state, and not the same as free. Also unassigned.
   { id: 9, name: 'Ortodontik davolash', price: null, doctor_type: null },
+] as const
+
+/** The clinic's admin accounts, as `AdminListSerializer` emits them. */
+export const MOCK_ADMINISTRATORS = [
+  {
+    id: 12,
+    username: 'reception',
+    full_name: 'Dilnoza Karimova',
+    phone_number: '+998901113355',
+    email: null,
+  },
 ] as const
 
 /** The clinic's doctor categories, as `DoctorTypeListSerializer` emits them. */

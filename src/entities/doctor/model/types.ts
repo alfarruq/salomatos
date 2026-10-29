@@ -21,6 +21,8 @@ export type DoctorId = number
 export interface Doctor {
   id: DoctorId
   fullName: string
+  /** The login. Null for doctors created before the server issued them. */
+  username: string | null
   phoneNumber: string | null
   email: string | null
   /** Null when no type is assigned — see `entities/doctor/model/schema.ts`. */

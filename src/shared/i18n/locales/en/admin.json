@@ -6,7 +6,8 @@
     "services": "Services",
     "clinic": "Clinic",
     "doctorTypes": "Doctor types",
-    "sms": "SMS"
+    "sms": "SMS",
+    "admins": "Admins"
   },
   "doctor": {
     "fullName": "Full name",
@@ -15,7 +16,7 @@
     "description": "Doctors who see patients at this clinic.",
     "create": "Add doctor",
     "createTitle": "New doctor",
-    "createDescription": "Name and phone number are required.",
+    "createDescription": "Name, phone number, login and password are required. The doctor signs in with this login and password.",
     "createFailed": "Could not add the doctor. Please try again.",
     "editTitle": "Edit doctor",
     "saveFailed": "Could not save the changes. Please try again.",
@@ -27,7 +28,11 @@
     "deleteDescription": "Delete doctor “{{name}}”?",
     "deleteWarning": "This cannot be undone. Deleting the doctor will also delete all data related to them: appointments, treatments and other records.",
     "deleteWait": "Delete ({{seconds}})",
-    "deleteFailed": "Could not delete the doctor. Please try again."
+    "deleteFailed": "Could not delete the doctor. Please try again.",
+    "username": "Login",
+    "password": "Password",
+    "newPassword": "New password",
+    "passwordKeep": "Leave empty to keep the current password."
   },
   "service": {
     "name": "Service",
@@ -109,5 +114,23 @@
     "previewModeTitle": "Preview mode",
     "previewModeBody": "The SMS service isn't connected yet. Figures are samples and settings aren't saved.",
     "sampleText": "Clinic: your appointment is on 21.10 at 14:30. Tel: +998 71 200 00 00"
+  },
+  "administrator": {
+    "fullName": "Full name",
+    "phoneNumber": "Phone number",
+    "email": "Email",
+    "username": "Login",
+    "password": "Password",
+    "description": "Staff who manage patients, appointments and treatments. Statistics, Finance and Management are hidden from them.",
+    "create": "Add admin",
+    "createTitle": "New admin",
+    "createDescription": "The admin signs in with this login and password. Hand the password over in person.",
+    "createFailed": "Could not add the admin. Please try again.",
+    "empty": "No admins yet",
+    "emptyDescription": "Create an admin account for front-desk staff.",
+    "deleteTitle": "Delete admin",
+    "deleteDescription": "Delete admin \"{{name}}\"?",
+    "deleteWarning": "This cannot be undone. The admin will no longer be able to sign in.",
+    "deleteFailed": "Could not delete the admin. Please try again."
   }
 }

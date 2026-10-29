@@ -19,6 +19,8 @@ export const doctorSchema = v.object({
   id: v.pipe(v.number(), v.integer()),
   full_name: v.string(),
 
+  // Null for doctors created before logins existed.
+  username: optionalString,
   phone_number: optionalString,
   email: optionalString,
   /*
@@ -42,6 +44,7 @@ export function toDoctor(response: DoctorResponse): Doctor {
   return {
     id: response.id,
     fullName: response.full_name,
+    username: response.username,
     phoneNumber: response.phone_number,
     email: response.email,
     doctorTypeName: response.doctor_type,
