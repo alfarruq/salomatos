@@ -3,6 +3,7 @@ import * as v from 'valibot'
 import { patientKeys } from '@/entities/patient'
 import { treatmentKeys, treatmentListSchema, treatmentSchema } from '@/entities/treatment'
 import { httpClient } from '@/shared/api/httpClient'
+import { clinicNow } from '@/shared/lib/datetime'
 import { toExistingTreatmentPayload, toNewTreatmentPayload } from './formSchema'
 import type { ComposerFields, TreatmentRow } from './types'
 
@@ -16,13 +17,18 @@ export interface SaveTreatmentsInput {
 }
 
 async function saveTreatments(input: SaveTreatmentsInput): Promise<void> {
+  // The clinic's day, not the browser's (§14).
+  const today = clinicNow().date
   const existingRow = input.rows.find((row) => row.existingTreatmentId !== null)
   const newRows = input.rows.filter((row) => row.existingTreatmentId === null)
 
   const requests: Promise<unknown>[] = []
 
   if (existingRow !== undefined && existingRow.existingTreatmentId !== null) {
-    const payload = toExistingTreatmentPayload(existingRow, input.fields, input.touched)
+    const payload = toExistingTreatmentPayload(existingRow, input.fields, input.touched, {
+      startDate: input.startDate,
+      today,
+    })
     requests.push(
       httpClient<unknown>(`v1/clinic/treatments/${existingRow.existingTreatmentId}/`, {
         method: 'PATCH',
@@ -38,6 +44,7 @@ async function saveTreatments(input: SaveTreatmentsInput): Promise<void> {
         patientId: input.patientId,
         startDate: input.startDate,
         visitNumber: input.visitNumber,
+        today,
       }),
     )
     .filter((payload) => payload !== null)

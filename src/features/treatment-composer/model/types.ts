@@ -19,6 +19,12 @@ export interface TreatmentRow {
   /** Per row, not per save: one visit can finish one tooth and leave another in progress. */
   status: TreatmentStatus
   /**
+   * The saved status of an existing row, `null` for a new one. A row that was
+   * already completed keeps its completion day on re-save, even one recorded
+   * before the backend stored that day.
+   */
+  initialStatus: TreatmentStatus | null
+  /**
    * Set only for the single row that came from an existing `Treatment`
    * (edit mode). Every other row — including ones added during that same
    * edit — is `null` and becomes a new record.

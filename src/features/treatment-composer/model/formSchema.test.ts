@@ -12,6 +12,7 @@ const newRow: TreatmentRow = {
   totalCost: '1,200,000',
   totalPaid: '500000',
   status: 'in_progress',
+  initialStatus: null,
   existingTreatmentId: null,
 }
 
@@ -22,6 +23,7 @@ describe('toNewTreatmentPayload', () => {
         patientId: 101,
         startDate: '2026-10-05',
         visitNumber: 4,
+        today: '2026-10-07',
       }),
     ).toEqual({
       patient: 101,
@@ -33,6 +35,7 @@ describe('toNewTreatmentPayload', () => {
       visit_number: 4,
       tooth_number: 16,
       start_date: '2026-10-05',
+      completed_date: null,
       notes: 'Izoh',
       status: 'in_progress',
     })
@@ -43,6 +46,7 @@ describe('toNewTreatmentPayload', () => {
       patientId: 101,
       startDate: '2026-10-05',
       visitNumber: 4,
+      today: '2026-10-07',
     })
     expect(payload).toHaveProperty('tooth_number', null)
   })
@@ -54,6 +58,7 @@ describe('toNewTreatmentPayload', () => {
         patientId: 101,
         startDate: '2026-10-05',
         visitNumber: 4,
+        today: '2026-10-07',
       }),
     ).toBeNull()
   })
@@ -67,18 +72,27 @@ describe('toNewTreatmentPayload', () => {
           patientId: 101,
           startDate: '2026-10-05',
           visitNumber: 4,
+          today: '2026-10-07',
         },
       ),
     ).toBeNull()
   })
 
   it("takes each row's own status, so one save can mix finished and ongoing teeth", () => {
-    const context = { patientId: 101, startDate: '2026-10-05', visitNumber: 4 }
+    const context = { patientId: 101, startDate: '2026-10-05', visitNumber: 4, today: '2026-10-07' }
     const done = toNewTreatmentPayload({ ...newRow, status: 'completed' }, fields, context)
     const ongoing = toNewTreatmentPayload(newRow, fields, context)
 
     expect(done?.status).toBe('completed')
     expect(ongoing?.status).toBe('in_progress')
+  })
+
+  it('dates a row completed on creation to the clinic today', () => {
+    const context = { patientId: 101, startDate: '2026-10-05', visitNumber: 4, today: '2026-10-07' }
+    expect(
+      toNewTreatmentPayload({ ...newRow, status: 'completed' }, fields, context)?.completed_date,
+    ).toBe('2026-10-07')
+    expect(toNewTreatmentPayload(newRow, fields, context)?.completed_date).toBeNull()
   })
 
   it('treats an unset money field as zero, not NaN', () => {
@@ -87,6 +101,7 @@ describe('toNewTreatmentPayload', () => {
       patientId: 101,
       startDate: '2026-10-05',
       visitNumber: 4,
+      today: '2026-10-07',
     })
     expect(payload?.total_treatment_cost).toBe(0)
     expect(payload?.total_paid).toBe(0)
@@ -94,13 +109,51 @@ describe('toNewTreatmentPayload', () => {
 })
 
 describe('toExistingTreatmentPayload', () => {
-  const existingRow: TreatmentRow = { ...newRow, existingTreatmentId: 55 }
+  const existingRow: TreatmentRow = {
+    ...newRow,
+    initialStatus: 'in_progress',
+    existingTreatmentId: 55,
+  }
+  const dates = { startDate: '2026-10-05', today: '2026-10-07' }
+
+  it('dates the save that completes the treatment, and only that one', () => {
+    const completing = toExistingTreatmentPayload(
+      { ...existingRow, status: 'completed' },
+      fields,
+      { doctor: false, treatmentType: false },
+      dates,
+    )
+    expect(completing.completed_date).toBe('2026-10-07')
+
+    const alreadyDone = toExistingTreatmentPayload(
+      { ...existingRow, status: 'completed', initialStatus: 'completed' },
+      fields,
+      { doctor: false, treatmentType: false },
+      dates,
+    )
+    expect(alreadyDone).not.toHaveProperty('completed_date')
+  })
+
+  it('never dates a completion before the treatment started', () => {
+    const payload = toExistingTreatmentPayload(
+      { ...existingRow, status: 'completed' },
+      fields,
+      { doctor: false, treatmentType: false },
+      { startDate: '2026-10-09', today: '2026-10-07' },
+    )
+    expect(payload.completed_date).toBe('2026-10-09')
+  })
 
   it('omits doctor and treatment_type when neither select was touched', () => {
-    const payload = toExistingTreatmentPayload(existingRow, fields, {
-      doctor: false,
-      treatmentType: false,
-    })
+    const payload = toExistingTreatmentPayload(
+      existingRow,
+      fields,
+      {
+        doctor: false,
+        treatmentType: false,
+      },
+      dates,
+    )
 
     expect(payload).toEqual({
       total_treatment_cost: 1_200_000,
@@ -111,30 +164,45 @@ describe('toExistingTreatmentPayload', () => {
   })
 
   it('includes doctor only once the select was actually touched', () => {
-    const payload = toExistingTreatmentPayload(existingRow, fields, {
-      doctor: true,
-      treatmentType: false,
-    })
+    const payload = toExistingTreatmentPayload(
+      existingRow,
+      fields,
+      {
+        doctor: true,
+        treatmentType: false,
+      },
+      dates,
+    )
 
     expect(payload.doctor).toBe(7)
     expect(payload).not.toHaveProperty('treatment_type')
   })
 
   it('includes treatment_type only once that select was touched', () => {
-    const payload = toExistingTreatmentPayload(existingRow, fields, {
-      doctor: false,
-      treatmentType: true,
-    })
+    const payload = toExistingTreatmentPayload(
+      existingRow,
+      fields,
+      {
+        doctor: false,
+        treatmentType: true,
+      },
+      dates,
+    )
 
     expect(payload.treatment_type).toBe(9)
     expect(payload).not.toHaveProperty('doctor')
   })
 
   it('never sends patient, tooth_number, start_date or visit_number — nothing here can change them', () => {
-    const payload = toExistingTreatmentPayload(existingRow, fields, {
-      doctor: true,
-      treatmentType: true,
-    })
+    const payload = toExistingTreatmentPayload(
+      existingRow,
+      fields,
+      {
+        doctor: true,
+        treatmentType: true,
+      },
+      dates,
+    )
 
     expect(payload).not.toHaveProperty('patient')
     expect(payload).not.toHaveProperty('tooth_number')

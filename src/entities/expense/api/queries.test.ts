@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { clinicNow } from '@/shared/lib/datetime'
 import { rangeOf } from '@/shared/lib/report'
 import { mockExpenseServer, resetMockExpenses } from './mockServer'
@@ -160,7 +160,16 @@ describe('recurring expenses (mock)', () => {
 })
 
 describe('payroll (mock)', () => {
-  const thisMonth = clinicNow().date.slice(0, 7)
+  // The seed pays doctors on the 15th and the 28th, so from the 28th on nobody is
+  // owed anything. A fixed mid-month day keeps these tests independent of the calendar.
+  const pinnedNow = new Date('2026-10-20T07:00:00Z')
+  beforeAll(() => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(pinnedNow)
+  })
+  afterAll(() => vi.useRealTimers())
+
+  const thisMonth = clinicNow(pinnedNow).date.slice(0, 7)
   const [year = 0, month = 1] = thisMonth.split('-').map(Number)
   const lastMonth = month === 1 ? `${year - 1}-12` : `${year}-${String(month - 1).padStart(2, '0')}`
 
@@ -190,7 +199,13 @@ describe('payroll (mock)', () => {
     if (row === undefined) throw new Error('nothing owed this month')
 
     await mockExpenseServer.create(
-      { ...payload, category: 'doctor_share', amount: row.balance, doctor: row.doctorId },
+      {
+        ...payload,
+        date: clinicNow(pinnedNow).date,
+        category: 'doctor_share',
+        amount: row.balance,
+        doctor: row.doctorId,
+      },
       row.doctorName,
     )
     const after = (await fetchPayroll(thisMonth)).rows.find((c) => c.doctorId === row.doctorId)
