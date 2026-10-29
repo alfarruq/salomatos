@@ -35,6 +35,7 @@ const ALL_PERMISSIONS: readonly Permission[] = [
   'payroll:manage',
   'clinic:manage',
   'staff:manage',
+  'reports:read',
 ]
 
 const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
@@ -42,9 +43,10 @@ const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   superadmin: ALL_PERMISSIONS,
 
   /**
-   * Reception and clinic management. Reads records to run the desk but does
-   * not write them — a receptionist amending a clinical note is not a
-   * workflow anyone asked for.
+   * Reception. Reads records to run the desk but does not write them — a
+   * receptionist amending a clinical note is not a workflow anyone asked for.
+   * Sees what a treatment costs and takes payments, but not the clinic's
+   * reports or staff: the server refuses those to everyone but the owner.
    */
   admin: [
     'patient:read',
@@ -54,17 +56,16 @@ const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'appointment:write',
     'medical-record:read',
     'billing:read',
-    'billing:write',
-    'staff:manage',
   ],
 
-  /** Clinical work. No billing, no archiving, no staff administration. */
+  /** Clinical work on their own patients, and their own earnings. No clinic-wide figures. */
   doctor: [
     'patient:read',
     'appointment:read',
     'appointment:write',
     'medical-record:read',
     'medical-record:write',
+    'reports:own',
   ],
 
   /**

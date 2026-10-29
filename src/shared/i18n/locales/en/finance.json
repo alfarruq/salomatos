@@ -6,10 +6,6 @@
     "recurring": "Recurring",
     "payroll": "Doctor pay"
   },
-  "demo": {
-    "title": "Sample data",
-    "description": "These amounts are made up to show the layout. Real figures appear once the server keeps a payment ledger."
-  },
   "period": {
     "label": "Period",
     "week": "Last 7 days",
@@ -33,10 +29,6 @@
       "billed": "Billed",
       "collected": "Collected"
     },
-    "methods": {
-      "title": "Payment methods",
-      "description": "Share of the money collected"
-    },
     "doctors": {
       "title": "Collected by doctor",
       "description": "Payments for each doctor's work"
@@ -45,13 +37,6 @@
       "title": "Revenue by service",
       "description": "Billed in the period"
     }
-  },
-  "methods": {
-    "cash": "Cash",
-    "card": "Card",
-    "click": "Click",
-    "payme": "Payme",
-    "transfer": "Bank transfer"
   },
   "debtors": {
     "title": "Largest debts",

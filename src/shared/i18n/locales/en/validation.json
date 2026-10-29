@@ -13,6 +13,13 @@
   "smsOffsetRequired": "Choose at least one time",
   "futureDate": "The date cannot be in the future",
   "tooLarge": "The amount is too large",
+  "future_date": "The date cannot be in the future",
+  "before_treatment_start": "The date cannot be before the treatment started",
+  "past_month": "Terms can start in the current month or later",
+  "recurring_category": "A recurring bill's payment keeps the bill's category",
+  "exceeds_debt": "The amount is more than what is still owed",
+  "too_far": "This month is too far ahead",
+  "before_start": "The bill did not exist yet in this month",
   "username": "Only Latin letters, digits and . @ + - _",
   "passwordTooShort": "Password must be at least 8 characters"
 }

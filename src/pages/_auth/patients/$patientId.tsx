@@ -30,6 +30,7 @@ import { CreateAppointmentDialog } from '@/features/appointment-create'
 import { DeletePatientDialog } from '@/features/patient-delete'
 import { EditPatientDialog } from '@/features/patient-edit'
 import { GalleryDropzone } from '@/features/patient-gallery-upload'
+import { TakePaymentDialog } from '@/features/payment-create'
 import { RecipeEditor } from '@/features/recipe-editor'
 import { TreatmentComposer } from '@/features/treatment-composer'
 import { DeleteTreatmentDialog } from '@/features/treatment-delete'
@@ -441,6 +442,7 @@ function PatientTabs({
   const { t } = useTranslation(['patients', 'common'])
   const { clinicId } = Route.useRouteContext()
   const [deletingTreatment, setDeletingTreatment] = useState<Treatment | null>(null)
+  const [payingTreatment, setPayingTreatment] = useState<Treatment | null>(null)
   // The same queries (and cache entries) the tabs' own contents read, so the
   // counts cost no extra request once a tab has been opened.
   const treatmentCount = useQuery(treatmentQueries.list(clinicId, patient.id)).data?.length
@@ -460,7 +462,7 @@ function PatientTabs({
                   onComplete={() => toast.info(t('patients:detail.comingSoon'))}
                   onDelete={setDeletingTreatment}
                   onEdit={onOpenComposer}
-                  onTakePayment={() => toast.info(t('patients:detail.comingSoon'))}
+                  onTakePayment={setPayingTreatment}
                   patientId={patient.id}
                 />
               </Card>
@@ -476,7 +478,7 @@ function PatientTabs({
                 onCreate={() => onOpenComposer(null)}
                 onDelete={setDeletingTreatment}
                 onEdit={onOpenComposer}
-                onTakePayment={() => toast.info(t('patients:detail.comingSoon'))}
+                onTakePayment={setPayingTreatment}
                 patientId={patient.id}
               />
             ),
@@ -515,6 +517,17 @@ function PatientTabs({
           },
         ]}
       />
+
+      {payingTreatment === null ? null : (
+        <TakePaymentDialog
+          clinicId={clinicId}
+          onOpenChange={(open) => {
+            if (!open) setPayingTreatment(null)
+          }}
+          open
+          treatment={payingTreatment}
+        />
+      )}
 
       {deletingTreatment === null ? null : (
         <DeleteTreatmentDialog

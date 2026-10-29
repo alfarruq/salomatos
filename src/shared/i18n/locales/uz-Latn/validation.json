@@ -13,6 +13,13 @@
   "smsOffsetRequired": "Kamida bitta vaqtni tanlang",
   "futureDate": "Kelajakdagi sana bo'lishi mumkin emas",
   "tooLarge": "Summa juda katta",
+  "future_date": "Sana kelajakda bo'lishi mumkin emas",
+  "before_treatment_start": "Sana muolaja boshlanishidan oldin bo'lishi mumkin emas",
+  "past_month": "Shartlar joriy oydan yoki keyinroqdan boshlanadi",
+  "recurring_category": "Doimiy to'lov o'z toifasida qoladi",
+  "exceeds_debt": "Summa qolgan qarzdan ko'p",
+  "too_far": "Bu oy juda uzoqda",
+  "before_start": "Bu oyda hali bu to'lov yo'q edi",
   "username": "Faqat lotin harflari, raqamlar va . @ + - _ belgilari",
   "passwordTooShort": "Parol kamida 8 belgidan iborat bo'lsin"
 }

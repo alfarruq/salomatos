@@ -1,8 +1,4 @@
 {
-  "demo": {
-    "title": "Namuna ma'lumotlar",
-    "description": "Bu yozuvlar faqat ko'rinishni ko'rsatish uchun o'ylab topilgan. Siz kiritgan xarajatlar sahifa yangilanguncha saqlanadi. Server xarajatlar jurnalini yurita boshlaganda haqiqiy yozuvlar chiqadi."
-  },
   "kpi": {
     "total": "Jami xarajat",
     "entries_one": "{{count}} ta yozuv",
@@ -28,11 +24,6 @@
     "taxes_fees": "Soliq va bank to'lovlari",
     "other": "Boshqa"
   },
-  "methods": {
-    "cash": "Naqd",
-    "card": "Karta",
-    "transfer": "Bank o'tkazmasi"
-  },
   "charts": {
     "trend": {
       "title": "Xarajatlar dinamikasi",
@@ -51,7 +42,6 @@
     "date": "Sana",
     "category": "Toifa",
     "payee": "Kimga / izoh",
-    "method": "Usul",
     "enteredBy": "Kiritgan",
     "amount": "Summa",
     "actions": "Amallar",
@@ -69,7 +59,6 @@
     "amount": "Summa, so'm",
     "category": "Toifa",
     "categoryPlaceholder": "Toifani tanlang",
-    "method": "To'lov usuli",
     "doctor": "Shifokor",
     "doctorPlaceholder": "Shifokorni tanlang",
     "payee": "Kimga to'landi",
@@ -110,7 +99,6 @@
     "description": "Internet aloqasini tekshirib, qayta urinib ko'ring."
   },
   "recurring": {
-    "demo": "Shablonlar va to'lovlar namuna uchun o'ylab topilgan. Siz kiritganlar sahifa yangilanguncha saqlanadi.",
     "month": {
       "previous": "Oldingi oy",
       "next": "Keyingi oy",
@@ -127,7 +115,7 @@
       "date": "Muddat",
       "name": "Nomi",
       "status": "Holat",
-      "paidOn": "{{date}}, {{method}}",
+      "paidOn": "{{date}}",
       "expected": "Kutilgan: {{amount}}"
     },
     "status": {
@@ -191,7 +179,6 @@
     "error": "Doimiy to'lovlarni yuklab bo'lmadi"
   },
   "payroll": {
-    "demo": "Shartlar, tushum va to'lovlar namuna uchun o'ylab topilgan. Server to'lovlar jurnalini yurita boshlaganda haqiqiy hisob chiqadi.",
     "totals": {
       "accrued": "Hisoblangan",
       "paid": "Berilgan",
@@ -253,5 +240,10 @@
       "description": "Shifokor qo'shilgach, uning ulushi shu yerda hisoblanadi."
     },
     "error": "Shifokor ulushini yuklab bo'lmadi"
+  },
+  "mine": {
+    "title": "Mening hisobim",
+    "details": "Qanday hisoblanadi",
+    "error": "Hisobingizni yuklab bo'lmadi"
   }
 }

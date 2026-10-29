@@ -61,23 +61,24 @@ export function CompensationDialog({
   const { mutate, isPending } = useSetCompensation(clinicId)
   const historyQuery = useQuery(expenseQueries.compensation(clinicId, row.doctorId))
 
-  // A few months either side: terms are set for now, fixed for a month just
-  // closed, or agreed ahead. The server accepts any month.
+  // From this month on only: an earlier month may already be paid out, and the
+  // server refuses terms that would rewrite it.
   const thisMonth = currentMonth()
-  const months = [-2, -1, 0, 1, 2].map((delta) => shiftMonth(thisMonth, delta))
-  if (!months.includes(month)) months.push(month)
+  const startMonth = month < thisMonth ? thisMonth : month
+  const months = [0, 1, 2, 3].map((delta) => shiftMonth(thisMonth, delta))
+  if (!months.includes(startMonth)) months.push(startMonth)
   months.sort()
 
   const form = useForm<CompensationFormInput>({
     resolver: valibotResolver(compensationFormSchema),
     mode: 'onBlur',
-    defaultValues: toCompensationForm(row.compensation, month),
+    defaultValues: toCompensationForm(row.compensation, startMonth),
   })
 
   const { reset } = form
   useEffect(() => {
-    if (open) reset(toCompensationForm(row.compensation, month))
-  }, [open, reset, row.compensation, month])
+    if (open) reset(toCompensationForm(row.compensation, startMonth))
+  }, [open, reset, row.compensation, startMonth])
 
   const message = (value: string | undefined): string | undefined => {
     if (value === undefined) return undefined

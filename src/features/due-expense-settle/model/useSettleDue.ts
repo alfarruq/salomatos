@@ -5,10 +5,10 @@ import {
   type Expense,
   expenseKeys,
   expenseSchema,
-  mockExpenseServer,
   type PayDuePayload,
   toExpense,
 } from '@/entities/expense'
+import { httpClient } from '@/shared/api/httpClient'
 
 export interface PayDueInput {
   recurringId: number
@@ -17,19 +17,13 @@ export interface PayDueInput {
   idempotencyKey: string
 }
 
-/**
- * ⚠️ Mock until `POST /api/v1/clinic/recurring-expenses/{id}/pay/` exists. The real call:
- *
- *   const raw = await httpClient<unknown>(`v1/clinic/recurring-expenses/${recurringId}/pay/`, {
- *     method: 'POST',
- *     headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
- *     body: JSON.stringify(payload),
- *   })
- *
- * The server answers with the expense it posted; the month links to it.
- */
-async function payDue({ recurringId, payload }: PayDueInput): Promise<Expense> {
-  const raw: unknown = await mockExpenseServer.pay(recurringId, payload)
+/** The server answers with the expense it posted; the month links to it. */
+async function payDue({ recurringId, payload, idempotencyKey }: PayDueInput): Promise<Expense> {
+  const raw = await httpClient<unknown>(`v1/finance/recurring-expenses/${recurringId}/pay/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
+    body: JSON.stringify(payload),
+  })
   return toExpense(v.parse(expenseSchema, raw))
 }
 
@@ -38,17 +32,12 @@ export interface SkipDueInput {
   month: CalendarMonth
 }
 
-/**
- * ⚠️ Mock until `POST /api/v1/clinic/recurring-expenses/{id}/skip/` exists. The real call:
- *
- *   await httpClient(`v1/clinic/recurring-expenses/${recurringId}/skip/`, {
- *     method: 'POST',
- *     headers: { 'Content-Type': 'application/json' },
- *     body: JSON.stringify({ month }),
- *   })
- */
 async function skipDue({ recurringId, month }: SkipDueInput): Promise<void> {
-  await mockExpenseServer.skip(recurringId, month)
+  await httpClient(`v1/finance/recurring-expenses/${recurringId}/skip/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ month }),
+  })
 }
 
 /** ⛔ No optimistic update: money (§10). Nothing is ever marked paid without this call. */

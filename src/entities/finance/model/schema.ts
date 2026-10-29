@@ -1,16 +1,10 @@
 import * as v from 'valibot'
-import { type FinanceOverview, type FinanceTotals, PAYMENT_METHODS } from './types'
+import type { FinanceOverview, FinanceTotals } from './types'
 
 /**
- * The **proposed** wire contract for `GET /api/v1/clinic/finance/overview/
- * ?from=YYYY-MM-DD&to=YYYY-MM-DD` — no backend serves it yet. The mock in
- * `../api/mockOverview.ts` produces exactly this shape and goes through this
- * same parse, so when the endpoint lands only the fetch changes.
- *
- * It needs a payment ledger on the backend (one row per payment with date,
- * amount and method); today `total_paid` is a single running number per
- * treatment, so "collected this month" cannot be answered. The server must
- * also refuse this endpoint to doctors — the frontend gate is UX only (§3).
+ * Wire contract of `GET /api/v1/finance/overview/?from=YYYY-MM-DD&to=YYYY-MM-DD`.
+ * "Collected" comes from the backend's payment ledger. The server refuses
+ * this endpoint to everyone but the owner; the frontend gate is UX only (§3).
  */
 const som = v.pipe(v.number(), v.integer(), v.minValue(0))
 const count = v.pipe(v.number(), v.integer(), v.minValue(0))
@@ -32,7 +26,6 @@ export const financeOverviewSchema = v.object({
   totals: totalsSchema,
   previous_totals: v.nullable(totalsSchema),
   series: v.array(v.object({ start: date, billed: som, collected: som })),
-  payment_methods: v.array(v.object({ method: v.picklist(PAYMENT_METHODS), amount: som })),
   doctors: v.array(v.object({ doctor_id: id, doctor: v.string(), collected: som })),
   treatment_types: v.array(
     v.object({ treatment_type_id: id, treatment_type: v.string(), billed: som }),
@@ -66,7 +59,6 @@ export function toFinanceOverview(response: FinanceOverviewResponse): FinanceOve
     totals: toTotals(response.totals),
     previousTotals: response.previous_totals === null ? null : toTotals(response.previous_totals),
     series: response.series,
-    paymentMethods: response.payment_methods,
     doctors: response.doctors.map((row) => ({
       doctorId: row.doctor_id,
       doctorName: row.doctor,

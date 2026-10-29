@@ -2,10 +2,8 @@ import * as v from 'valibot'
 import type { StatsOverview, StatsTotals } from './types'
 
 /**
- * The **proposed** wire contract for `GET /api/v1/clinic/stats/overview/
- * ?from=YYYY-MM-DD&to=YYYY-MM-DD` — no backend serves it yet. The mock in
- * `../api/mockOverview.ts` produces exactly this shape and goes through this
- * same parse, so when the endpoint lands only the fetch changes.
+ * Wire contract of `GET /api/v1/statistics/overview/?from=YYYY-MM-DD&to=YYYY-MM-DD`
+ * (and of `statistics/me/`, the same report for the signed-in doctor).
  *
  * Aggregates only, computed server-side in the clinic's zone (§14): the
  * browser never pages through rows to count them.

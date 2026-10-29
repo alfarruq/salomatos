@@ -44,12 +44,8 @@ export function CreateExpenseDialog({ clinicId, open, onOpenChange }: CreateExpe
   }))
 
   const handleSubmit = form.handleSubmit((values) => {
-    const payload = toExpensePayload(values)
-    const doctorName =
-      doctorOptions.find((option) => option.value === values.doctorId)?.label ?? null
-
     mutate(
-      { payload, idempotencyKey, doctorName },
+      { payload: toExpensePayload(values), idempotencyKey },
       {
         onSuccess: () => {
           form.reset(emptyExpenseForm())

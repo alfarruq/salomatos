@@ -5,30 +5,21 @@ import {
   type ExpensePayload,
   expenseKeys,
   expenseSchema,
-  mockExpenseServer,
   toExpense,
 } from '@/entities/expense'
+import { httpClient } from '@/shared/api/httpClient'
 
 export interface UpdateExpenseInput {
   id: number
   payload: ExpensePayload
-  /** Only the mock needs it; the server joins the name from the id. */
-  doctorName: string | null
 }
 
-/**
- * ⚠️ Mock until `PATCH /api/v1/clinic/expenses/{id}/` exists. The real call:
- *
- *   const raw = await httpClient<unknown>(`v1/clinic/expenses/${id}/`, {
- *     method: 'PATCH',
- *     headers: { 'Content-Type': 'application/json' },
- *     body: JSON.stringify(payload),
- *   })
- *
- * The server keeps the edit history; this client only sends the new values.
- */
-async function updateExpense({ id, payload, doctorName }: UpdateExpenseInput): Promise<Expense> {
-  const raw: unknown = await mockExpenseServer.update(id, payload, doctorName)
+async function updateExpense({ id, payload }: UpdateExpenseInput): Promise<Expense> {
+  const raw = await httpClient<unknown>(`v1/finance/expenses/${id}/`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
   return toExpense(v.parse(expenseSchema, raw))
 }
 

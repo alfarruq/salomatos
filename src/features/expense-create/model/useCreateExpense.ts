@@ -5,29 +5,22 @@ import {
   type ExpensePayload,
   expenseKeys,
   expenseSchema,
-  mockExpenseServer,
   toExpense,
 } from '@/entities/expense'
+import { httpClient } from '@/shared/api/httpClient'
 
 export interface CreateExpenseInput {
   payload: ExpensePayload
-  /** Same for every retry of one entry, so the server can drop a double submit. */
+  /** Same for every retry of one entry, so a server that dedupes can drop a double submit. */
   idempotencyKey: string
-  /** Only the mock needs it; the server joins the name from the id. */
-  doctorName: string | null
 }
 
-/**
- * ⚠️ Mock until `POST /api/v1/clinic/expenses/` exists. The real call:
- *
- *   const raw = await httpClient<unknown>('v1/clinic/expenses/', {
- *     method: 'POST',
- *     headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
- *     body: JSON.stringify(payload),
- *   })
- */
-async function createExpense({ payload, doctorName }: CreateExpenseInput): Promise<Expense> {
-  const raw: unknown = await mockExpenseServer.create(payload, doctorName)
+async function createExpense({ payload, idempotencyKey }: CreateExpenseInput): Promise<Expense> {
+  const raw = await httpClient<unknown>('v1/finance/expenses/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
+    body: JSON.stringify(payload),
+  })
   return toExpense(v.parse(expenseSchema, raw))
 }
 

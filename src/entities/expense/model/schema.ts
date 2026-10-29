@@ -6,12 +6,13 @@ import {
   type Compensation,
   type DueMonth,
   EXPENSE_CATEGORIES,
-  EXPENSE_METHODS,
   type Expense,
   type ExpensePage,
   type ExpenseSummary,
   type ExpenseTotals,
+  type MyMonth,
   type Payroll,
+  type PayrollRow,
   RECURRING_CATEGORIES,
   type RecurringExpense,
 } from './types'
@@ -55,7 +56,6 @@ export const expenseSchema = v.object({
   date,
   category: categorySchema,
   amount: v.pipe(v.number(), v.integer(), v.minValue(1)),
-  method: v.picklist(EXPENSE_METHODS),
   payee: v.nullable(v.string()),
   note: v.nullable(v.string()),
   doctor_id: v.nullable(id),
@@ -97,7 +97,6 @@ export function toExpense(response: ExpenseResponse): Expense {
     date: response.date,
     category: response.category,
     amount: response.amount,
-    method: response.method,
     payee: response.payee,
     note: response.note,
     doctorId: response.doctor_id,
@@ -140,7 +139,6 @@ export const recurringExpenseSchema = v.object({
   name: v.string(),
   category: recurringCategorySchema,
   amount: v.pipe(v.number(), v.integer(), v.minValue(1)),
-  method: v.picklist(EXPENSE_METHODS),
   payee: v.nullable(v.string()),
   day_of_month: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(28)),
   is_active: v.boolean(),
@@ -157,7 +155,6 @@ export const dueMonthSchema = v.object({
       name: v.string(),
       category: recurringCategorySchema,
       amount: som,
-      method: v.picklist(EXPENSE_METHODS),
       payee: v.nullable(v.string()),
       due_date: date,
       status: v.picklist(['due', 'overdue', 'paid', 'skipped']),
@@ -177,7 +174,6 @@ export function toRecurringExpense(response: RecurringExpenseResponse): Recurrin
     name: response.name,
     category: response.category,
     amount: response.amount,
-    method: response.method,
     payee: response.payee,
     dayOfMonth: response.day_of_month,
     isActive: response.is_active,
@@ -193,7 +189,6 @@ export function toDueMonth(response: DueMonthResponse): DueMonth {
       name: item.name,
       category: item.category,
       amount: item.amount,
-      method: item.method,
       payee: item.payee,
       dueDate: item.due_date,
       status: item.status,
@@ -220,28 +215,32 @@ export const compensationListSchema = v.array(compensationSchema)
 /** Signed: a balance or carry-over is negative when a doctor was paid ahead. */
 const signedSom = v.pipe(v.number(), v.integer())
 
+const payrollRowSchema = v.object({
+  doctor_id: id,
+  doctor: v.string(),
+  compensation: v.nullable(compensationSchema),
+  collected: som,
+  billed: som,
+  lab: som,
+  base_amount: som,
+  accrued: som,
+  opening: signedSom,
+  paid: som,
+  balance: signedSom,
+})
+
 export const payrollSchema = v.object({
   month,
-  rows: v.array(
-    v.object({
-      doctor_id: id,
-      doctor: v.string(),
-      compensation: v.nullable(compensationSchema),
-      collected: som,
-      billed: som,
-      lab: som,
-      base_amount: som,
-      accrued: som,
-      opening: signedSom,
-      paid: som,
-      balance: signedSom,
-    }),
-  ),
+  rows: v.array(payrollRowSchema),
   totals: v.object({ accrued: som, paid: som, balance: signedSom }),
 })
 
+/** `GET /finance/me/?month=`: a doctor's own payroll row, the figures the owner sees for them. */
+export const myMonthSchema = v.object({ ...payrollRowSchema.entries, month })
+
 export type CompensationResponse = v.InferOutput<typeof compensationSchema>
 export type PayrollResponse = v.InferOutput<typeof payrollSchema>
+export type MyMonthResponse = v.InferOutput<typeof myMonthSchema>
 
 export function toCompensation(response: CompensationResponse): Compensation {
   return {
@@ -256,22 +255,30 @@ export function toCompensation(response: CompensationResponse): Compensation {
   }
 }
 
+function toPayrollRow(row: PayrollResponse['rows'][number]): PayrollRow {
+  return {
+    doctorId: row.doctor_id,
+    doctorName: row.doctor,
+    compensation: row.compensation === null ? null : toCompensation(row.compensation),
+    collected: row.collected,
+    billed: row.billed,
+    lab: row.lab,
+    baseAmount: row.base_amount,
+    accrued: row.accrued,
+    opening: row.opening,
+    paid: row.paid,
+    balance: row.balance,
+  }
+}
+
 export function toPayroll(response: PayrollResponse): Payroll {
   return {
     month: response.month,
     totals: response.totals,
-    rows: response.rows.map((row) => ({
-      doctorId: row.doctor_id,
-      doctorName: row.doctor,
-      compensation: row.compensation === null ? null : toCompensation(row.compensation),
-      collected: row.collected,
-      billed: row.billed,
-      lab: row.lab,
-      baseAmount: row.base_amount,
-      accrued: row.accrued,
-      opening: row.opening,
-      paid: row.paid,
-      balance: row.balance,
-    })),
+    rows: response.rows.map(toPayrollRow),
   }
+}
+
+export function toMyMonth(response: MyMonthResponse): MyMonth {
+  return { ...toPayrollRow(response), month: response.month }
 }

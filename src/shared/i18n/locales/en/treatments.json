@@ -69,7 +69,8 @@
       "upper": "Upper jaw",
       "lower": "Lower jaw",
       "tooth": "Tooth"
-    }
+    },
+    "paidLocked": "Further payments go through \"Take payment\""
   },
   "chart": {
     "completed": "Completed",
@@ -107,5 +108,19 @@
     "noMatch": "No matching treatments",
     "noMatchDescription": "Try changing the filters.",
     "clear": "Clear filters"
+  },
+  "payment": {
+    "title": "Take payment",
+    "description": "Still owed: {{debt}}",
+    "amount": "Amount",
+    "date": "Date",
+    "datePlaceholder": "Choose a date",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "note": "Note",
+    "noteHint": "No diagnosis or other medical details here",
+    "submit": "Record payment",
+    "success": "Payment recorded",
+    "failed": "The payment could not be recorded"
   }
 }

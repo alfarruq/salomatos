@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
-  EXPENSE_METHODS,
   type ExpenseFormInput,
   emptyExpenseForm,
   expenseFormFieldOf,
@@ -14,17 +13,7 @@ import {
 import { ApiError } from '@/shared/api/errors'
 import { clinicNow } from '@/shared/lib/datetime'
 import { formatSom } from '@/shared/lib/money'
-import {
-  Alert,
-  Button,
-  DatePicker,
-  Dialog,
-  Field,
-  MoneyInput,
-  Select,
-  Textarea,
-  toast,
-} from '@/shared/ui'
+import { Alert, Button, DatePicker, Dialog, Field, MoneyInput, Textarea, toast } from '@/shared/ui'
 import { usePayDoctorShare } from '../model/usePayDoctorShare'
 
 export interface PayDoctorShareDialogProps {
@@ -41,7 +30,6 @@ function defaultsOf(row: PayrollRow): ExpenseFormInput {
     ...emptyExpenseForm(),
     category: 'doctor_share',
     doctorId: String(row.doctorId),
-    method: 'cash',
     amount: row.balance > 0 ? String(row.balance) : '',
   }
 }
@@ -78,7 +66,7 @@ export function PayDoctorShareDialog({
 
   const handleSubmit = form.handleSubmit((values) =>
     mutate(
-      { payload: toExpensePayload(values), idempotencyKey, doctorName: row.doctorName },
+      { payload: toExpensePayload(values), idempotencyKey },
       {
         onSuccess: () => {
           setIdempotencyKey(crypto.randomUUID())
@@ -172,25 +160,6 @@ export function PayDoctorShareDialog({
             />
           </Field>
         </div>
-
-        <Field isRequired label={t('expenses:form.method')}>
-          <Controller
-            control={form.control}
-            name="method"
-            render={({ field }) => (
-              <Select
-                disabled={isPending}
-                name={field.name}
-                onValueChange={field.onChange}
-                options={EXPENSE_METHODS.map((value) => ({
-                  value,
-                  label: t(`expenses:methods.${value}`),
-                }))}
-                value={field.value}
-              />
-            )}
-          />
-        </Field>
 
         <Field
           description={t('expenses:payroll.pay.noteHint')}

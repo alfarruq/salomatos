@@ -1,18 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { CalendarClock } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { type CalendarMonth, EXPENSES_SOURCE_IS_MOCK, expenseQueries } from '@/entities/expense'
+import { type CalendarMonth, expenseQueries } from '@/entities/expense'
 import { monthLabel } from '@/shared/lib/calendarMonth'
 import { formatSom } from '@/shared/lib/money'
-import {
-  Alert,
-  Card,
-  EmptyState,
-  ErrorState,
-  MonthSwitcher,
-  QueryBoundary,
-  Skeleton,
-} from '@/shared/ui'
+import { Card, EmptyState, ErrorState, MonthSwitcher, QueryBoundary, Skeleton } from '@/shared/ui'
 import { DueList } from './DueList'
 import { RecurringTemplates } from './RecurringTemplates'
 
@@ -42,10 +34,6 @@ export function FinanceRecurring({ clinicId, month, onMonthChange }: FinanceRecu
         onMonthChange={onMonthChange}
         previousLabel={t('expenses:recurring.month.previous')}
       />
-
-      {EXPENSES_SOURCE_IS_MOCK ? (
-        <Alert title={t('expenses:demo.title')}>{t('expenses:recurring.demo')}</Alert>
-      ) : null}
 
       <QueryBoundary
         empty={

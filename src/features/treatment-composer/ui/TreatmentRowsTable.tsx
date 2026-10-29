@@ -202,13 +202,20 @@ export function TreatmentRowsTable({
                     <CellLabel htmlFor={`${row.rowId}-paid`}>
                       {t('treatments:composer.rowPaid')}
                     </CellLabel>
+                    {/* A saved row's payments are recorded one by one, never overwritten here. */}
                     <MoneyInput
                       id={`${row.rowId}-paid`}
                       className="h-9 px-3 text-right text-callout pointer-coarse:min-h-11"
+                      disabled={row.existingTreatmentId !== null}
                       onChange={(value) => onRowChange(row.rowId, { totalPaid: value })}
                       placeholder="0"
                       value={row.totalPaid}
                     />
+                    {row.existingTreatmentId === null ? null : (
+                      <span className="text-caption text-text-tertiary">
+                        {t('treatments:composer.paidLocked')}
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex min-w-0 flex-col gap-1">

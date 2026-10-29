@@ -2,24 +2,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import * as v from 'valibot'
 import {
   expenseKeys,
-  mockExpenseServer,
   type RecurringExpense,
   type RecurringPayload,
   recurringExpenseSchema,
   toRecurringExpense,
 } from '@/entities/expense'
+import { httpClient } from '@/shared/api/httpClient'
 
-/**
- * ⚠️ Mock until `POST /api/v1/clinic/recurring-expenses/` exists. The real call:
- *
- *   const raw = await httpClient<unknown>('v1/clinic/recurring-expenses/', {
- *     method: 'POST',
- *     headers: { 'Content-Type': 'application/json' },
- *     body: JSON.stringify(payload),
- *   })
- */
 async function createRecurring(payload: RecurringPayload): Promise<RecurringExpense> {
-  const raw: unknown = await mockExpenseServer.createRecurring(payload)
+  const raw = await httpClient<unknown>('v1/finance/recurring-expenses/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
   return toRecurringExpense(v.parse(recurringExpenseSchema, raw))
 }
 
@@ -28,19 +23,13 @@ export interface UpdateRecurringInput {
   payload: Partial<RecurringPayload> & { is_active?: boolean }
 }
 
-/**
- * ⚠️ Mock until `PATCH /api/v1/clinic/recurring-expenses/{id}/` exists. The real call:
- *
- *   const raw = await httpClient<unknown>(`v1/clinic/recurring-expenses/${id}/`, {
- *     method: 'PATCH',
- *     headers: { 'Content-Type': 'application/json' },
- *     body: JSON.stringify(payload),
- *   })
- *
- * A template is paused, never deleted: past months still point at it.
- */
+/** A template is paused, never deleted: past months still point at it. */
 async function updateRecurring({ id, payload }: UpdateRecurringInput): Promise<RecurringExpense> {
-  const raw: unknown = await mockExpenseServer.updateRecurring(id, payload)
+  const raw = await httpClient<unknown>(`v1/finance/recurring-expenses/${id}/`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
   return toRecurringExpense(v.parse(recurringExpenseSchema, raw))
 }
 

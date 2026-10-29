@@ -21,6 +21,10 @@ export type Permission =
   | 'payroll:manage'
   | 'clinic:manage'
   | 'staff:manage'
+  /** The clinic-wide finance and statistics pages. The server serves them to the owner alone. */
+  | 'reports:read'
+  /** A doctor's own earnings and statistics (`/finance/me/`, `/statistics/me/`). */
+  | 'reports:own'
 
 /**
  * The backend's `User.Roles`, verbatim — lowercase, and `admin` rather than

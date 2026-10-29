@@ -1,51 +1,51 @@
 import { keepPreviousData, queryOptions } from '@tanstack/react-query'
 import * as v from 'valibot'
+import { httpClient } from '@/shared/api/httpClient'
 import { cachePolicy } from '@/shared/config/cache'
 import { statsOverviewSchema, toStatsOverview } from '../model/schema'
 import type { StatsOverview, StatsRange } from '../model/types'
-import { buildMockStatsOverview } from './mockOverview'
 
 export const statsKeys = {
   scope: (clinicId: number) => ['clinics', clinicId, 'stats'] as const,
 
-  overview: (clinicId: number, range: StatsRange) =>
-    [...statsKeys.scope(clinicId), 'overview', range] as const,
+  /** `mine` is the signed-in doctor's own figures: a separate key, never mixed with the clinic's. */
+  overview: (clinicId: number, range: StatsRange, scope: StatsScope = 'clinic') =>
+    [...statsKeys.scope(clinicId), scope === 'mine' ? 'mine' : 'overview', range] as const,
 }
 
-/** Drives the "sample data" notice on screen. Goes away with the mock. */
-export const STATS_SOURCE_IS_MOCK = true
+export type StatsScope = 'clinic' | 'mine'
 
-/** Long enough for the skeleton to be seen, so the loading state is reviewed too. */
-const MOCK_LATENCY_MS = 400
-
-/**
- * ⚠️ Served from `./mockOverview.ts` until the backend has the endpoint. To
- * switch, replace the body with:
- *
- *   const params = new URLSearchParams({ from: range.from, to: range.to })
- *   const raw: unknown = await httpClient(`v1/clinic/stats/overview/?${params}`, { signal })
- *
- * and delete the mock file. The parse below stays as it is.
- */
 export async function fetchStatsOverview(
   range: StatsRange,
   signal?: AbortSignal,
 ): Promise<StatsOverview> {
-  const raw: unknown = await new Promise((resolve, reject) => {
-    const timer = setTimeout(() => resolve(buildMockStatsOverview(range)), MOCK_LATENCY_MS)
-    signal?.addEventListener('abort', () => {
-      clearTimeout(timer)
-      reject(signal.reason)
-    })
-  })
+  const params = new URLSearchParams({ from: range.from, to: range.to })
+  const raw = await httpClient<unknown>(
+    `v1/statistics/overview/?${params}`,
+    signal === undefined ? {} : { signal },
+  )
+  return toStatsOverview(v.parse(statsOverviewSchema, raw))
+}
+
+/** The same report, counting only the signed-in doctor's work. */
+export async function fetchMyStatsOverview(
+  range: StatsRange,
+  signal?: AbortSignal,
+): Promise<StatsOverview> {
+  const params = new URLSearchParams({ from: range.from, to: range.to })
+  const raw = await httpClient<unknown>(
+    `v1/statistics/me/?${params}`,
+    signal === undefined ? {} : { signal },
+  )
   return toStatsOverview(v.parse(statsOverviewSchema, raw))
 }
 
 export const statsQueries = {
-  overview: (clinicId: number, range: StatsRange) =>
+  overview: (clinicId: number, range: StatsRange, scope: StatsScope = 'clinic') =>
     queryOptions({
-      queryKey: statsKeys.overview(clinicId, range),
-      queryFn: ({ signal }) => fetchStatsOverview(range, signal),
+      queryKey: statsKeys.overview(clinicId, range, scope),
+      queryFn: ({ signal }) =>
+        scope === 'mine' ? fetchMyStatsOverview(range, signal) : fetchStatsOverview(range, signal),
       ...cachePolicy.standard,
       // Keeps the current charts on screen while another period loads.
       placeholderData: keepPreviousData,

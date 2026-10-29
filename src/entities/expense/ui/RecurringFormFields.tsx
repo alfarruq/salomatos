@@ -2,7 +2,7 @@ import { Controller, type UseFormReturn } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { Field, Input, MoneyInput, Select } from '@/shared/ui'
 import type { RecurringFormInput } from '../model/formSchema'
-import { EXPENSE_METHODS, RECURRING_CATEGORIES } from '../model/types'
+import { RECURRING_CATEGORIES } from '../model/types'
 
 export interface RecurringFormFieldsProps {
   form: UseFormReturn<RecurringFormInput>
@@ -96,25 +96,6 @@ export function RecurringFormFields({ form, isDisabled = false }: RecurringFormF
                   label: t(`expenses:categories.${value}`),
                 }))}
                 placeholder={t('expenses:form.categoryPlaceholder')}
-                value={field.value}
-              />
-            )}
-          />
-        </Field>
-
-        <Field isRequired label={t('expenses:form.method')}>
-          <Controller
-            control={form.control}
-            name="method"
-            render={({ field }) => (
-              <Select
-                disabled={isDisabled}
-                name={field.name}
-                onValueChange={field.onChange}
-                options={EXPENSE_METHODS.map((value) => ({
-                  value,
-                  label: t(`expenses:methods.${value}`),
-                }))}
                 value={field.value}
               />
             )}

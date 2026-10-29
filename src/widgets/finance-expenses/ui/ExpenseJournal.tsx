@@ -118,9 +118,6 @@ export function ExpenseJournal({
                       <TableHead className="max-sm:hidden">{t('expenses:journal.date')}</TableHead>
                       <TableHead>{t('expenses:journal.category')}</TableHead>
                       <TableHead className="max-sm:hidden">{t('expenses:journal.payee')}</TableHead>
-                      <TableHead className="max-md:hidden">
-                        {t('expenses:journal.method')}
-                      </TableHead>
                       <TableHead className="max-lg:hidden">
                         {t('expenses:journal.enteredBy')}
                       </TableHead>
@@ -185,9 +182,6 @@ export function ExpenseJournal({
                               </span>
                             )}
                           </div>
-                        </TableCell>
-                        <TableCell className="max-md:hidden">
-                          {t(`expenses:methods.${expense.method}`)}
                         </TableCell>
                         <TableCell className="max-lg:hidden">{expense.createdBy ?? '—'}</TableCell>
                         <TableCell

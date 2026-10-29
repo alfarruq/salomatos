@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './pages/login'
 import { Route as AuthDashboardRouteImport } from './pages/_auth/dashboard'
 import { Route as AuthFinanceRouteImport } from './pages/_auth/finance'
 import { Route as AuthManageRouteImport } from './pages/_auth/manage'
+import { Route as AuthMyReportRouteImport } from './pages/_auth/my-report'
 import { Route as AuthAppointmentsIndexRouteImport } from './pages/_auth/appointments/index'
 import { Route as AuthFinanceIndexRouteImport } from './pages/_auth/finance/index'
 import { Route as AuthFinanceExpensesRouteImport } from './pages/_auth/finance/expenses'
@@ -59,6 +60,11 @@ const AuthFinanceRoute = AuthFinanceRouteImport.update({
 const AuthManageRoute = AuthManageRouteImport.update({
   id: '/manage',
   path: '/manage',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthMyReportRoute = AuthMyReportRouteImport.update({
+  id: '/my-report',
+  path: '/my-report',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthAppointmentsIndexRoute = AuthAppointmentsIndexRouteImport.update({
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthDashboardRoute
   '/finance': typeof AuthFinanceRouteWithChildren
   '/manage': typeof AuthManageRouteWithChildren
+  '/my-report': typeof AuthMyReportRoute
   '/finance/expenses': typeof AuthFinanceExpensesRoute
   '/finance/payroll': typeof AuthFinancePayrollRoute
   '/finance/recurring': typeof AuthFinanceRecurringRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthDashboardRoute
+  '/my-report': typeof AuthMyReportRoute
   '/finance/expenses': typeof AuthFinanceExpensesRoute
   '/finance/payroll': typeof AuthFinancePayrollRoute
   '/finance/recurring': typeof AuthFinanceRecurringRoute
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   '/_auth/dashboard': typeof AuthDashboardRoute
   '/_auth/finance': typeof AuthFinanceRouteWithChildren
   '/_auth/manage': typeof AuthManageRouteWithChildren
+  '/_auth/my-report': typeof AuthMyReportRoute
   '/_auth/finance/expenses': typeof AuthFinanceExpensesRoute
   '/_auth/finance/payroll': typeof AuthFinancePayrollRoute
   '/_auth/finance/recurring': typeof AuthFinanceRecurringRoute
@@ -219,6 +228,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/finance'
     | '/manage'
+    | '/my-report'
     | '/finance/expenses'
     | '/finance/payroll'
     | '/finance/recurring'
@@ -240,6 +250,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/dashboard'
+    | '/my-report'
     | '/finance/expenses'
     | '/finance/payroll'
     | '/finance/recurring'
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/_auth/dashboard'
     | '/_auth/finance'
     | '/_auth/manage'
+    | '/_auth/my-report'
     | '/_auth/finance/expenses'
     | '/_auth/finance/payroll'
     | '/_auth/finance/recurring'
@@ -330,6 +342,13 @@ declare module '@tanstack/react-router' {
       path: '/manage'
       fullPath: '/manage'
       preLoaderRoute: typeof AuthManageRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/my-report': {
+      id: '/_auth/my-report'
+      path: '/my-report'
+      fullPath: '/my-report'
+      preLoaderRoute: typeof AuthMyReportRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/appointments/': {
@@ -493,6 +512,7 @@ interface AuthRouteChildren {
   AuthDashboardRoute: typeof AuthDashboardRoute
   AuthFinanceRoute: typeof AuthFinanceRouteWithChildren
   AuthManageRoute: typeof AuthManageRouteWithChildren
+  AuthMyReportRoute: typeof AuthMyReportRoute
   AuthPatientsPatientIdRoute: typeof AuthPatientsPatientIdRoute
   AuthAppointmentsIndexRoute: typeof AuthAppointmentsIndexRoute
   AuthPatientsIndexRoute: typeof AuthPatientsIndexRoute
@@ -504,6 +524,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthDashboardRoute: AuthDashboardRoute,
   AuthFinanceRoute: AuthFinanceRouteWithChildren,
   AuthManageRoute: AuthManageRouteWithChildren,
+  AuthMyReportRoute: AuthMyReportRoute,
   AuthPatientsPatientIdRoute: AuthPatientsPatientIdRoute,
   AuthAppointmentsIndexRoute: AuthAppointmentsIndexRoute,
   AuthPatientsIndexRoute: AuthPatientsIndexRoute,

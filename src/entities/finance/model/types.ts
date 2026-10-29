@@ -1,11 +1,6 @@
 import type { CalendarDate } from '@/shared/lib/calendarDate'
 import type { ReportRange } from '@/shared/lib/report'
 
-/** How the money came in. The values are a proposal; the backend has no payment model yet. */
-export const PAYMENT_METHODS = ['cash', 'card', 'click', 'payme', 'transfer'] as const
-
-export type PaymentMethod = (typeof PAYMENT_METHODS)[number]
-
 /**
  * Money in so'm, whole numbers (§7.3). Every figure is the server's own sum:
  * the browser displays totals, it never adds money up.
@@ -27,11 +22,6 @@ export interface FinanceSeriesPoint {
   start: CalendarDate
   billed: number
   collected: number
-}
-
-export interface FinanceMethodAmount {
-  method: PaymentMethod
-  amount: number
 }
 
 export interface FinanceDoctorAmount {
@@ -61,7 +51,6 @@ export interface FinanceOverview {
   /** The same-length window right before this one, for the deltas. */
   previousTotals: FinanceTotals | null
   series: readonly FinanceSeriesPoint[]
-  paymentMethods: readonly FinanceMethodAmount[]
   doctors: readonly FinanceDoctorAmount[]
   treatmentTypes: readonly FinanceTreatmentTypeAmount[]
   /** The largest debts, already sorted and capped by the server. */

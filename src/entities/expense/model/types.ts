@@ -3,8 +3,7 @@ import type { CalendarMonth } from '@/shared/lib/calendarMonth'
 import type { ReportRange } from '@/shared/lib/report'
 
 /**
- * The fixed category list every clinic starts with. A proposal, like the rest
- * of this entity: the backend has no expense model yet. Clinic-defined
+ * The fixed category list every clinic starts with. Clinic-defined
  * categories come later, so readers must already tolerate an unknown value
  * (see `schema.ts`).
  */
@@ -44,11 +43,6 @@ export const EXPENSE_CATEGORY_KIND: Record<ExpenseCategory, ExpenseKind> = {
   other: 'variable',
 }
 
-/** How money left the clinic. Narrower than `PaymentMethod`: nobody pays rent with Payme. */
-export const EXPENSE_METHODS = ['cash', 'card', 'transfer'] as const
-
-export type ExpenseMethod = (typeof EXPENSE_METHODS)[number]
-
 /**
  * One payment the clinic made, entered by hand. Money is whole so'm (§7.3).
  *
@@ -60,7 +54,6 @@ export interface Expense {
   date: CalendarDate
   category: ExpenseCategory
   amount: number
-  method: ExpenseMethod
   /** Who was paid: a landlord, a supplier, a utility. */
   payee: string | null
   note: string | null
@@ -127,7 +120,6 @@ export interface RecurringExpense {
   category: RecurringCategory
   /** The usual amount; the real one is entered when it is paid. */
   amount: number
-  method: ExpenseMethod
   payee: string | null
   /** 1–28, so every month has the day. */
   dayOfMonth: number
@@ -142,7 +134,6 @@ export interface DueExpense {
   name: string
   category: RecurringCategory
   amount: number
-  method: ExpenseMethod
   payee: string | null
   dueDate: CalendarDate
   status: DueStatus
@@ -202,6 +193,11 @@ export interface PayrollRow {
   paid: number
   /** `opening + accrued − paid`. */
   balance: number
+}
+
+/** A doctor's own month, read by the doctor. */
+export interface MyMonth extends PayrollRow {
+  month: CalendarMonth
 }
 
 export interface Payroll {
