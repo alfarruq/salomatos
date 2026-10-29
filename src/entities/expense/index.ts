@@ -5,6 +5,7 @@ export {
   fetchDueMonth,
   fetchExpenseSummary,
   fetchExpenses,
+  fetchMyMonth,
   fetchPayroll,
   fetchRecurringExpenses,
 } from './api/queries'
@@ -63,6 +64,7 @@ export {
   type ExpensePage,
   type ExpenseSummary,
   type ExpenseTotals,
+  type MyMonth,
   type Payroll,
   type PayrollRow,
   RECURRING_CATEGORIES,

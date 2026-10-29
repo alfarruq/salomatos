@@ -195,6 +195,11 @@ export interface PayrollRow {
   balance: number
 }
 
+/** A doctor's own month, read by the doctor. */
+export interface MyMonth extends PayrollRow {
+  month: CalendarMonth
+}
+
 export interface Payroll {
   month: CalendarMonth
   rows: PayrollRow[]

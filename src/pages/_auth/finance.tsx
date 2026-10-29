@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Link, Outlet, redirect } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useCan } from '@/entities/session'
 import { cn } from '@/shared/lib/cn'
@@ -12,6 +12,12 @@ const TABS = [
 ] as const
 
 export const Route = createFileRoute('/_auth/finance')({
+  beforeLoad: ({ context }) => {
+    // The clinic's money is the owner's alone; the server refuses everyone else (§3).
+    if (!context.session.permissions.has('reports:read')) {
+      throw redirect({ to: '/dashboard' })
+    }
+  },
   component: FinanceLayout,
 })
 

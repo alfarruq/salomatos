@@ -240,5 +240,10 @@
       "description": "Once doctors are added, their share is worked out here."
     },
     "error": "Could not load doctor pay"
+  },
+  "mine": {
+    "title": "My earnings",
+    "details": "How it is counted",
+    "error": "Your earnings could not be loaded"
   }
 }

@@ -220,14 +220,20 @@ function AuthenticatedLayout() {
             </li>
           </Can>
           {/* Clinic-wide figures are for whoever runs the clinic, not for one doctor's chair. */}
-          <Can permission="staff:manage">
+          <Can permission="reports:read">
             <li>
               <SidebarLink icon={BarChart3} label={t('nav.statistics')} to="/statistics" />
             </li>
           </Can>
-          <Can permission="billing:read">
+          <Can permission="reports:read">
             <li>
               <SidebarLink icon={Wallet} label={t('nav.billing')} to="/finance" />
+            </li>
+          </Can>
+          {/* A doctor's own earnings and work; never another doctor's. */}
+          <Can permission="reports:own">
+            <li>
+              <SidebarLink icon={Wallet} label={t('nav.myReport')} to="/my-report" />
             </li>
           </Can>
           {/* `clinic:manage` is the clinic account alone (ADR-012). */}

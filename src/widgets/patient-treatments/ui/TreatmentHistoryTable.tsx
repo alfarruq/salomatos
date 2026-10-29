@@ -190,6 +190,11 @@ export function TreatmentHistoryTable({
                           <DropdownMenuItem onSelect={() => onEdit(treatment)}>
                             {t('treatments:table.actionEdit')}
                           </DropdownMenuItem>
+                          {debt === 0 ? null : (
+                            <DropdownMenuItem onSelect={() => onTakePayment(treatment)}>
+                              {t('treatments:detail.takePayment')}
+                            </DropdownMenuItem>
+                          )}
                           {treatment.status === 'completed' ? null : (
                             <DropdownMenuItem onSelect={() => onComplete(treatment)}>
                               {t('treatments:table.actionComplete')}

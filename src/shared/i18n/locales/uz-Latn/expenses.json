@@ -240,5 +240,10 @@
       "description": "Shifokor qo'shilgach, uning ulushi shu yerda hisoblanadi."
     },
     "error": "Shifokor ulushini yuklab bo'lmadi"
+  },
+  "mine": {
+    "title": "Mening hisobim",
+    "details": "Qanday hisoblanadi",
+    "error": "Hisobingizni yuklab bo'lmadi"
   }
 }

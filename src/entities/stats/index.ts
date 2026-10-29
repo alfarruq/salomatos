@@ -1,4 +1,10 @@
-export { fetchStatsOverview, statsKeys, statsQueries } from './api/queries'
+export {
+  fetchMyStatsOverview,
+  fetchStatsOverview,
+  type StatsScope,
+  statsKeys,
+  statsQueries,
+} from './api/queries'
 export { statsOverviewSchema, toStatsOverview } from './model/schema'
 export {
   STATS_PERIODS,

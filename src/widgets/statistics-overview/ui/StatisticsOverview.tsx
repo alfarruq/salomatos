@@ -1,7 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { BarChart3 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { STATS_PERIODS, type StatsOverview, type StatsPeriod, statsQueries } from '@/entities/stats'
+import {
+  STATS_PERIODS,
+  type StatsOverview,
+  type StatsPeriod,
+  type StatsScope,
+  statsQueries,
+} from '@/entities/stats'
 import { clinicNow } from '@/shared/lib/datetime'
 import { bucketLabel, rangeOf } from '@/shared/lib/report'
 import {
@@ -23,13 +29,20 @@ export interface StatisticsOverviewProps {
   clinicId: number
   period: StatsPeriod
   onPeriodChange: (period: StatsPeriod) => void
+  /** `mine`: the signed-in doctor's own work, from `/statistics/me/`. */
+  scope?: StatsScope
 }
 
-export function StatisticsOverview({ clinicId, period, onPeriodChange }: StatisticsOverviewProps) {
+export function StatisticsOverview({
+  clinicId,
+  period,
+  onPeriodChange,
+  scope = 'clinic',
+}: StatisticsOverviewProps) {
   const { t } = useTranslation('statistics')
   // The clinic's day, not the browser's (§14): "last 7 days" ends there.
   const range = rangeOf(period, clinicNow().date)
-  const query = useQuery(statsQueries.overview(clinicId, range))
+  const query = useQuery(statsQueries.overview(clinicId, range, scope))
 
   return (
     <div className="flex flex-col gap-6">
@@ -64,13 +77,13 @@ export function StatisticsOverview({ clinicId, period, onPeriodChange }: Statist
         loading={<OverviewSkeleton />}
         query={query}
       >
-        {(data) => <OverviewContent data={data} />}
+        {(data) => <OverviewContent data={data} showDoctors={scope === 'clinic'} />}
       </QueryBoundary>
     </div>
   )
 }
 
-function OverviewContent({ data }: { data: StatsOverview }) {
+function OverviewContent({ data, showDoctors }: { data: StatsOverview; showDoctors: boolean }) {
   const { t, i18n } = useTranslation('statistics')
 
   return (
@@ -94,18 +107,24 @@ function OverviewContent({ data }: { data: StatsOverview }) {
       </ChartCard>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <ChartCard description={t('charts.doctors.description')} title={t('charts.doctors.title')}>
-          <BarList
-            items={[...data.doctors]
-              .sort((a, b) => b.appointments - a.appointments)
-              .map((row) => ({
-                key: String(row.doctorId),
-                label: row.doctorName,
-                value: row.appointments,
-              }))}
-            label={t('charts.doctors.title')}
-          />
-        </ChartCard>
+        {/* A doctor's own report has one row here: themselves. */}
+        {showDoctors ? (
+          <ChartCard
+            description={t('charts.doctors.description')}
+            title={t('charts.doctors.title')}
+          >
+            <BarList
+              items={[...data.doctors]
+                .sort((a, b) => b.appointments - a.appointments)
+                .map((row) => ({
+                  key: String(row.doctorId),
+                  label: row.doctorName,
+                  value: row.appointments,
+                }))}
+              label={t('charts.doctors.title')}
+            />
+          </ChartCard>
+        ) : null}
 
         <ChartCard title={t('charts.patients.title')}>
           <PatientMix totals={data.totals} />

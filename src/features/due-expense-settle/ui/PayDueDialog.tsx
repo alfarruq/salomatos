@@ -113,7 +113,7 @@ export function PayDueDialog({ clinicId, month, item, open, onOpenChange }: PayD
       title={t('expenses:recurring.pay.title')}
     >
       <form className="flex flex-col gap-4" id={FORM_ID} noValidate onSubmit={handleSubmit}>
-        {rootError ? <Alert title={rootError} tone="danger" /> : null}
+        {rootError ? <Alert title={message(rootError) ?? rootError} tone="danger" /> : null}
         <div className="grid gap-4 sm:grid-cols-2">
           <Field error={message(errors.date?.message)} isRequired label={t('expenses:form.date')}>
             <Controller

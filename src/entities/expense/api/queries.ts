@@ -8,12 +8,14 @@ import {
   dueMonthSchema,
   expensePageSchema,
   expenseSummarySchema,
+  myMonthSchema,
   payrollSchema,
   recurringExpenseListSchema,
   toCompensation,
   toDueMonth,
   toExpensePage,
   toExpenseSummary,
+  toMyMonth,
   toPayroll,
   toRecurringExpense,
 } from '../model/schema'
@@ -24,6 +26,7 @@ import type {
   ExpenseFilters,
   ExpensePage,
   ExpenseSummary,
+  MyMonth,
   Payroll,
   RecurringExpense,
 } from '../model/types'
@@ -50,6 +53,9 @@ export const expenseKeys = {
 
   compensation: (clinicId: number, doctorId: number) =>
     [...expenseKeys.scope(clinicId), 'compensation', doctorId] as const,
+
+  myMonth: (clinicId: number, month: CalendarMonth) =>
+    [...expenseKeys.scope(clinicId), 'my-month', month] as const,
 }
 
 const init = (signal?: AbortSignal) => (signal === undefined ? {} : { signal })
@@ -106,6 +112,11 @@ export async function fetchCompensationHistory(
   return v.parse(compensationListSchema, raw).map(toCompensation)
 }
 
+export async function fetchMyMonth(month: CalendarMonth, signal?: AbortSignal): Promise<MyMonth> {
+  const raw = await httpClient<unknown>(`v1/finance/me/?month=${month}`, init(signal))
+  return toMyMonth(v.parse(myMonthSchema, raw))
+}
+
 export const expenseQueries = {
   list: (clinicId: number, filters: ExpenseFilters) =>
     queryOptions({
@@ -144,6 +155,14 @@ export const expenseQueries = {
     queryOptions({
       queryKey: expenseKeys.payroll(clinicId, month),
       queryFn: ({ signal }) => fetchPayroll(month, signal),
+      ...cachePolicy.financial,
+      placeholderData: keepPreviousData,
+    }),
+
+  myMonth: (clinicId: number, month: CalendarMonth) =>
+    queryOptions({
+      queryKey: expenseKeys.myMonth(clinicId, month),
+      queryFn: ({ signal }) => fetchMyMonth(month, signal),
       ...cachePolicy.financial,
       placeholderData: keepPreviousData,
     }),

@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import * as v from 'valibot'
 import { STATS_PERIODS } from '@/entities/stats'
@@ -16,6 +16,14 @@ export const Route = createFileRoute('/_auth/statistics/')({
   validateSearch: (search): StatisticsSearch => {
     const result = v.safeParse(statisticsSearchSchema, search)
     return result.success ? result.output : {}
+  },
+  beforeLoad: ({ context }) => {
+    // Clinic-wide figures are the owner's; a doctor has their own under /my-report.
+    if (!context.session.permissions.has('reports:read')) {
+      throw redirect({
+        to: context.session.permissions.has('reports:own') ? '/my-report' : '/dashboard',
+      })
+    }
   },
   component: StatisticsPage,
 })
