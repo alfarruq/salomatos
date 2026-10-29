@@ -12,6 +12,7 @@ import { cn } from '@/shared/lib/cn'
 const SECTIONS = [
   { to: '/manage/doctors', labelKey: 'admin:nav.doctors' },
   { to: '/manage/doctor-types', labelKey: 'admin:nav.doctorTypes' },
+  { to: '/manage/admins', labelKey: 'admin:nav.admins' },
   { to: '/manage/services', labelKey: 'admin:nav.services' },
   { to: '/manage/clinic', labelKey: 'admin:nav.clinic' },
   { to: '/manage/sms', labelKey: 'admin:nav.sms' },

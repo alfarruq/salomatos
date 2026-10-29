@@ -110,6 +110,7 @@ export function EditDoctorDialog({ clinicId, doctor, open, onOpenChange }: EditD
           doctorTypeOptions={doctorTypeOptions}
           form={form}
           isDisabled={isPending}
+          mode="edit"
         />
       </form>
     </Dialog>

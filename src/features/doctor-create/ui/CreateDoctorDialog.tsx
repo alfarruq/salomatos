@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next'
 import {
   DoctorFormFields,
   type DoctorFormInput,
+  doctorCreateFormSchema,
   doctorFormFieldOf,
-  doctorFormSchema,
   emptyDoctorForm,
 } from '@/entities/doctor'
 import { doctorTypeQueries, isDentalDoctorType } from '@/entities/doctor-type'
@@ -33,7 +33,7 @@ export function CreateDoctorDialog({
   const { t } = useTranslation(['admin', 'common'])
 
   const form = useForm<DoctorFormInput>({
-    resolver: valibotResolver(doctorFormSchema),
+    resolver: valibotResolver(doctorCreateFormSchema),
     mode: 'onBlur',
     defaultValues: emptyDoctorForm,
   })
@@ -73,6 +73,12 @@ export function CreateDoctorDialog({
 
     setValue('doctorTypeId', String(defaultDoctorTypeId))
   }, [defaultDoctorTypeId, form.formState.dirtyFields.doctorTypeId, setValue])
+
+  // The dialog stays mounted while closed, so a typed password would otherwise
+  // sit in memory and reappear the next time it opens.
+  useEffect(() => {
+    if (!open) setValue('password', '')
+  }, [open, setValue])
 
   const handleSubmit = form.handleSubmit((values) =>
     mutate(values, {
@@ -137,6 +143,7 @@ export function CreateDoctorDialog({
           doctorTypeOptions={doctorTypeOptions}
           form={form}
           isDisabled={isPending}
+          mode="create"
         />
       </form>
     </Dialog>

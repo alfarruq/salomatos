@@ -21,6 +21,7 @@ import { Route as AuthFinanceExpensesRouteImport } from './pages/_auth/finance/e
 import { Route as AuthFinancePayrollRouteImport } from './pages/_auth/finance/payroll'
 import { Route as AuthFinanceRecurringRouteImport } from './pages/_auth/finance/recurring'
 import { Route as AuthManageIndexRouteImport } from './pages/_auth/manage/index'
+import { Route as AuthManageAdminsRouteImport } from './pages/_auth/manage/admins'
 import { Route as AuthManageClinicRouteImport } from './pages/_auth/manage/clinic'
 import { Route as AuthManageDoctorTypesRouteImport } from './pages/_auth/manage/doctor-types'
 import { Route as AuthManageDoctorsRouteImport } from './pages/_auth/manage/doctors'
@@ -90,6 +91,11 @@ const AuthManageIndexRoute = AuthManageIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthManageRoute,
 } as any)
+const AuthManageAdminsRoute = AuthManageAdminsRouteImport.update({
+  id: '/admins',
+  path: '/admins',
+  getParentRoute: () => AuthManageRoute,
+} as any)
 const AuthManageClinicRoute = AuthManageClinicRouteImport.update({
   id: '/clinic',
   path: '/clinic',
@@ -145,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/finance/expenses': typeof AuthFinanceExpensesRoute
   '/finance/payroll': typeof AuthFinancePayrollRoute
   '/finance/recurring': typeof AuthFinanceRecurringRoute
+  '/manage/admins': typeof AuthManageAdminsRoute
   '/manage/clinic': typeof AuthManageClinicRoute
   '/manage/doctor-types': typeof AuthManageDoctorTypesRoute
   '/manage/doctors': typeof AuthManageDoctorsRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/finance/expenses': typeof AuthFinanceExpensesRoute
   '/finance/payroll': typeof AuthFinancePayrollRoute
   '/finance/recurring': typeof AuthFinanceRecurringRoute
+  '/manage/admins': typeof AuthManageAdminsRoute
   '/manage/clinic': typeof AuthManageClinicRoute
   '/manage/doctor-types': typeof AuthManageDoctorTypesRoute
   '/manage/doctors': typeof AuthManageDoctorsRoute
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   '/_auth/finance/expenses': typeof AuthFinanceExpensesRoute
   '/_auth/finance/payroll': typeof AuthFinancePayrollRoute
   '/_auth/finance/recurring': typeof AuthFinanceRecurringRoute
+  '/_auth/manage/admins': typeof AuthManageAdminsRoute
   '/_auth/manage/clinic': typeof AuthManageClinicRoute
   '/_auth/manage/doctor-types': typeof AuthManageDoctorTypesRoute
   '/_auth/manage/doctors': typeof AuthManageDoctorsRoute
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
     | '/finance/expenses'
     | '/finance/payroll'
     | '/finance/recurring'
+    | '/manage/admins'
     | '/manage/clinic'
     | '/manage/doctor-types'
     | '/manage/doctors'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/finance/expenses'
     | '/finance/payroll'
     | '/finance/recurring'
+    | '/manage/admins'
     | '/manage/clinic'
     | '/manage/doctor-types'
     | '/manage/doctors'
@@ -256,6 +267,7 @@ export interface FileRouteTypes {
     | '/_auth/finance/expenses'
     | '/_auth/finance/payroll'
     | '/_auth/finance/recurring'
+    | '/_auth/manage/admins'
     | '/_auth/manage/clinic'
     | '/_auth/manage/doctor-types'
     | '/_auth/manage/doctors'
@@ -362,6 +374,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthManageIndexRouteImport
       parentRoute: typeof AuthManageRoute
     }
+    '/_auth/manage/admins': {
+      id: '/_auth/manage/admins'
+      path: '/admins'
+      fullPath: '/manage/admins'
+      preLoaderRoute: typeof AuthManageAdminsRouteImport
+      parentRoute: typeof AuthManageRoute
+    }
     '/_auth/manage/clinic': {
       id: '/_auth/manage/clinic'
       path: '/clinic'
@@ -447,6 +466,7 @@ const AuthFinanceRouteWithChildren = AuthFinanceRoute._addFileChildren(
 )
 
 interface AuthManageRouteChildren {
+  AuthManageAdminsRoute: typeof AuthManageAdminsRoute
   AuthManageClinicRoute: typeof AuthManageClinicRoute
   AuthManageDoctorTypesRoute: typeof AuthManageDoctorTypesRoute
   AuthManageDoctorsRoute: typeof AuthManageDoctorsRoute
@@ -456,6 +476,7 @@ interface AuthManageRouteChildren {
 }
 
 const AuthManageRouteChildren: AuthManageRouteChildren = {
+  AuthManageAdminsRoute: AuthManageAdminsRoute,
   AuthManageClinicRoute: AuthManageClinicRoute,
   AuthManageDoctorTypesRoute: AuthManageDoctorTypesRoute,
   AuthManageDoctorsRoute: AuthManageDoctorsRoute,
