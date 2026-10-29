@@ -14,7 +14,7 @@ const USERNAME = /^[\w.@+-]+$/
  * The server has no password rules of its own (`set_password` without
  * `validate_password`), so this floor is the only one there is.
  */
-export const PASSWORD_MIN_LENGTH = 8
+const minPasswordLength = 8
 
 export const usernameSchema = v.pipe(
   v.string(),
@@ -26,14 +26,14 @@ export const usernameSchema = v.pipe(
 /** Required: a new account cannot sign in without one. */
 export const passwordSchema = v.pipe(
   v.string(),
-  v.minLength(PASSWORD_MIN_LENGTH, 'validation.passwordTooShort'),
+  v.minLength(minPasswordLength, 'validation.passwordTooShort'),
 )
 
 /** For edits, where empty means "keep the current password". */
 export const optionalPasswordSchema = v.pipe(
   v.string(),
   v.check(
-    (value) => value === '' || value.length >= PASSWORD_MIN_LENGTH,
+    (value) => value === '' || value.length >= minPasswordLength,
     'validation.passwordTooShort',
   ),
 )
