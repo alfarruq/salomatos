@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   CompensationTerms,
-  EXPENSES_SOURCE_IS_MOCK,
   expenseQueries,
   type Payroll,
   type PayrollRow,
@@ -15,7 +14,6 @@ import type { CalendarMonth } from '@/shared/lib/calendarMonth'
 import { cn } from '@/shared/lib/cn'
 import { formatSom } from '@/shared/lib/money'
 import {
-  Alert,
   Button,
   Card,
   ChartCard,
@@ -57,10 +55,6 @@ export function FinancePayroll({ clinicId, month, onMonthChange }: FinancePayrol
         onMonthChange={onMonthChange}
         previousLabel={t('expenses:recurring.month.previous')}
       />
-
-      {EXPENSES_SOURCE_IS_MOCK ? (
-        <Alert title={t('expenses:demo.title')}>{t('expenses:payroll.demo')}</Alert>
-      ) : null}
 
       <QueryBoundary
         empty={

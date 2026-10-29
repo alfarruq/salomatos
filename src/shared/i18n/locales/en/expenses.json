@@ -1,8 +1,4 @@
 {
-  "demo": {
-    "title": "Sample data",
-    "description": "These entries are made up to show the screen. Expenses you add are kept until the page reloads. Real entries will appear once the server keeps an expense journal."
-  },
   "kpi": {
     "total": "Total expenses",
     "entries_one": "{{count}} entry",
@@ -28,11 +24,6 @@
     "taxes_fees": "Taxes and bank fees",
     "other": "Other"
   },
-  "methods": {
-    "cash": "Cash",
-    "card": "Card",
-    "transfer": "Bank transfer"
-  },
   "charts": {
     "trend": {
       "title": "Expenses over time",
@@ -51,7 +42,6 @@
     "date": "Date",
     "category": "Category",
     "payee": "Paid to / note",
-    "method": "Method",
     "enteredBy": "Entered by",
     "amount": "Amount",
     "actions": "Actions",
@@ -69,7 +59,6 @@
     "amount": "Amount, so'm",
     "category": "Category",
     "categoryPlaceholder": "Pick a category",
-    "method": "Payment method",
     "doctor": "Doctor",
     "doctorPlaceholder": "Pick a doctor",
     "payee": "Paid to",
@@ -110,7 +99,6 @@
     "description": "Check your internet connection and try again."
   },
   "recurring": {
-    "demo": "These templates and payments are made up to show the layout. What you enter is kept until the page reloads.",
     "month": {
       "previous": "Previous month",
       "next": "Next month",
@@ -127,7 +115,7 @@
       "date": "Due",
       "name": "Name",
       "status": "Status",
-      "paidOn": "{{date}}, {{method}}",
+      "paidOn": "{{date}}",
       "expected": "Expected: {{amount}}"
     },
     "status": {
@@ -191,7 +179,6 @@
     "error": "Could not load recurring bills"
   },
   "payroll": {
-    "demo": "These terms, takings and payouts are made up to show the layout. Real figures come once the server keeps a payment ledger.",
     "totals": {
       "accrued": "Accrued",
       "paid": "Paid out",

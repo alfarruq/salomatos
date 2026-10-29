@@ -2,12 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Plus, Receipt } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  EXPENSES_SOURCE_IS_MOCK,
-  type ExpenseCategory,
-  type ExpenseSummary,
-  expenseQueries,
-} from '@/entities/expense'
+import { type ExpenseCategory, type ExpenseSummary, expenseQueries } from '@/entities/expense'
 import { Can } from '@/entities/session'
 import { CreateExpenseDialog } from '@/features/expense-create'
 import { clinicNow } from '@/shared/lib/datetime'
@@ -20,7 +15,6 @@ import {
   rangeOf,
 } from '@/shared/lib/report'
 import {
-  Alert,
   BarChart,
   BarList,
   Button,
@@ -83,10 +77,6 @@ export function FinanceExpenses({ clinicId, view, onViewChange }: FinanceExpense
           </Button>
         </Can>
       </div>
-
-      {EXPENSES_SOURCE_IS_MOCK ? (
-        <Alert title={t('expenses:demo.title')}>{t('expenses:demo.description')}</Alert>
-      ) : null}
 
       <QueryBoundary
         empty={

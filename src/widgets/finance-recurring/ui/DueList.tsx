@@ -91,7 +91,6 @@ export function DueList({ clinicId, due, monthLabel }: DueListProps) {
                       <span className="text-caption text-text-secondary">
                         {t('expenses:recurring.due.paidOn', {
                           date: formatFixedDate(item.paidDate),
-                          method: t(`expenses:methods.${item.method}`),
                         })}
                       </span>
                     )}

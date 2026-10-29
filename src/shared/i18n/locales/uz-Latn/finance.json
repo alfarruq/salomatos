@@ -6,10 +6,6 @@
     "recurring": "Doimiy to'lovlar",
     "payroll": "Shifokor ulushi"
   },
-  "demo": {
-    "title": "Namuna ma'lumotlar",
-    "description": "Bu summalar faqat ko'rinishni ko'rsatish uchun o'ylab topilgan. Haqiqiy raqamlar server to'lovlar jurnalini yurita boshlaganda chiqadi."
-  },
   "period": {
     "label": "Davr",
     "week": "Oxirgi 7 kun",
@@ -33,10 +29,6 @@
       "billed": "Bajarilgan ish",
       "collected": "Tushum"
     },
-    "methods": {
-      "title": "To'lov usullari",
-      "description": "Tushumdagi ulushi"
-    },
     "doctors": {
       "title": "Shifokorlar bo'yicha tushum",
       "description": "Har bir shifokor ishi uchun to'lovlar"
@@ -45,13 +37,6 @@
       "title": "Xizmatlar bo'yicha daromad",
       "description": "Davr ichida bajarilgan ish summasi"
     }
-  },
-  "methods": {
-    "cash": "Naqd",
-    "card": "Karta",
-    "click": "Click",
-    "payme": "Payme",
-    "transfer": "Bank o'tkazmasi"
   },
   "debtors": {
     "title": "Eng katta qarzlar",

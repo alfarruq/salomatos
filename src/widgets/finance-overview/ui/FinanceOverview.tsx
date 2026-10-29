@@ -1,22 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { Wallet } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import {
-  FINANCE_SOURCE_IS_MOCK,
-  type FinanceOverview as FinanceOverviewData,
-  financeQueries,
-} from '@/entities/finance'
+import { type FinanceOverview as FinanceOverviewData, financeQueries } from '@/entities/finance'
 import { clinicNow } from '@/shared/lib/datetime'
 import { formatSom } from '@/shared/lib/money'
+import { bucketLabel, REPORT_PERIODS, type ReportPeriod, rangeOf } from '@/shared/lib/report'
 import {
-  bucketLabel,
-  percentOf,
-  REPORT_PERIODS,
-  type ReportPeriod,
-  rangeOf,
-} from '@/shared/lib/report'
-import {
-  Alert,
   BarChart,
   BarList,
   ChartCard,
@@ -60,10 +49,6 @@ export function FinanceOverview({ clinicId, period, onPeriodChange }: FinanceOve
           value={period}
         />
       </div>
-
-      {FINANCE_SOURCE_IS_MOCK ? (
-        <Alert title={t('demo.title')}>{t('demo.description')}</Alert>
-      ) : null}
 
       <QueryBoundary
         empty={
@@ -122,37 +107,19 @@ function OverviewContent({ clinicId, data }: { clinicId: number; data: FinanceOv
         />
       </ChartCard>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <ChartCard description={t('charts.methods.description')} title={t('charts.methods.title')}>
-          <BarList
-            formatValue={(amount) =>
-              `${money(amount)} · ${percentOf(amount, data.totals.collected)}%`
-            }
-            items={[...data.paymentMethods]
-              .sort((a, b) => b.amount - a.amount)
-              .map((row) => ({
-                key: row.method,
-                label: t(`methods.${row.method}`),
-                value: row.amount,
-              }))}
-            label={t('charts.methods.title')}
-          />
-        </ChartCard>
-
-        <ChartCard description={t('charts.doctors.description')} title={t('charts.doctors.title')}>
-          <BarList
-            formatValue={money}
-            items={[...data.doctors]
-              .sort((a, b) => b.collected - a.collected)
-              .map((row) => ({
-                key: String(row.doctorId),
-                label: row.doctorName,
-                value: row.collected,
-              }))}
-            label={t('charts.doctors.title')}
-          />
-        </ChartCard>
-      </div>
+      <ChartCard description={t('charts.doctors.description')} title={t('charts.doctors.title')}>
+        <BarList
+          formatValue={money}
+          items={[...data.doctors]
+            .sort((a, b) => b.collected - a.collected)
+            .map((row) => ({
+              key: String(row.doctorId),
+              label: row.doctorName,
+              value: row.collected,
+            }))}
+          label={t('charts.doctors.title')}
+        />
+      </ChartCard>
 
       <div className="grid gap-6 lg:grid-cols-5">
         <ChartCard
@@ -182,7 +149,7 @@ function OverviewContent({ clinicId, data }: { clinicId: number; data: FinanceOv
           {data.topDebtors.length === 0 ? (
             <p className="text-callout text-text-secondary">{t('debtors.empty')}</p>
           ) : (
-            <DebtorsTable debtors={data.topDebtors} linkToPatients={!FINANCE_SOURCE_IS_MOCK} />
+            <DebtorsTable debtors={data.topDebtors} linkToPatients />
           )}
         </ChartCard>
       </div>

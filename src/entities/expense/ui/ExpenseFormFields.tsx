@@ -11,7 +11,7 @@ import {
   Textarea,
 } from '@/shared/ui'
 import type { ExpenseFormInput } from '../model/formSchema'
-import { EXPENSE_CATEGORIES, EXPENSE_METHODS } from '../model/types'
+import { EXPENSE_CATEGORIES } from '../model/types'
 
 export interface ExpenseFormFieldsProps {
   form: UseFormReturn<ExpenseFormInput>
@@ -98,25 +98,6 @@ export function ExpenseFormFields({
                   label: t(`expenses:categories.${value}`),
                 }))}
                 placeholder={t('expenses:form.categoryPlaceholder')}
-                value={field.value}
-              />
-            )}
-          />
-        </Field>
-
-        <Field isRequired label={t('expenses:form.method')}>
-          <Controller
-            control={form.control}
-            name="method"
-            render={({ field }) => (
-              <Select
-                disabled={isDisabled}
-                name={field.name}
-                onValueChange={field.onChange}
-                options={EXPENSE_METHODS.map((value) => ({
-                  value,
-                  label: t(`expenses:methods.${value}`),
-                }))}
                 value={field.value}
               />
             )}

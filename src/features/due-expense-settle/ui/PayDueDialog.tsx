@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next'
 import {
   type CalendarMonth,
   type DueExpense,
-  EXPENSE_METHODS,
   type PayDueFormInput,
   payDueFormFieldOf,
   payDueFormSchema,
@@ -14,17 +13,7 @@ import {
 import { ApiError } from '@/shared/api/errors'
 import { formatFixedDate } from '@/shared/lib/calendarDate'
 import { clinicNow } from '@/shared/lib/datetime'
-import {
-  Alert,
-  Button,
-  DatePicker,
-  Dialog,
-  Field,
-  MoneyInput,
-  Select,
-  Textarea,
-  toast,
-} from '@/shared/ui'
+import { Alert, Button, DatePicker, Dialog, Field, MoneyInput, Textarea, toast } from '@/shared/ui'
 import { usePayDue } from '../model/useSettleDue'
 
 export interface PayDueDialogProps {
@@ -39,7 +28,7 @@ const FORM_ID = 'pay-due-form'
 
 function defaultsOf(item: DueExpense): PayDueFormInput {
   // Paid today unless said otherwise; a bill paid ahead of its day is still paid today.
-  return { date: clinicNow().date, amount: String(item.amount), method: item.method, note: '' }
+  return { date: clinicNow().date, amount: String(item.amount), note: '' }
 }
 
 /**
@@ -164,25 +153,6 @@ export function PayDueDialog({ clinicId, month, item, open, onOpenChange }: PayD
             />
           </Field>
         </div>
-
-        <Field isRequired label={t('expenses:form.method')}>
-          <Controller
-            control={form.control}
-            name="method"
-            render={({ field }) => (
-              <Select
-                disabled={isPending}
-                name={field.name}
-                onValueChange={field.onChange}
-                options={EXPENSE_METHODS.map((value) => ({
-                  value,
-                  label: t(`expenses:methods.${value}`),
-                }))}
-                value={field.value}
-              />
-            )}
-          />
-        </Field>
 
         {/* Free text is where a patient's name could slip in; the hint is the only guard here. */}
         <Field

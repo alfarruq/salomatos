@@ -1,5 +1,6 @@
 import { keepPreviousData, queryOptions } from '@tanstack/react-query'
 import * as v from 'valibot'
+import { httpClient } from '@/shared/api/httpClient'
 import { cachePolicy } from '@/shared/config/cache'
 import type { ReportRange } from '@/shared/lib/report'
 import {
@@ -26,7 +27,6 @@ import type {
   Payroll,
   RecurringExpense,
 } from '../model/types'
-import { mockExpenseServer } from './mockServer'
 
 export const expenseKeys = {
   scope: (clinicId: number) => ['clinics', clinicId, 'expenses'] as const,
@@ -52,81 +52,57 @@ export const expenseKeys = {
     [...expenseKeys.scope(clinicId), 'compensation', doctorId] as const,
 }
 
-/** Drives the "sample data" notice. Goes away with the mock. */
-export const EXPENSES_SOURCE_IS_MOCK = true
+const init = (signal?: AbortSignal) => (signal === undefined ? {} : { signal })
 
-/**
- * ⚠️ Served from `./mockServer.ts` until the backend has the endpoint. To
- * switch, replace the body with:
- *
- *   const params = new URLSearchParams({ from, to, page: String(page) })
- *   if (category !== null) params.set('category', category)
- *   const raw: unknown = await httpClient(`v1/clinic/expenses/?${params}`, { signal })
- *
- * The parse below stays as it is.
- */
 export async function fetchExpenses(
   filters: ExpenseFilters,
   signal?: AbortSignal,
 ): Promise<ExpensePage> {
-  const raw: unknown = await mockExpenseServer.list(filters, signal)
+  const params = new URLSearchParams({
+    from: filters.from,
+    to: filters.to,
+    page: String(filters.page),
+  })
+  if (filters.category !== null) params.set('category', filters.category)
+  const raw = await httpClient<unknown>(`v1/finance/expenses/?${params}`, init(signal))
   return toExpensePage(v.parse(expensePageSchema, raw))
 }
 
-/**
- * ⚠️ Mock, as above. The real call:
- *
- *   const params = new URLSearchParams({ from: range.from, to: range.to })
- *   const raw: unknown = await httpClient(`v1/clinic/expenses/summary/?${params}`, { signal })
- */
 export async function fetchExpenseSummary(
   range: ReportRange,
   signal?: AbortSignal,
 ): Promise<ExpenseSummary> {
-  const raw: unknown = await mockExpenseServer.summary(range, signal)
+  const params = new URLSearchParams({ from: range.from, to: range.to })
+  const raw = await httpClient<unknown>(`v1/finance/expenses/summary/?${params}`, init(signal))
   return toExpenseSummary(v.parse(expenseSummarySchema, raw))
 }
 
-/**
- * ⚠️ Mock, as above. The real call:
- *
- *   const raw: unknown = await httpClient('v1/clinic/recurring-expenses/', { signal })
- */
 export async function fetchRecurringExpenses(signal?: AbortSignal): Promise<RecurringExpense[]> {
-  const raw: unknown = await mockExpenseServer.listRecurring(signal)
+  const raw = await httpClient<unknown>('v1/finance/recurring-expenses/', init(signal))
   return v.parse(recurringExpenseListSchema, raw).map(toRecurringExpense)
 }
 
-/**
- * ⚠️ Mock, as above. The real call:
- *
- *   const raw: unknown = await httpClient(`v1/clinic/recurring-expenses/due/?month=${month}`, { signal })
- */
 export async function fetchDueMonth(month: CalendarMonth, signal?: AbortSignal): Promise<DueMonth> {
-  const raw: unknown = await mockExpenseServer.due(month, signal)
+  const raw = await httpClient<unknown>(
+    `v1/finance/recurring-expenses/due/?month=${month}`,
+    init(signal),
+  )
   return toDueMonth(v.parse(dueMonthSchema, raw))
 }
 
-/**
- * ⚠️ Mock, as above. The real call:
- *
- *   const raw: unknown = await httpClient(`v1/clinic/payroll/?month=${month}`, { signal })
- */
 export async function fetchPayroll(month: CalendarMonth, signal?: AbortSignal): Promise<Payroll> {
-  const raw: unknown = await mockExpenseServer.payroll(month, signal)
+  const raw = await httpClient<unknown>(`v1/finance/payroll/?month=${month}`, init(signal))
   return toPayroll(v.parse(payrollSchema, raw))
 }
 
-/**
- * ⚠️ Mock, as above. The real call:
- *
- *   const raw: unknown = await httpClient(`v1/clinic/doctors/${doctorId}/compensation/`, { signal })
- */
 export async function fetchCompensationHistory(
   doctorId: number,
   signal?: AbortSignal,
 ): Promise<Compensation[]> {
-  const raw: unknown = await mockExpenseServer.compensationHistory(doctorId, signal)
+  const raw = await httpClient<unknown>(
+    `v1/finance/doctors/${doctorId}/compensation/`,
+    init(signal),
+  )
   return v.parse(compensationListSchema, raw).map(toCompensation)
 }
 

@@ -7,10 +7,8 @@ import {
   type Compensation,
   type CompensationBase,
   EXPENSE_CATEGORIES,
-  EXPENSE_METHODS,
   type Expense,
   type ExpenseCategory,
-  type ExpenseMethod,
   RECURRING_CATEGORIES,
   type RecurringCategory,
   type RecurringExpense,
@@ -61,7 +59,6 @@ export const expenseFormSchema = v.pipe(
       v.check((value) => value !== '', 'validation.required'),
     ),
     amount: amountSchema,
-    method: v.picklist(EXPENSE_METHODS),
     payee: payeeSchema,
     note: noteSchema,
     /** An `entities/doctor` id as a string; `''` when the category is not a doctor's share. */
@@ -84,7 +81,6 @@ export function emptyExpenseForm(): ExpenseFormInput {
     date: clinicNow().date,
     category: '',
     amount: '',
-    method: 'cash',
     payee: '',
     note: '',
     doctorId: '',
@@ -96,7 +92,6 @@ export function toExpenseForm(expense: Expense): ExpenseFormInput {
     date: expense.date,
     category: expense.category,
     amount: String(expense.amount),
-    method: expense.method,
     payee: expense.payee ?? '',
     note: expense.note ?? '',
     doctorId: expense.doctorId === null ? '' : String(expense.doctorId),
@@ -107,7 +102,6 @@ export interface ExpensePayload {
   date: string
   category: ExpenseCategory
   amount: number
-  method: ExpenseMethod
   payee: string | null
   note: string | null
   doctor: number | null
@@ -120,7 +114,6 @@ export function toExpensePayload(input: ExpenseFormInput): ExpensePayload {
     date: input.date,
     category,
     amount: Number(input.amount),
-    method: input.method,
     payee: input.payee === '' ? null : input.payee,
     note: input.note === '' ? null : input.note,
     // A doctor left over from switching category away is not sent.
@@ -132,7 +125,6 @@ const SERVER_FIELD_NAMES: Record<string, keyof ExpenseFormInput> = {
   date: 'date',
   category: 'category',
   amount: 'amount',
-  method: 'method',
   payee: 'payee',
   note: 'note',
   doctor: 'doctorId',
@@ -168,7 +160,6 @@ export const recurringFormSchema = v.object({
     v.check((value) => value !== '', 'validation.required'),
   ),
   amount: amountSchema,
-  method: v.picklist(EXPENSE_METHODS),
   payee: payeeSchema,
   /** `'1'`–`'28'`: a select's value. Past 28 some months would have no such day. */
   dayOfMonth: v.pipe(
@@ -186,7 +177,6 @@ export const emptyRecurringForm: RecurringFormInput = {
   name: '',
   category: '',
   amount: '',
-  method: 'transfer',
   payee: '',
   dayOfMonth: '5',
 }
@@ -196,7 +186,6 @@ export function toRecurringForm(template: RecurringExpense): RecurringFormInput 
     name: template.name,
     category: template.category,
     amount: String(template.amount),
-    method: template.method,
     payee: template.payee ?? '',
     dayOfMonth: String(template.dayOfMonth),
   }
@@ -206,7 +195,6 @@ export interface RecurringPayload {
   name: string
   category: RecurringCategory
   amount: number
-  method: ExpenseMethod
   payee: string | null
   day_of_month: number
 }
@@ -217,7 +205,6 @@ export function toRecurringPayload(input: RecurringFormInput): RecurringPayload 
     name: input.name,
     category: input.category === '' ? 'other' : input.category,
     amount: Number(input.amount),
-    method: input.method,
     payee: input.payee === '' ? null : input.payee,
     day_of_month: Number(input.dayOfMonth),
   }
@@ -227,7 +214,6 @@ const RECURRING_SERVER_FIELDS: Record<string, keyof RecurringFormInput> = {
   name: 'name',
   category: 'category',
   amount: 'amount',
-  method: 'method',
   payee: 'payee',
   day_of_month: 'dayOfMonth',
 }
@@ -240,7 +226,6 @@ export function recurringFormFieldOf(serverField: string): keyof RecurringFormIn
 export const payDueFormSchema = v.object({
   date: paidDateSchema,
   amount: amountSchema,
-  method: v.picklist(EXPENSE_METHODS),
   note: noteSchema,
 })
 
@@ -250,7 +235,6 @@ export interface PayDuePayload {
   month: string
   date: string
   amount: number
-  method: ExpenseMethod
   note: string | null
 }
 
@@ -259,7 +243,6 @@ export function toPayDuePayload(month: string, input: PayDueFormInput): PayDuePa
     month,
     date: input.date,
     amount: Number(input.amount),
-    method: input.method,
     note: input.note === '' ? null : input.note,
   }
 }
@@ -267,7 +250,6 @@ export function toPayDuePayload(month: string, input: PayDueFormInput): PayDuePa
 const PAY_SERVER_FIELDS: Record<string, keyof PayDueFormInput> = {
   date: 'date',
   amount: 'amount',
-  method: 'method',
   note: 'note',
 }
 

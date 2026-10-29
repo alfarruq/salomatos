@@ -1,17 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { BarChart3 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import {
-  STATS_PERIODS,
-  STATS_SOURCE_IS_MOCK,
-  type StatsOverview,
-  type StatsPeriod,
-  statsQueries,
-} from '@/entities/stats'
+import { STATS_PERIODS, type StatsOverview, type StatsPeriod, statsQueries } from '@/entities/stats'
 import { clinicNow } from '@/shared/lib/datetime'
 import { bucketLabel, rangeOf } from '@/shared/lib/report'
 import {
-  Alert,
   BarChart,
   BarList,
   ChartCard,
@@ -50,8 +43,6 @@ export function StatisticsOverview({ clinicId, period, onPeriodChange }: Statist
           value={period}
         />
       </div>
-
-      {STATS_SOURCE_IS_MOCK ? <Alert title={t('demo.title')}>{t('demo.description')}</Alert> : null}
 
       <QueryBoundary
         empty={

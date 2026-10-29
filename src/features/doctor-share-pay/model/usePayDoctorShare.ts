@@ -5,26 +5,28 @@ import {
   type ExpensePayload,
   expenseKeys,
   expenseSchema,
-  mockExpenseServer,
   toExpense,
 } from '@/entities/expense'
+import { httpClient } from '@/shared/api/httpClient'
 
 export interface PayDoctorShareInput {
   /** Always `doctor_share` with the doctor set; the dialog builds it. */
   payload: ExpensePayload
   /** Same for every retry of one payout, so the server can drop a double submit. */
   idempotencyKey: string
-  /** Only the mock needs it; the server joins the name from the id. */
-  doctorName: string
 }
 
 /**
  * A payout is an ordinary expense in the "doctor share" category: the same
- * `POST /api/v1/clinic/expenses/` as the journal, so there is one record of
- * money out. ⚠️ Mock until that endpoint exists; see `features/expense-create`.
+ * `POST /api/v1/finance/expenses/` as the journal, so there is one record of
+ * money out.
  */
-async function payDoctorShare({ payload, doctorName }: PayDoctorShareInput): Promise<Expense> {
-  const raw: unknown = await mockExpenseServer.create(payload, doctorName)
+async function payDoctorShare({ payload, idempotencyKey }: PayDoctorShareInput): Promise<Expense> {
+  const raw = await httpClient<unknown>('v1/finance/expenses/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
+    body: JSON.stringify(payload),
+  })
   return toExpense(v.parse(expenseSchema, raw))
 }
 

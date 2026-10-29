@@ -1,6 +1,27 @@
-import { describe, expect, it } from 'vitest'
+import { HttpResponse, http } from 'msw'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { accessTokenFor } from '@/shared/api/mocks/fixtures'
+import { server } from '@/shared/api/mocks/server'
+import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
 import { rangeOf } from '@/shared/lib/report'
 import { fetchStatsOverview, statsKeys } from './queries'
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+afterEach(() => {
+  server.resetHandlers()
+  clearAccessToken()
+})
+afterAll(() => server.close())
+
+const totals = {
+  appointments: 4,
+  appointments_completed: 3,
+  new_patients: 1,
+  returning_patients: 2,
+  treatments_completed: 2,
+  treatments_started: 1,
+  treatments_in_progress: 5,
+}
 
 describe('statsKeys', () => {
   it('puts the clinic inside every key', () => {
@@ -10,35 +31,41 @@ describe('statsKeys', () => {
   })
 })
 
-describe('fetchStatsOverview (mock)', () => {
-  it('passes the wire schema and adds up', async () => {
-    const overview = await fetchStatsOverview(rangeOf('month', '2026-10-19'))
+describe('fetchStatsOverview', () => {
+  beforeEach(() => setAccessToken(accessTokenFor('clinic')))
 
-    expect(overview.appointmentsSeries).toHaveLength(30)
-    const seriesTotal = overview.appointmentsSeries.reduce((acc, point) => acc + point.total, 0)
-    expect(overview.totals.appointments).toBe(seriesTotal)
-    expect(overview.doctors.reduce((acc, row) => acc + row.appointments, 0)).toBe(seriesTotal)
-    expect(overview.busySlots.reduce((acc, slot) => acc + slot.appointments, 0)).toBe(seriesTotal)
-
-    const treated = overview.totals.treatmentsCompleted
-    expect(overview.treatmentsSeries.reduce((acc, point) => acc + point.completed, 0)).toBe(treated)
-    expect(overview.doctors.reduce((acc, row) => acc + row.treatmentsCompleted, 0)).toBe(treated)
-    expect(overview.teeth).toHaveLength(32)
-    expect(overview.teeth.reduce((acc, row) => acc + row.count, 0)).toBe(treated)
-  })
-
-  it('buckets a year by month', async () => {
-    const overview = await fetchStatsOverview(rangeOf('year', '2026-10-19'))
-
-    expect(overview.appointmentsSeries.map((point) => point.start).slice(0, 2)).toEqual([
-      '2025-10-20',
-      '2025-11-01',
-    ])
-    expect(overview.appointmentsSeries).toHaveLength(13)
-  })
-
-  it('is stable for the same range', async () => {
+  it('asks for the range and maps the wire shape', async () => {
     const range = rangeOf('week', '2026-10-19')
-    expect(await fetchStatsOverview(range)).toEqual(await fetchStatsOverview(range))
+    let query = ''
+    server.use(
+      http.get('/api/v1/statistics/overview/', ({ request }) => {
+        query = new URL(request.url).search
+        return HttpResponse.json({
+          from: range.from,
+          to: range.to,
+          bucket: 'day',
+          totals,
+          previous_totals: null,
+          appointments_series: [{ start: range.from, total: 4, completed: 3 }],
+          treatments_series: [{ start: range.from, completed: 2 }],
+          doctors: [{ doctor_id: 3, doctor: 'Karimov', appointments: 4, treatments_completed: 2 }],
+          treatment_types: [{ treatment_type_id: 7, treatment_type: 'Plomba', count: 2 }],
+          busy_hours: [{ weekday: 1, hour: 10, appointments: 4 }],
+          teeth: [{ tooth: '36', count: 2 }],
+        })
+      }),
+    )
+
+    const overview = await fetchStatsOverview(range)
+
+    expect(query).toBe(`?from=${range.from}&to=${range.to}`)
+    expect(overview.totals.treatmentsInProgress).toBe(5)
+    expect(overview.doctors[0]).toEqual({
+      doctorId: 3,
+      doctorName: 'Karimov',
+      appointments: 4,
+      treatmentsCompleted: 2,
+    })
+    expect(overview.busySlots).toEqual([{ weekday: 1, hour: 10, appointments: 4 }])
   })
 })

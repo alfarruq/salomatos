@@ -56,13 +56,8 @@ export function EditExpenseDialog({
   }))
 
   const handleSubmit = form.handleSubmit((values) => {
-    const doctorName =
-      doctorOptions.find((option) => option.value === values.doctorId)?.label ??
-      // A doctor no longer on staff keeps the name the entry was saved with.
-      (values.doctorId === String(expense.doctorId) ? expense.doctorName : null)
-
     mutate(
-      { id: expense.id, payload: toExpensePayload(values), doctorName },
+      { id: expense.id, payload: toExpensePayload(values) },
       {
         onSuccess: () => {
           toast.success(t('expenses:edit.success'))

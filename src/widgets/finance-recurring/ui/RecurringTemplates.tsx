@@ -77,7 +77,6 @@ export function RecurringTemplates({ clinicId }: { clinicId: number }) {
                 <TableHead className="max-sm:hidden">
                   {t('expenses:recurring.templates.day')}
                 </TableHead>
-                <TableHead className="max-md:hidden">{t('expenses:journal.method')}</TableHead>
                 <TableHead align="right" className="max-sm:hidden">
                   {t('expenses:journal.amount')}
                 </TableHead>
@@ -109,9 +108,6 @@ export function RecurringTemplates({ clinicId }: { clinicId: number }) {
                   </TableCell>
                   <TableCell className="whitespace-nowrap max-sm:hidden">
                     {t('expenses:recurring.templates.everyMonth', { day: template.dayOfMonth })}
-                  </TableCell>
-                  <TableCell className="max-md:hidden">
-                    {t(`expenses:methods.${template.method}`)}
                   </TableCell>
                   <TableCell
                     align="right"

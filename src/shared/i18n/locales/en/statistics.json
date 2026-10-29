@@ -1,9 +1,5 @@
 {
   "title": "Statistics",
-  "demo": {
-    "title": "Sample data",
-    "description": "These figures are made up to show the layout. Real numbers appear once the server provides them."
-  },
   "period": {
     "label": "Period",
     "week": "Last 7 days",
