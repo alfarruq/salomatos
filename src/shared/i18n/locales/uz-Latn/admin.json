@@ -6,7 +6,8 @@
     "services": "Xizmatlar",
     "clinic": "Klinika",
     "doctorTypes": "Shifokor turlari",
-    "sms": "SMS"
+    "sms": "SMS",
+    "admins": "Adminlar"
   },
   "doctor": {
     "fullName": "F. I. Sh.",
@@ -15,7 +16,7 @@
     "description": "Shu klinikada bemor qabul qiladigan shifokorlar.",
     "create": "Shifokor qo'shish",
     "createTitle": "Yangi shifokor",
-    "createDescription": "Ism va telefon raqami majburiy.",
+    "createDescription": "Ism, telefon raqami, login va parol majburiy. Shifokor shu login va parol bilan tizimga kiradi.",
     "createFailed": "Shifokorni qo'shib bo'lmadi. Qayta urinib ko'ring.",
     "editTitle": "Shifokorni tahrirlash",
     "saveFailed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring.",
@@ -27,7 +28,11 @@
     "deleteDescription": "\"{{name}}\" shifokori o'chirilsinmi?",
     "deleteWarning": "Bu amalni ortga qaytarib bo'lmaydi. Shifokor o'chirilsa, unga doir barcha ma'lumotlar ham o'chib ketadi: uchrashuvlar, davolashlar va boshqa yozuvlar.",
     "deleteWait": "O'chirish ({{seconds}})",
-    "deleteFailed": "Shifokorni o'chirib bo'lmadi. Qayta urinib ko'ring."
+    "deleteFailed": "Shifokorni o'chirib bo'lmadi. Qayta urinib ko'ring.",
+    "username": "Login",
+    "password": "Parol",
+    "newPassword": "Yangi parol",
+    "passwordKeep": "Bo'sh qoldirilsa, joriy parol o'zgarmaydi."
   },
   "service": {
     "name": "Xizmat",
@@ -109,5 +114,23 @@
     "previewModeTitle": "Namuna rejimi",
     "previewModeBody": "SMS xizmati hali ulanmagan. Raqamlar namuna uchun, sozlamalar saqlanmaydi.",
     "sampleText": "Klinika: qabulingiz 21.10 kuni 14:30 da. Tel: +998 71 200 00 00"
+  },
+  "administrator": {
+    "fullName": "F. I. Sh.",
+    "phoneNumber": "Telefon raqami",
+    "email": "Email",
+    "username": "Login",
+    "password": "Parol",
+    "description": "Bemorlar, qabullar va davolashlarni yuritadigan xodimlar. Statistika, Moliya va Boshqaruv bo'limlari ularga ko'rinmaydi.",
+    "create": "Admin qo'shish",
+    "createTitle": "Yangi admin",
+    "createDescription": "Admin shu login va parol bilan tizimga kiradi. Parolni unga shaxsan yetkazing.",
+    "createFailed": "Adminni qo'shib bo'lmadi. Qayta urinib ko'ring.",
+    "empty": "Hozircha admin yo'q",
+    "emptyDescription": "Qabulxona xodimi uchun admin hisobini yarating.",
+    "deleteTitle": "Adminni o'chirish",
+    "deleteDescription": "\"{{name}}\" admini o'chirilsinmi?",
+    "deleteWarning": "Bu amalni ortga qaytarib bo'lmaydi. Admin endi tizimga kira olmaydi.",
+    "deleteFailed": "Adminni o'chirib bo'lmadi. Qayta urinib ko'ring."
   }
 }

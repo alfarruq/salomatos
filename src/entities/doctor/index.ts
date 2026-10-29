@@ -2,6 +2,7 @@ export { doctorKeys, doctorQueries, fetchDoctors } from './api/queries'
 export { type DoctorColor, doctorColorOf } from './model/color'
 export {
   type DoctorFormInput,
+  doctorCreateFormSchema,
   doctorFormFieldOf,
   doctorFormSchema,
   emptyDoctorForm,

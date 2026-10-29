@@ -16,6 +16,8 @@ afterEach(() => {
 afterAll(() => server.close())
 
 const INPUT = {
+  username: 'sardor',
+  password: '',
   fullName: 'Sardor Usmonov',
   phoneNumber: '+998901112244',
   email: '',
@@ -75,5 +77,42 @@ describe('useUpdateDoctor', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(sentBody).toMatchObject({ doctor_type: 5 })
+  })
+
+  it('keeps the current password when the field was left empty', async () => {
+    let sentBody: unknown
+    server.use(
+      http.patch('/api/v1/clinic/doctors/:id/', async ({ request }) => {
+        sentBody = await request.json()
+        return HttpResponse.json({ id: 2, full_name: 'Sardor Usmonov' })
+      }),
+    )
+
+    const { result } = renderHook(() => useUpdateDoctor(1), { wrapper })
+    result.current.mutate({ doctorId: 2, input: INPUT, includeDoctorType: false })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(sentBody).toMatchObject({ username: 'sardor' })
+    expect(sentBody).not.toHaveProperty('password')
+  })
+
+  it('sends a new password once one is typed', async () => {
+    let sentBody: unknown
+    server.use(
+      http.patch('/api/v1/clinic/doctors/:id/', async ({ request }) => {
+        sentBody = await request.json()
+        return HttpResponse.json({ id: 2, full_name: 'Sardor Usmonov' })
+      }),
+    )
+
+    const { result } = renderHook(() => useUpdateDoctor(1), { wrapper })
+    result.current.mutate({
+      doctorId: 2,
+      input: { ...INPUT, password: 'yangi-parol' },
+      includeDoctorType: false,
+    })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(sentBody).toMatchObject({ password: 'yangi-parol' })
   })
 })

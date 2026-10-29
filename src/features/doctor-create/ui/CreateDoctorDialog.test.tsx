@@ -65,6 +65,8 @@ describe('CreateDoctorDialog', () => {
     })
     await userEvent.type(screen.getByLabelText('F. I. Sh.'), 'Yangi Shifokor')
     await userEvent.type(screen.getByLabelText('Telefon raqami'), '935550099')
+    await userEvent.type(screen.getByLabelText('Login'), 'yangi.shifokor')
+    await userEvent.type(screen.getByLabelText('Parol'), 'maxfiy-parol')
     await userEvent.click(screen.getByRole('button', { name: "Shifokor qo'shish" }))
 
     await waitFor(() => expect(sentBody).toMatchObject({ doctor_type: 5 }))
@@ -89,6 +91,8 @@ describe('CreateDoctorDialog', () => {
 
     await userEvent.type(screen.getByLabelText('F. I. Sh.'), 'Yangi Shifokor')
     await userEvent.type(screen.getByLabelText('Telefon raqami'), '935550099')
+    await userEvent.type(screen.getByLabelText('Login'), 'yangi.shifokor')
+    await userEvent.type(screen.getByLabelText('Parol'), 'maxfiy-parol')
     await userEvent.click(screen.getByRole('button', { name: "Shifokor qo'shish" }))
 
     await waitFor(() => expect(sentBody).toMatchObject({ doctor_type: 6 }))
@@ -102,6 +106,8 @@ describe('CreateDoctorDialog', () => {
     })
     await userEvent.type(screen.getByLabelText('F. I. Sh.'), 'Birinchi Shifokor')
     await userEvent.type(screen.getByLabelText('Telefon raqami'), '935550001')
+    await userEvent.type(screen.getByLabelText('Login'), 'yangi.shifokor')
+    await userEvent.type(screen.getByLabelText('Parol'), 'maxfiy-parol')
     await userEvent.click(screen.getByRole('button', { name: "Shifokor qo'shish" }))
 
     await waitFor(() => expect(onCreated).toHaveBeenCalledOnce())
@@ -112,5 +118,39 @@ describe('CreateDoctorDialog', () => {
      * itself, this would come back empty for every doctor after the first.
      */
     expect(screen.getByRole('combobox', { name: 'Turi' })).toHaveTextContent('Stomatolog')
+  })
+
+  it('sends the login and password the doctor will sign in with', async () => {
+    let sentBody: unknown
+    server.use(
+      http.post('/api/v1/clinic/doctors/', async ({ request }) => {
+        sentBody = await request.json()
+        return HttpResponse.json({ id: 900, full_name: 'Test', phone_number: null, email: null })
+      }),
+    )
+
+    renderDialog()
+
+    await userEvent.type(await screen.findByLabelText('F. I. Sh.'), 'Yangi Shifokor')
+    await userEvent.type(screen.getByLabelText('Telefon raqami'), '935550099')
+    await userEvent.type(screen.getByLabelText('Login'), 'yangi.shifokor')
+    await userEvent.type(screen.getByLabelText('Parol'), 'maxfiy-parol')
+    await userEvent.click(screen.getByRole('button', { name: "Shifokor qo'shish" }))
+
+    await waitFor(() =>
+      expect(sentBody).toMatchObject({ username: 'yangi.shifokor', password: 'maxfiy-parol' }),
+    )
+  })
+
+  it('refuses to create a doctor without a password', async () => {
+    const { onCreated } = renderDialog()
+
+    await userEvent.type(await screen.findByLabelText('F. I. Sh.'), 'Yangi Shifokor')
+    await userEvent.type(screen.getByLabelText('Telefon raqami'), '935550099')
+    await userEvent.type(screen.getByLabelText('Login'), 'yangi.shifokor')
+    await userEvent.click(screen.getByRole('button', { name: "Shifokor qo'shish" }))
+
+    expect(await screen.findByText("Parol kamida 8 belgidan iborat bo'lsin")).toBeInTheDocument()
+    expect(onCreated).not.toHaveBeenCalled()
   })
 })
